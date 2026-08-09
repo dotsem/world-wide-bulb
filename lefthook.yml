@@ -1,0 +1,21 @@
+# Lefthook Git Hooks Configuration
+# https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    go-fmt:
+      glob: "*.go"
+      run: just go fmt
+    go-lint:
+      glob: "*.go"
+      run: just go lint
+    web-fmt:
+      glob: "web/**/*.{js,ts,svelte,json,css,html,md}"
+      run: just web fmt
+    web-lint:
+      glob: "web/**/*.{js,ts,svelte}"
+      run: just web lint
+    web-check:
+      glob: "web/**/*.{ts,svelte}"
+      run: just web check

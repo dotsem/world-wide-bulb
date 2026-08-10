@@ -15,13 +15,18 @@ var (
 	CooldownTime = 10 * time.Second
 )
 
+type Store interface {
+	GetLatestToggle(ctx context.Context) (store.Toggle, error)
+	InsertToggle(ctx context.Context, arg store.InsertToggleParams) (store.Toggle, error)
+}
+
 type Engine struct {
 	state    atomic.Bool
-	store    *store.Queries
+	store    Store
 	cooldown *Cooldown
 }
 
-func NewEngine(ctx context.Context, s *store.Queries) *Engine {
+func NewEngine(ctx context.Context, s Store) *Engine {
 	e := &Engine{
 		store:    s,
 		cooldown: NewCooldown(CooldownTime),
@@ -42,6 +47,9 @@ func (e *Engine) GetState() bool {
 	return e.state.Load()
 }
 
+// Toggle flips the state of the bulb and records the toggle in the database
+// It returns the new toggle record and an error if the toggle failed
+// The toggle is rate limited based on the cooldown time
 func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (store.Toggle, error) {
 	if !e.cooldown.CanToggle(ipHash) {
 		return store.Toggle{}, ErrCooldown

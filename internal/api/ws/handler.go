@@ -11,15 +11,19 @@ import (
 )
 
 const (
-	ReadBufferSize  = 1024
+	// ReadBufferSize defines default read buffer size for websockets.
+	ReadBufferSize = 1024
+	// WriteBufferSize defines default write buffer size for websockets.
 	WriteBufferSize = 1024
 )
 
+// Handler manages WebSocket upgrades and client registrations.
 type Handler struct {
 	hub      *Hub
 	upgrader websocket.Upgrader
 }
 
+// NewHandler creates a configured WebSocket Handler with origin checking.
 func NewHandler(hub *Hub, isProd bool, allowedHosts []string) *Handler {
 	return &Handler{
 		hub: hub,
@@ -50,6 +54,7 @@ func NewHandler(hub *Hub, isProd bool, allowedHosts []string) *Handler {
 	}
 }
 
+// ServeWS handles incoming HTTP GET requests and upgrades them to WebSocket connections.
 func (h *Handler) ServeWS(c *gin.Context) {
 	conn, err := h.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -61,4 +66,3 @@ func (h *Handler) ServeWS(c *gin.Context) {
 	go client.WritePump()
 	go client.ReadPump()
 }
-

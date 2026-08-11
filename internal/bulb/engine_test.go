@@ -21,11 +21,11 @@ type mockStore struct {
 	insertErr error
 }
 
-func (m *mockStore) GetLatestToggle(ctx context.Context) (store.Toggle, error) {
+func (m *mockStore) GetLatestToggle(_ context.Context) (store.Toggle, error) {
 	return m.latest, m.getErr
 }
 
-func (m *mockStore) InsertToggle(ctx context.Context, arg store.InsertToggleParams) (store.Toggle, error) {
+func (m *mockStore) InsertToggle(_ context.Context, arg store.InsertToggleParams) (store.Toggle, error) {
 	if m.insertErr != nil {
 		return store.Toggle{}, m.insertErr
 	}

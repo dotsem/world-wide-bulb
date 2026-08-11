@@ -15,7 +15,7 @@ func TestMigrate(t *testing.T) {
 	t.Run("creates tables and indexes on fresh database", func(t *testing.T) {
 		db, err := sql.Open("sqlite", ":memory:")
 		require.NoError(t, err)
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 
 		ctx := context.Background()
 		err = store.Migrate(ctx, db)
@@ -30,7 +30,7 @@ func TestMigrate(t *testing.T) {
 	t.Run("is idempotent when executed multiple times", func(t *testing.T) {
 		db, err := sql.Open("sqlite", ":memory:")
 		require.NoError(t, err)
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 
 		ctx := context.Background()
 		err = store.Migrate(ctx, db)

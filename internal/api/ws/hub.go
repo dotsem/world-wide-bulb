@@ -4,6 +4,7 @@ import (
 	"log/slog"
 )
 
+// Hub coordinates active WebSocket clients and broadcasts state payloads.
 type Hub struct {
 	clients    map[*Client]bool
 	broadcast  chan []byte
@@ -11,6 +12,7 @@ type Hub struct {
 	unregister chan *Client
 }
 
+// NewHub initializes and runs a new WebSocket Hub event loop.
 func NewHub() *Hub {
 	hub := &Hub{
 		clients:    make(map[*Client]bool),
@@ -20,9 +22,9 @@ func NewHub() *Hub {
 	}
 	go hub.Run()
 	return hub
-
 }
 
+// Run executes the multiplexing event loop for the Hub.
 func (h *Hub) Run() {
 	for {
 		select {
@@ -47,12 +49,17 @@ func (h *Hub) Run() {
 	}
 }
 
+// Broadcast sends a raw payload to all registered clients.
 func (h *Hub) Broadcast(payload []byte) {
 	h.broadcast <- payload
 }
+
+// Register adds a client connection to the hub.
 func (h *Hub) Register(c *Client) {
 	h.register <- c
 }
+
+// Unregister removes a client connection from the hub.
 func (h *Hub) Unregister(c *Client) {
 	h.unregister <- c
 }

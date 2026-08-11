@@ -1,3 +1,4 @@
+// Package config manages application configuration and environment variable loading.
 package config
 
 import (
@@ -6,6 +7,7 @@ import (
 	"strings"
 )
 
+// Config holds runtime configuration settings for the service.
 type Config struct {
 	Port         string
 	IsProd       bool
@@ -14,6 +16,7 @@ type Config struct {
 	AllowedHosts []string
 }
 
+// Load parses environment variables and returns a validated Config.
 func Load() (*Config, error) {
 	var hosts []string
 	if rawHosts := os.Getenv("ALLOWED_HOSTS"); rawHosts != "" {

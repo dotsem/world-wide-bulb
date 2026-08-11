@@ -1,8 +1,10 @@
+// Package main is the entry point for the World Wide Bulb server.
 package main
 
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"world-wide-bulb/internal/api"
 	"world-wide-bulb/internal/api/config"
@@ -16,29 +18,31 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	if err := run(context.Background()); err != nil {
+		log.Fatalf("server error: %v", err)
+	}
+}
 
+func run(ctx context.Context) error {
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
-		return
+		return fmt.Errorf("failed to load config: %w", err)
 	}
 
 	db, err := sql.Open("sqlite", cfg.DBPath)
 	if err != nil {
-		log.Fatalf("failed to open db: %v", err)
-		return
+		return fmt.Errorf("failed to open db: %w", err)
 	}
-	defer db.Close()
+	defer func() {
+		_ = db.Close()
+	}()
 
 	if _, err := db.ExecContext(ctx, "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;"); err != nil {
-		log.Fatalf("failed to set sqlite pragmas: %v", err)
-		return
+		return fmt.Errorf("failed to set sqlite pragmas: %w", err)
 	}
 
 	if err := store.Migrate(ctx, db); err != nil {
-		log.Fatalf("failed to run database migration: %v", err)
-		return
+		return fmt.Errorf("failed to run database migration: %w", err)
 	}
 
 	queries := store.New(db)
@@ -49,9 +53,10 @@ func main() {
 	restHandler := rest.NewHandler(queries, engine, hub, hasher)
 	wsHandler := ws.NewHandler(hub, cfg.IsProd, cfg.AllowedHosts)
 	router := api.NewRouter(restHandler, wsHandler)
+
 	if err := router.Run(":" + cfg.Port); err != nil {
-		log.Fatalf("failed to start server: %v", err)
-		return
+		return fmt.Errorf("failed to start server: %w", err)
 	}
 
+	return nil
 }

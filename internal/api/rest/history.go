@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// HistoryItem represents a public toggle history entry.
 type HistoryItem struct {
 	ID        int64     `json:"id"`
 	State     bool      `json:"state"`
@@ -14,6 +15,7 @@ type HistoryItem struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+// GetHistory returns recent toggle events from the database.
 func (h *Handler) GetHistory(c *gin.Context) {
 	toggles, err := h.queries.GetRecentToggles(c.Request.Context(), 100)
 	if err != nil {
@@ -37,4 +39,3 @@ func (h *Handler) GetHistory(c *gin.Context) {
 		"toggles": items,
 	})
 }
-

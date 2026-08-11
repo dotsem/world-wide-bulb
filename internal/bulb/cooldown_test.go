@@ -46,7 +46,7 @@ func TestCooldown(t *testing.T) {
 		assert.False(t, c.CheckAndRecord("ip_atomic"))
 	})
 
-	t.Run("concurrent access is thread-safe", func(t *testing.T) {
+	t.Run("concurrent access is thread-safe", func(_ *testing.T) {
 		c := NewCooldown(50 * time.Millisecond)
 		var wg sync.WaitGroup
 
@@ -68,4 +68,3 @@ func TestCooldown(t *testing.T) {
 		wg.Wait()
 	})
 }
-

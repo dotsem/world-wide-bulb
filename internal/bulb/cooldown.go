@@ -1,3 +1,4 @@
+// Package bulb implements the core bulb engine and per-IP cooldown rate limiting.
 package bulb
 
 import (
@@ -7,12 +8,14 @@ import (
 
 const maxHistoryEntries = 500
 
+// Cooldown manages per-IP rate limiting and history tracking.
 type Cooldown struct {
 	mu           sync.Mutex
 	history      map[string]time.Time
 	cooldownTime time.Duration
 }
 
+// NewCooldown initializes a new Cooldown manager with the given duration.
 func NewCooldown(cooldownTime time.Duration) *Cooldown {
 	return &Cooldown{
 		history:      make(map[string]time.Time),
@@ -45,6 +48,7 @@ func (c *Cooldown) CheckAndRecord(ipHash string) bool {
 	return true
 }
 
+// CanToggle reports whether the given IP hash has waited past the cooldown period.
 func (c *Cooldown) CanToggle(ipHash string) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()

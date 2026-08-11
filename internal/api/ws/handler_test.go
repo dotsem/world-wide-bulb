@@ -32,7 +32,7 @@ func TestOriginValidation(t *testing.T) {
 		conn, resp, err := websocket.DefaultDialer.Dial(u, header)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusSwitchingProtocols, resp.StatusCode)
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 	})
 
 	t.Run("prod mode rejects unauthorized origin with 403", func(t *testing.T) {
@@ -67,7 +67,7 @@ func TestOriginValidation(t *testing.T) {
 		conn, resp, err := websocket.DefaultDialer.Dial(u, header)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusSwitchingProtocols, resp.StatusCode)
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 	})
 }
 
@@ -84,7 +84,7 @@ func TestWebSocketBroadcast(t *testing.T) {
 	u := "ws" + strings.TrimPrefix(s.URL, "http") + "/ws"
 	conn, _, err := websocket.DefaultDialer.Dial(u, nil)
 	require.NoError(t, err)
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	time.Sleep(20 * time.Millisecond)
 

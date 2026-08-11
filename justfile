@@ -31,11 +31,11 @@ test:
 build:
     just web build
     mkdir -p bin
-    go build -ldflags="-s -w" -o bin/wwb ./cmd/server
+    go build -ldflags="-s -w" -o bin/wwb ./cmd/wwb
 
 # Generate OpenAPI / Swagger docs
 swagger:
-    swag init -g cmd/server/main.go -o internal/api/docs
+    swag init -g cmd/wwb/main.go -o internal/api/docs
 
 # Clean build artifacts and local sqlite databases
 clean:

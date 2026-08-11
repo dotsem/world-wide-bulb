@@ -8,11 +8,6 @@ import (
 	"log"
 	"world-wide-bulb/internal/api"
 	"world-wide-bulb/internal/api/config"
-	"world-wide-bulb/internal/api/rest"
-	"world-wide-bulb/internal/api/ws"
-	"world-wide-bulb/internal/bulb"
-	"world-wide-bulb/internal/store"
-	"world-wide-bulb/internal/utils"
 
 	_ "modernc.org/sqlite"
 )
@@ -37,24 +32,12 @@ func run(ctx context.Context) error {
 		_ = db.Close()
 	}()
 
-	if _, err := db.ExecContext(ctx, "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;"); err != nil {
-		return fmt.Errorf("failed to set sqlite pragmas: %w", err)
+	app, err := api.NewApp(ctx, cfg, db)
+	if err != nil {
+		return err
 	}
 
-	if err := store.Migrate(ctx, db); err != nil {
-		return fmt.Errorf("failed to run database migration: %w", err)
-	}
-
-	queries := store.New(db)
-	engine := bulb.NewEngine(ctx, queries)
-	hasher := utils.NewHasher(cfg.IPSalt)
-	hub := ws.NewHub()
-
-	restHandler := rest.NewHandler(queries, engine, hub, hasher)
-	wsHandler := ws.NewHandler(hub, cfg.IsProd, cfg.AllowedHosts)
-	router := api.NewRouter(restHandler, wsHandler)
-
-	if err := router.Run(":" + cfg.Port); err != nil {
+	if err := app.Router.Run(":" + cfg.Port); err != nil {
 		return fmt.Errorf("failed to start server: %w", err)
 	}
 

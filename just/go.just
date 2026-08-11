@@ -14,4 +14,5 @@ test:
 
 # Run Go development server
 dev:
-    go run ./cmd/server
+    go run ./cmd/wwb
+

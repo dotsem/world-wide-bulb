@@ -27,40 +27,36 @@ jobs:
   frontend-audit:
     name: Frontend Dependency Audit
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
         with:
-          version: 9.15.4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
+          install-deps: "false"
 
       - name: Run security audit
-        working-directory: web
         run: pnpm audit --audit-level high
 
   backend-audit:
     name: Backend Dependency Audit
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.26"
+      - name: Setup Backend Environment
+        uses: ./.github/actions/setup-backend
 
       - name: Run Go Vulnerability Check
         uses: golang/govulncheck-action@v1
-        with:
-          work-dir: ./
 
   notify:
     name: Notify on Failure

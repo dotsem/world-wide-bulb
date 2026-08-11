@@ -9,6 +9,10 @@ concurrency:
   group: backend-ci-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: .
+
 on:
   push:
     branches: ["main"]
@@ -42,31 +46,17 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Setup Backend Environment
+        uses: ./.github/actions/setup-backend
         with:
           go-version: ${{ matrix.go-version }}
-          cache: true
-          cache-dependency-path: go.sum
-
-      - name: Cache golangci-lint analysis results
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/golangci-lint
-          key: ${{ runner.os }}-golangci-cache-${{ hashFiles('go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-golangci-cache-
-
-      - name: Ensure dependencies
-        working-directory: ./
-        run: go mod download
 
       - name: Check formatting (gofmt)
-        working-directory: ./
         run: gofmt -l -w -s .
 
       - name: Commit Changes
         id: auto_commit
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: fix gofmt errors"
@@ -83,7 +73,6 @@ jobs:
         run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
       - name: Run golangci-lint
-        working-directory: ./
         run: |
           # The binary is installed to GOPATH/bin
           $(go env GOPATH)/bin/golangci-lint run --config=.golangci.yml
@@ -112,17 +101,10 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref }}
 
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Setup Backend Environment
+        uses: ./.github/actions/setup-backend
         with:
           go-version: ${{ matrix.go-version }}
-          cache: true
-          cache-dependency-path: go.sum
-
-      - name: Ensure dependencies
-        working-directory: ./
-        run: go mod download
 
       - name: Cache gotestsum binary
         id: cache-gotestsum
@@ -136,7 +118,6 @@ jobs:
         run: go install gotest.tools/gotestsum@latest
 
       - name: Run tests with coverage
-        working-directory: ./
         run: |
           # Run tests with gotestsum for a clear overview of failures in CI logs
           $(go env GOPATH)/bin/gotestsum --format pkgname-and-test-fails --junitfile unit-tests.xml -- -race ./... -coverprofile=coverage.out -covermode=atomic
@@ -238,9 +219,12 @@ jobs:
 
       - name: Post test status to formatting commit
         if: always() && needs.lint.outputs.changes_detected == 'true'
+        env:
+          JOB_STATUS: ${{ job.status }}
+          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
         run: |
           STATE="success"
-          if [ "${{ job.status }}" = "failure" ] || [ "${{ job.status }}" = "cancelled" ] || [ "${{ steps.coverage.outcome }}" = "failure" ]; then
+          if [ "$JOB_STATUS" = "failure" ] || [ "$JOB_STATUS" = "cancelled" ] || [ "$COVERAGE_OUTCOME" = "failure" ]; then
             STATE="failure"
           fi
           curl -X POST \

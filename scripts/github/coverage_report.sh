@@ -2,7 +2,13 @@
 # Generate a detailed Markdown coverage report from coverage.out
 
 COVERAGE_FILE=$1
-MODULE_NAME="digital-innovation/gostrategy"
+MODULE_NAME="world-wide-bulb"
+if [ -f "go.mod" ]; then
+    DETECTED_MOD=$(awk '/^module / {print $2}' go.mod)
+    if [ -n "$DETECTED_MOD" ]; then
+        MODULE_NAME="$DETECTED_MOD"
+    fi
+fi
 
 if [ ! -f "$COVERAGE_FILE" ]; then
     echo "No coverage data available."

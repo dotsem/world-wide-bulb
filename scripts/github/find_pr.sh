@@ -21,7 +21,7 @@ fi
 PR_DATA=$(curl -s -H "Authorization: token $TOKEN" \
     "https://api.github.com/repos/$REPO/pulls?head=$OWNER:$BRANCH&state=open")
 
-PR_ID=$(echo "$PR_DATA" | jq -r '.[0].number')
+PR_ID=$(echo "$PR_DATA" | jq -r 'if type == "array" and length > 0 then .[0].number else empty end' 2>/dev/null)
 
 if [ "$PR_ID" != "null" ] && [ "$PR_ID" != "" ]; then
     echo "$PR_ID"

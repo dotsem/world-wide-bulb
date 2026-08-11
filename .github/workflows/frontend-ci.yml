@@ -7,18 +7,24 @@ concurrency:
   group: frontend-ci-${{ github.ref }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: web
+
 on:
   push:
     branches: ["main"]
     paths:
       - "web/**"
       - ".github/workflows/frontend-ci.yml"
+      - ".github/actions/setup-frontend/**"
       - "!**.md"
   pull_request:
     branches: ["**"]
     paths:
       - "web/**"
       - ".github/workflows/frontend-ci.yml"
+      - ".github/actions/setup-frontend/**"
       - "!**.md"
 
 jobs:
@@ -33,24 +39,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
-          cache-dependency-path: web/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: web
-        run: pnpm install --frozen-lockfile
 
       - name: Run Svelte type check
-        working-directory: web
         run: pnpm check
 
   build:
@@ -65,24 +59,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.15.4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
-          cache-dependency-path: web/pnpm-lock.yaml
-
-      - name: Install dependencies
-        working-directory: web
-        run: pnpm install --frozen-lockfile
 
       - name: Build frontend
-        working-directory: web
         run: pnpm build
 
       - name: Upload build artifacts

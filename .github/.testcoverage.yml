@@ -1,5 +1,4 @@
-# Coverage configuration
-profile: code/backend/coverage.out
+profile: coverage.out
 
 # (optional)
 # require at least 50% coverage for the whole project

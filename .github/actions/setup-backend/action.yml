@@ -1,0 +1,27 @@
+name: "Setup Backend"
+description: "Configures Go environment, caching, and downloads module dependencies"
+
+inputs:
+  work-dir:
+    description: "Backend working directory"
+    required: false
+    default: "."
+  go-version:
+    description: "Go version to install"
+    required: false
+    default: "1.26"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go-version }}
+        cache: true
+        cache-dependency-path: ${{ inputs.work-dir }}/go.sum
+
+    - name: Ensure dependencies
+      working-directory: ${{ inputs.work-dir }}
+      shell: bash
+      run: go mod download

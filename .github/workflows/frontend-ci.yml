@@ -1,0 +1,75 @@
+name: Frontend CI
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: web
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "web/**"
+      - ".github/workflows/frontend-ci.yml"
+      - ".github/actions/setup-frontend/**"
+      - "!**.md"
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "web/**"
+      - ".github/workflows/frontend-ci.yml"
+      - ".github/actions/setup-frontend/**"
+      - "!**.md"
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Run Svelte type check
+        run: pnpm check
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: lint
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build frontend
+        run: pnpm build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: web/build/
+          retention-days: 7

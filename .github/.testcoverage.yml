@@ -1,0 +1,12 @@
+profile: coverage.out
+
+# (optional)
+# require at least 50% coverage for the whole project
+threshold:
+  total: 0
+  package: 0
+
+# (optional)
+# specify which packages to skip
+# skip:
+#   - digital-innovation/gostrategy/docs

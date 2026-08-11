@@ -13,7 +13,7 @@ name: "CodeQL Advanced"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "cmd/**"
       - "internal/**"
@@ -22,7 +22,7 @@ on:
       - "go.sum"
       - ".github/workflows/**"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "cmd/**"
       - "internal/**"
@@ -37,6 +37,8 @@ jobs:
   filter:
     name: Check for Changes
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
@@ -54,7 +56,6 @@ jobs:
               - 'web/**'
             actions:
               - '.github/workflows/**'
-
 
       - id: set-matrix
         shell: bash
@@ -90,7 +91,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.filter.outputs.matrix) }}
+        include:
+          ${{ fromJson(needs.filter.outputs.matrix) }}
           # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'rust', 'swift'
           # Use `c-cpp` to analyze code written in C, C++ or both
           # Use 'java-kotlin' to analyze code written in Java, Kotlin or both

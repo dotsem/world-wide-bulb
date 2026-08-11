@@ -30,4 +30,3 @@ func Migrate(ctx context.Context, db *sql.DB) error {
 	}
 	return nil
 }
-

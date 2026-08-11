@@ -68,4 +68,3 @@ func TestCooldown(t *testing.T) {
 		wg.Wait()
 	})
 }
-

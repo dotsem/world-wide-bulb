@@ -61,4 +61,3 @@ func (h *Handler) ServeWS(c *gin.Context) {
 	go client.WritePump()
 	go client.ReadPump()
 }
-

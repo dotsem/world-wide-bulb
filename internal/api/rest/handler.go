@@ -22,4 +22,3 @@ func NewHandler(q *store.Queries, e *bulb.Engine, h *ws.Hub, hasher *utils.Hashe
 		hasher:  hasher,
 	}
 }
-

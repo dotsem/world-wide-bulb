@@ -37,4 +37,3 @@ func (h *Handler) GetHistory(c *gin.Context) {
 		"toggles": items,
 	})
 }
-

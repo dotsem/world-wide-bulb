@@ -42,4 +42,3 @@ func (h *Handler) PostToggle(c *gin.Context) {
 
 	c.JSON(http.StatusOK, res)
 }
-

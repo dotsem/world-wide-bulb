@@ -1,3 +1,4 @@
+// Package api initializes HTTP routing for REST and WebSocket handlers.
 package api
 
 import (
@@ -7,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// NewRouter creates and initializes the Gin engine with all API routes.
 func NewRouter(restH *rest.Handler, wsH *ws.Handler) *gin.Engine {
 	r := gin.Default()
 	_ = r.SetTrustedProxies(nil)

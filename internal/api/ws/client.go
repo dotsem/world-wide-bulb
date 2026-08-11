@@ -1,3 +1,4 @@
+// Package ws provides WebSocket hub and client infrastructure.
 package ws
 
 import (
@@ -15,12 +16,14 @@ const (
 	sendBufferSize = 256
 )
 
+// Client manages an active WebSocket connection and message routing.
 type Client struct {
 	hub  *Hub
 	conn *websocket.Conn
 	send chan []byte
 }
 
+// NewClient instantiates a new Client for an upgraded WebSocket connection.
 func NewClient(hub *Hub, conn *websocket.Conn) *Client {
 	return &Client{
 		hub:  hub,
@@ -29,10 +32,13 @@ func NewClient(hub *Hub, conn *websocket.Conn) *Client {
 	}
 }
 
+// ReadPump listens for incoming frames and detects connection terminations.
 func (c *Client) ReadPump() {
 	defer func() {
 		c.hub.Unregister(c)
-		c.conn.Close()
+		if err := c.conn.Close(); err != nil {
+			slog.Error("failed to close connection", slog.Any("error", err))
+		}
 	}()
 
 	c.conn.SetReadLimit(maxMessageSize)
@@ -48,19 +54,21 @@ func (c *Client) ReadPump() {
 		_, _, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				slog.Warn("Websocket read error", slog.Any("error", err))
+				slog.Warn("websocket read error", slog.Any("error", err))
 			}
 			break
 		}
 	}
 }
 
+// WritePump drains queued messages to the WebSocket connection.
 func (c *Client) WritePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.conn.Close()
+		_ = c.conn.Close()
 	}()
+
 	for {
 		select {
 		case message, ok := <-c.send:

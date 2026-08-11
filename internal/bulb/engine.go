@@ -12,15 +12,19 @@ import (
 )
 
 var (
-	ErrCooldown  = errors.New("rate limited: please wait before toggling again")
+	// ErrCooldown indicates a user tried to toggle before their cooldown expired.
+	ErrCooldown = errors.New("rate limited: please wait before toggling again")
+	// CooldownTime is the default duration a client must wait between toggles.
 	CooldownTime = 10 * time.Second
 )
 
+// Store defines persistence operations needed by the bulb Engine.
 type Store interface {
 	GetLatestToggle(ctx context.Context) (store.Toggle, error)
 	InsertToggle(ctx context.Context, arg store.InsertToggleParams) (store.Toggle, error)
 }
 
+// Engine manages the state and business logic of the bulb.
 type Engine struct {
 	mu       sync.Mutex
 	state    atomic.Bool
@@ -28,6 +32,7 @@ type Engine struct {
 	cooldown *Cooldown
 }
 
+// NewEngine initializes a new bulb Engine and hydrates state from the database.
 func NewEngine(ctx context.Context, s Store) *Engine {
 	e := &Engine{
 		store:    s,

@@ -1,3 +1,4 @@
+// Package store provides database access, generated queries, and migration execution.
 package store
 
 import (
@@ -10,6 +11,7 @@ import (
 //go:embed schema/*.sql
 var schemaFS embed.FS
 
+// Migrate executes all schema SQL files against the database in alphabetical order.
 func Migrate(ctx context.Context, db *sql.DB) error {
 	entries, err := fs.ReadDir(schemaFS, "schema")
 	if err != nil {

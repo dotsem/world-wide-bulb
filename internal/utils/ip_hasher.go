@@ -5,17 +5,16 @@ import (
 	"encoding/hex"
 )
 
-var salt string
-
-func init() {
-	var err error
-	salt, err = GetEnvOrErrInProd("IP_SALT", "dev_fallback")
-	if err != nil {
-		panic(err)
-	}
+type Hasher struct {
+	salt string
 }
 
-func HashIP(ip string) string {
-	hash := sha256.Sum256([]byte(ip + salt))
+func NewHasher(salt string) *Hasher {
+	return &Hasher{salt: salt}
+}
+
+func (h *Hasher) Hash(ip string) string {
+	hash := sha256.Sum256([]byte(ip + h.salt))
 	return hex.EncodeToString(hash[:])
 }
+

@@ -40,6 +40,12 @@ func TestCooldown(t *testing.T) {
 		assert.True(t, c.CanToggle("ip_2"))
 	})
 
+	t.Run("atomic CheckAndRecord prevents concurrent double execution", func(t *testing.T) {
+		c := NewCooldown(100 * time.Millisecond)
+		assert.True(t, c.CheckAndRecord("ip_atomic"))
+		assert.False(t, c.CheckAndRecord("ip_atomic"))
+	})
+
 	t.Run("concurrent access is thread-safe", func(t *testing.T) {
 		c := NewCooldown(50 * time.Millisecond)
 		var wg sync.WaitGroup
@@ -62,3 +68,4 @@ func TestCooldown(t *testing.T) {
 		wg.Wait()
 	})
 }
+

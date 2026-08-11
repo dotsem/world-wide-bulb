@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"sync"
 	"sync/atomic"
 	"time"
 	"world-wide-bulb/internal/store"
@@ -21,6 +22,7 @@ type Store interface {
 }
 
 type Engine struct {
+	mu       sync.Mutex
 	state    atomic.Bool
 	store    Store
 	cooldown *Cooldown
@@ -51,6 +53,13 @@ func (e *Engine) GetState() bool {
 // It returns the new toggle record and an error if the toggle failed
 // The toggle is rate limited based on the cooldown time
 func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (store.Toggle, error) {
+	if !e.cooldown.CanToggle(ipHash) {
+		return store.Toggle{}, ErrCooldown
+	}
+
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
 	if !e.cooldown.CanToggle(ipHash) {
 		return store.Toggle{}, ErrCooldown
 	}

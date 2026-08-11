@@ -9,6 +9,7 @@ import (
 
 func NewRouter(restH *rest.Handler, wsH *ws.Handler) *gin.Engine {
 	r := gin.Default()
+	_ = r.SetTrustedProxies(nil)
 
 	v1 := r.Group("/api/v1")
 	{

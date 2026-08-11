@@ -3,6 +3,8 @@ package ws
 import (
 	"log/slog"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -19,22 +21,33 @@ type Handler struct {
 }
 
 func NewHandler(hub *Hub, isProd bool, allowedHosts []string) *Handler {
-	return &Handler{hub: hub, upgrader: websocket.Upgrader{
-		ReadBufferSize:  ReadBufferSize,
-		WriteBufferSize: WriteBufferSize,
-		CheckOrigin: func(r *http.Request) bool {
-			if isProd {
-				origin := r.Header.Get("Origin")
-				for _, host := range allowedHosts {
-					if origin == host || origin == "https://"+host {
-						return true
+	return &Handler{
+		hub: hub,
+		upgrader: websocket.Upgrader{
+			ReadBufferSize:  ReadBufferSize,
+			WriteBufferSize: WriteBufferSize,
+			CheckOrigin: func(r *http.Request) bool {
+				if isProd {
+					origin := r.Header.Get("Origin")
+					if origin == "" {
+						return false
 					}
+					u, err := url.Parse(origin)
+					if err != nil {
+						return false
+					}
+					hostname := u.Hostname()
+					for _, host := range allowedHosts {
+						if strings.EqualFold(hostname, host) {
+							return true
+						}
+					}
+					return false
 				}
-				return false
-			}
-			return true
+				return true
+			},
 		},
-	}}
+	}
 }
 
 func (h *Handler) ServeWS(c *gin.Context) {
@@ -48,3 +61,4 @@ func (h *Handler) ServeWS(c *gin.Context) {
 	go client.WritePump()
 	go client.ReadPump()
 }
+

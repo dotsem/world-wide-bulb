@@ -31,6 +31,16 @@ func main() {
 	}
 	defer db.Close()
 
+	if _, err := db.ExecContext(ctx, "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;"); err != nil {
+		log.Fatalf("failed to set sqlite pragmas: %v", err)
+		return
+	}
+
+	if err := store.Migrate(ctx, db); err != nil {
+		log.Fatalf("failed to run database migration: %v", err)
+		return
+	}
+
 	queries := store.New(db)
 	engine := bulb.NewEngine(ctx, queries)
 	hasher := utils.NewHasher(cfg.IPSalt)

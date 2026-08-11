@@ -5,9 +5,11 @@ import (
 	"time"
 )
 
+const maxHistoryEntries = 500
+
 type Cooldown struct {
 	mu           sync.Mutex
-	history      map[string]time.Time // ipHash -> lastToggleTime
+	history      map[string]time.Time
 	cooldownTime time.Duration
 }
 
@@ -18,7 +20,31 @@ func NewCooldown(cooldownTime time.Duration) *Cooldown {
 	}
 }
 
-// CanToggle checks if this specific IP has waited long enough
+// CheckAndRecord atomically checks if an IP can toggle and records the timestamp.
+func (c *Cooldown) CheckAndRecord(ipHash string) bool {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	now := time.Now()
+	if lastTime, exists := c.history[ipHash]; exists {
+		if now.Sub(lastTime) < c.cooldownTime {
+			return false
+		}
+	}
+
+	c.history[ipHash] = now
+
+	if len(c.history) > maxHistoryEntries {
+		for k, t := range c.history {
+			if now.Sub(t) >= c.cooldownTime {
+				delete(c.history, k)
+			}
+		}
+	}
+
+	return true
+}
+
 func (c *Cooldown) CanToggle(ipHash string) bool {
 	c.mu.Lock()
 	defer c.mu.Unlock()

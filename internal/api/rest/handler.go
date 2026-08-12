@@ -14,14 +14,16 @@ type Handler struct {
 	engine  *bulb.Engine
 	hub     *ws.Hub
 	hasher  *utils.Hasher
+	isProd  bool
 }
 
 // NewHandler creates a new REST handler with the given dependencies.
-func NewHandler(q *store.Queries, e *bulb.Engine, h *ws.Hub, hasher *utils.Hasher) *Handler {
+func NewHandler(q *store.Queries, e *bulb.Engine, h *ws.Hub, hasher *utils.Hasher, isProd bool) *Handler {
 	return &Handler{
 		queries: q,
 		engine:  e,
 		hub:     h,
 		hasher:  hasher,
+		isProd:  isProd,
 	}
 }

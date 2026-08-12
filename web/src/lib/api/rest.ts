@@ -8,6 +8,7 @@ class RestApi {
     async toggle(reason?: string): Promise<ToggleResponse> {
         const res = await fetch(`${API_BASE}/api/v1/toggle`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -22,6 +23,7 @@ class RestApi {
     async state(): Promise<StateResponse> {
         const res = await fetch(`${API_BASE}/api/v1/state`, {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },

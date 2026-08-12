@@ -39,7 +39,7 @@ func setupTestEnv(t *testing.T) *testEnv {
 	hasher := utils.NewHasher("test_salt")
 	hub := ws.NewHub()
 
-	handler := rest.NewHandler(queries, engine, hub, hasher)
+	handler := rest.NewHandler(queries, engine, hub, hasher, false)
 
 	r := gin.New()
 	v1 := r.Group("/api/v1")

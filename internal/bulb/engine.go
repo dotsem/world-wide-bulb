@@ -54,6 +54,11 @@ func (e *Engine) GetState() bool {
 	return e.state.Load()
 }
 
+// RecordCooldown registers a cooldown entry for the given key hash.
+func (e *Engine) RecordCooldown(ipHash string) {
+	e.cooldown.Record(ipHash)
+}
+
 // Toggle flips the state of the bulb and records the toggle in the database
 // It returns the new toggle record and an error if the toggle failed
 // The toggle is rate limited based on the cooldown time

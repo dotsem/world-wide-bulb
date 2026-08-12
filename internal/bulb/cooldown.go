@@ -62,9 +62,28 @@ func (c *Cooldown) CanToggle(ipHash string) bool {
 }
 
 // Record saves the current timestamp for this IP
-func (c *Cooldown) Record(ipHash string) {
+// Returns the remaining time until the next toggle
+func (c *Cooldown) Record(ipHash string) time.Duration {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	c.history[ipHash] = time.Now()
+	return c.cooldownTime
+}
+
+// GetRemainingCooldown returns the remaining duration until the given IP hash can toggle again.
+func (c *Cooldown) GetRemainingCooldown(ipHash string) time.Duration {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	lastTime, exists := c.history[ipHash]
+	if !exists {
+		return time.Duration(0)
+	}
+
+	remaining := c.cooldownTime - time.Since(lastTime)
+	if remaining < 0 {
+		return 0
+	}
+	return remaining
 }

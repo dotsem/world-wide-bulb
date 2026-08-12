@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"time"
 	"world-wide-bulb/internal/api/ws"
 	"world-wide-bulb/internal/bulb"
 
@@ -21,6 +22,14 @@ type ToggleRequest struct {
 	Reason string `json:"reason" binding:"max=60"`
 }
 
+// ToggleResponse defines the response payload for toggling the bulb.
+type ToggleResponse struct {
+	State      bool      `json:"state"`
+	Reason     string    `json:"reason,omitempty"`
+	CreatedAt  time.Time `json:"created_at"`
+	CooldownMs int64     `json:"cooldown_ms"`
+}
+
 // PostToggle flips the state of the bulb and broadcasts the change.
 func (h *Handler) PostToggle(c *gin.Context) {
 	var req ToggleRequest
@@ -31,10 +40,14 @@ func (h *Handler) PostToggle(c *gin.Context) {
 
 	primaryKey, secondaryKey := h.getOrCreateDeviceID(c)
 
-	toggle, err := h.engine.Toggle(c.Request.Context(), req.Reason, h.hasher.Hash(primaryKey))
+	toggle, remainingTime, err := h.engine.Toggle(c.Request.Context(), req.Reason, h.hasher.Hash(primaryKey))
 	if err != nil {
 		if errors.Is(err, bulb.ErrCooldown) {
-			c.JSON(http.StatusTooManyRequests, gin.H{errKey: err.Error()})
+			remaining := h.engine.GetRemainingCooldown(h.hasher.Hash(primaryKey))
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				errKey:        err.Error(),
+				"cooldown_ms": remaining.Milliseconds(),
+			})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -44,14 +57,19 @@ func (h *Handler) PostToggle(c *gin.Context) {
 	}
 
 	if secondaryKey != "" {
-		h.engine.RecordCooldown(h.hasher.Hash(secondaryKey))
+		remainingTime = h.engine.RecordCooldown(h.hasher.Hash(secondaryKey))
 	}
 
-	res := ws.FromToggle(toggle)
+	wsMsg := ws.FromToggle(toggle)
 
-	if payload, err := json.Marshal(res); err == nil {
+	if payload, err := json.Marshal(wsMsg); err == nil {
 		h.hub.Broadcast(payload)
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, ToggleResponse{
+		State:      toggle.State,
+		Reason:     toggle.Reason.String,
+		CreatedAt:  toggle.CreatedAt.Time,
+		CooldownMs: remainingTime.Milliseconds(),
+	})
 }

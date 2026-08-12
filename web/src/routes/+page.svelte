@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { bulbState, Bulb } from "$lib";
+    import { bulbState, Bulb, CooldownNotice } from "$lib";
 </script>
 
-<Bulb isOn={bulbState.isOn} durationMs={200} onclick={bulbState.toggle} />
+<CooldownNotice />
+<Bulb isOn={bulbState.isOn} disabled={bulbState.isCooldownActive} durationMs={200} onclick={bulbState.toggle} />

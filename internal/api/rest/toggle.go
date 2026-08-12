@@ -29,13 +29,9 @@ func (h *Handler) PostToggle(c *gin.Context) {
 		return
 	}
 
-	deviceID, hasCookie := h.getOrCreateDeviceID(c)
-	clientKey := c.ClientIP()
-	if hasCookie {
-		clientKey += ":" + deviceID
-	}
+	primaryKey, secondaryKey := h.getOrCreateDeviceID(c)
 
-	toggle, err := h.engine.Toggle(c.Request.Context(), req.Reason, h.hasher.Hash(clientKey))
+	toggle, err := h.engine.Toggle(c.Request.Context(), req.Reason, h.hasher.Hash(primaryKey))
 	if err != nil {
 		if errors.Is(err, bulb.ErrCooldown) {
 			c.JSON(http.StatusTooManyRequests, gin.H{errKey: err.Error()})
@@ -45,6 +41,10 @@ func (h *Handler) PostToggle(c *gin.Context) {
 			errKey: errInternalServer,
 		})
 		return
+	}
+
+	if secondaryKey != "" {
+		h.engine.RecordCooldown(h.hasher.Hash(secondaryKey))
 	}
 
 	res := ws.FromToggle(toggle)

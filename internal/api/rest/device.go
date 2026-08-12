@@ -12,16 +12,18 @@ const (
 	deviceCookieMaxAge = 31536000 // 1 year
 )
 
-// getOrCreateDeviceID reads an HttpOnly device cookie if present, or sets a new one on the response.
-// Returns (deviceID, true) if request presented a cookie, or (newDeviceID, false) if no cookie was sent.
-func (h *Handler) getOrCreateDeviceID(c *gin.Context) (string, bool) {
+// getOrCreateDeviceID returns (primaryKey, secondaryKey).
+// If the request presents a device_id cookie, returns (IP:deviceID, "").
+// If no cookie is present, sets Set-Cookie and returns (IP, IP:newDeviceID).
+func (h *Handler) getOrCreateDeviceID(c *gin.Context) (string, string) {
+	ip := c.ClientIP()
 	deviceID, err := c.Cookie(deviceCookieName)
 	if err == nil && deviceID != "" {
-		return deviceID, true
+		return ip + ":" + deviceID, ""
 	}
 
 	newID := uuid.NewString()
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie(deviceCookieName, newID, deviceCookieMaxAge, "/", "", false, true)
-	return newID, false
+	return ip, ip + ":" + newID
 }

@@ -39,7 +39,7 @@ func NewApp(ctx context.Context, cfg *config.Config, db *sql.DB) (*App, error) {
 	hasher := utils.NewHasher(cfg.IPSalt)
 	hub := ws.NewHub()
 
-	restHandler := rest.NewHandler(queries, engine, hub, hasher)
+	restHandler := rest.NewHandler(queries, engine, hub, hasher, cfg.IsProd)
 	wsHandler := ws.NewHandler(hub, cfg.IsProd, cfg.AllowedHosts)
 	router := NewRouter(restHandler, wsHandler)
 

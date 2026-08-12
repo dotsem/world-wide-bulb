@@ -24,6 +24,6 @@ func (h *Handler) getOrCreateDeviceID(c *gin.Context) (string, string) {
 
 	newID := uuid.NewString()
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie(deviceCookieName, newID, deviceCookieMaxAge, "/", "", false, true)
+	c.SetCookie(deviceCookieName, newID, deviceCookieMaxAge, "/", "", h.isProd, true)
 	return ip, ip + ":" + newID
 }

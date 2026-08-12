@@ -1,1 +1,4 @@
-// place files you want to import through the `$lib` alias in this folder.
+export { default as Bulb } from './components/Bulb.svelte';
+export { restApi } from './api/rest';
+export { wsClient } from './api/ws.svelte';
+export { bulbState } from './state/bulb.svelte';

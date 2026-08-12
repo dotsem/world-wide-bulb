@@ -2,6 +2,7 @@
 package api
 
 import (
+	"world-wide-bulb/internal/api/middleware"
 	"world-wide-bulb/internal/api/rest"
 	"world-wide-bulb/internal/api/ws"
 
@@ -12,6 +13,7 @@ import (
 func NewRouter(restH *rest.Handler, wsH *ws.Handler) *gin.Engine {
 	r := gin.Default()
 	_ = r.SetTrustedProxies(nil)
+	r.Use(middleware.CORS())
 
 	v1 := r.Group("/api/v1")
 	{

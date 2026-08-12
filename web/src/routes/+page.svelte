@@ -1,11 +1,5 @@
 <script lang="ts">
-    import Bulb from "$lib/components/Bulb.svelte";
-
-    let state: boolean = $state(false);
-
-    function toggle() {
-        state = !state;
-    }
+    import { bulbState, Bulb } from "$lib";
 </script>
 
-<Bulb isOn={state} durationMs={200} onclick={toggle} />
+<Bulb isOn={bulbState.isOn} durationMs={200} onclick={bulbState.toggle} />

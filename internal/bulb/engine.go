@@ -55,23 +55,23 @@ func (e *Engine) GetState() bool {
 }
 
 // RecordCooldown registers a cooldown entry for the given key hash.
-func (e *Engine) RecordCooldown(ipHash string) {
-	e.cooldown.Record(ipHash)
+func (e *Engine) RecordCooldown(ipHash string) time.Duration {
+	return e.cooldown.Record(ipHash)
 }
 
 // Toggle flips the state of the bulb and records the toggle in the database
 // It returns the new toggle record and an error if the toggle failed
 // The toggle is rate limited based on the cooldown time
-func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (store.Toggle, error) {
+func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (store.Toggle, time.Duration, error) {
 	if !e.cooldown.CanToggle(ipHash) {
-		return store.Toggle{}, ErrCooldown
+		return store.Toggle{}, time.Duration(0), ErrCooldown
 	}
 
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
 	if !e.cooldown.CanToggle(ipHash) {
-		return store.Toggle{}, ErrCooldown
+		return store.Toggle{}, time.Duration(0), ErrCooldown
 	}
 
 	newState := !e.state.Load()
@@ -88,12 +88,16 @@ func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (stor
 	})
 	if err != nil {
 		slog.Error("failed to insert toggle into db", "error", err)
-		return store.Toggle{}, err
+		return store.Toggle{}, time.Duration(0), err
 	}
 
-	e.cooldown.Record(ipHash)
+	remainingTime := e.cooldown.Record(ipHash)
 	e.state.Store(newState)
 	slog.Info("bulb toggled", "state", newState, "reason", reason, "id", toggle.ID, "at", toggle.CreatedAt.Time.Format(time.RFC3339))
 
-	return toggle, nil
+	return toggle, remainingTime, nil
+}
+
+func (e *Engine) GetRemainingCooldown(ipHash string) time.Duration {
+	return e.cooldown.GetRemainingCooldown(ipHash)
 }

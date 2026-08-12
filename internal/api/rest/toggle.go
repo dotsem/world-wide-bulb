@@ -43,7 +43,11 @@ func (h *Handler) PostToggle(c *gin.Context) {
 	toggle, remainingTime, err := h.engine.Toggle(c.Request.Context(), req.Reason, h.hasher.Hash(primaryKey))
 	if err != nil {
 		if errors.Is(err, bulb.ErrCooldown) {
-			c.JSON(http.StatusTooManyRequests, gin.H{errKey: err.Error()})
+			remaining := h.engine.GetRemainingCooldown(h.hasher.Hash(primaryKey))
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				errKey:        err.Error(),
+				"cooldown_ms": remaining.Milliseconds(),
+			})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{

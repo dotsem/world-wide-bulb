@@ -14,10 +14,11 @@ class RestApi {
             },
             body: JSON.stringify({ reason }),
         });
+        const data = await res.json();
         if (!res.ok) {
-            throw new Error('Failed to toggle bulb');
+            throw { message: data.error || 'Failed to toggle bulb', cooldown_ms: data.cooldown_ms || 0 };
         }
-        return res.json();
+        return data;
     }
 
     async state(): Promise<StateResponse> {

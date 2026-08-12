@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// StateResponse defines the JSON response payload for the bulb state endpoint.
 type StateResponse struct {
 	State      bool  `json:"state"`
 	CooldownMs int64 `json:"cooldown_ms"`

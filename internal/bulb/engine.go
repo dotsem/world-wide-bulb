@@ -98,6 +98,7 @@ func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (stor
 	return toggle, remainingTime, nil
 }
 
+// GetRemainingCooldown returns the remaining cooldown duration for the given IP hash.
 func (e *Engine) GetRemainingCooldown(ipHash string) time.Duration {
 	return e.cooldown.GetRemainingCooldown(ipHash)
 }

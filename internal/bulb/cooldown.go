@@ -71,6 +71,7 @@ func (c *Cooldown) Record(ipHash string) time.Duration {
 	return c.cooldownTime
 }
 
+// GetRemainingCooldown returns the remaining duration until the given IP hash can toggle again.
 func (c *Cooldown) GetRemainingCooldown(ipHash string) time.Duration {
 	c.mu.Lock()
 	defer c.mu.Unlock()

@@ -121,4 +121,10 @@ func TestToggle(t *testing.T) {
 		_, _, err := e.Toggle(ctx, testReason, "manual_ip")
 		assert.ErrorIs(t, err, ErrCooldown)
 	})
+
+	t.Run("GetRemainingCooldown delegates to cooldown struct", func(t *testing.T) {
+		e := NewEngine(ctx, &mockStore{})
+		e.RecordCooldown("manual_ip")
+		assert.Greater(t, e.GetRemainingCooldown("manual_ip"), int64(0))
+	})
 }

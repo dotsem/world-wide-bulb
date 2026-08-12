@@ -27,15 +27,17 @@ func TestPostToggle(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 
 		var res struct {
-			State     bool   `json:"state"`
-			Reason    string `json:"reason"`
-			CreatedAt string `json:"created_at"`
+			State      bool   `json:"state"`
+			Reason     string `json:"reason"`
+			CreatedAt  string `json:"created_at"`
+			CooldownMs int64  `json:"cooldown_ms"`
 		}
 		err := json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
 		assert.True(t, res.State)
 		assert.Equal(t, "testing toggle", res.Reason)
 		assert.NotEmpty(t, res.CreatedAt)
+		assert.Greater(t, res.CooldownMs, int64(0))
 		assert.True(t, env.engine.GetState())
 	})
 

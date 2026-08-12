@@ -77,4 +77,24 @@ func TestCooldown(t *testing.T) {
 
 		assert.True(t, c.CheckAndRecord("ip_trigger_cleanup"))
 	})
+
+	t.Run("GetRemainingCooldown returns 0 for unrecorded IP", func(t *testing.T) {
+		c := NewCooldown(100 * time.Millisecond)
+		assert.Equal(t, time.Duration(0), c.GetRemainingCooldown("unknown_ip"))
+	})
+
+	t.Run("GetRemainingCooldown returns remaining duration for active cooldown", func(t *testing.T) {
+		c := NewCooldown(100 * time.Millisecond)
+		c.Record("ip_active")
+		remaining := c.GetRemainingCooldown("ip_active")
+		assert.Greater(t, remaining, time.Duration(0))
+		assert.LessOrEqual(t, remaining, 100*time.Millisecond)
+	})
+
+	t.Run("GetRemainingCooldown clamps to 0 when cooldown expired", func(t *testing.T) {
+		c := NewCooldown(10 * time.Millisecond)
+		c.Record("ip_expired")
+		time.Sleep(15 * time.Millisecond)
+		assert.Equal(t, time.Duration(0), c.GetRemainingCooldown("ip_expired"))
+	})
 }

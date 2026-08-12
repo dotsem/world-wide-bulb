@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"world-wide-bulb/internal/api"
 	"world-wide-bulb/internal/config"
 
@@ -22,6 +24,12 @@ func run(ctx context.Context) error {
 	cfg, err := config.Load()
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
+	}
+
+	if dir := filepath.Dir(cfg.DBPath); dir != "." && dir != "" {
+		if err := os.MkdirAll(dir, 0750); err != nil {
+			return fmt.Errorf("failed to create database directory: %w", err)
+		}
 	}
 
 	db, err := sql.Open("sqlite", cfg.DBPath)

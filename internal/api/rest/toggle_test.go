@@ -99,4 +99,45 @@ func TestPostToggle(t *testing.T) {
 		env.router.ServeHTTP(rec2, req2)
 		assert.Equal(t, http.StatusOK, rec2.Code)
 	})
+
+	t.Run("enforces cooldown when second request presents issued device_id cookie", func(t *testing.T) {
+		env := setupTestEnv(t)
+
+		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req1.RemoteAddr = "192.168.1.10:12345"
+		rec1 := httptest.NewRecorder()
+		env.router.ServeHTTP(rec1, req1)
+		assert.Equal(t, http.StatusOK, rec1.Code)
+
+		setCookie := rec1.Header().Get("Set-Cookie")
+		require.Contains(t, setCookie, "device_id=")
+
+		cookieParts := strings.Split(setCookie, ";")
+		cookieValue := cookieParts[0]
+
+		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req2.RemoteAddr = "192.168.1.10:12345"
+		req2.Header.Set("Cookie", cookieValue)
+		rec2 := httptest.NewRecorder()
+		env.router.ServeHTTP(rec2, req2)
+		assert.Equal(t, http.StatusTooManyRequests, rec2.Code)
+	})
+
+	t.Run("allows distinct devices on same IP to toggle independently", func(t *testing.T) {
+		env := setupTestEnv(t)
+
+		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req1.RemoteAddr = "192.168.1.50:12345"
+		req1.Header.Set("Cookie", "device_id=device-A")
+		rec1 := httptest.NewRecorder()
+		env.router.ServeHTTP(rec1, req1)
+		assert.Equal(t, http.StatusOK, rec1.Code)
+
+		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req2.RemoteAddr = "192.168.1.50:12345"
+		req2.Header.Set("Cookie", "device_id=device-B")
+		rec2 := httptest.NewRecorder()
+		env.router.ServeHTTP(rec2, req2)
+		assert.Equal(t, http.StatusOK, rec2.Code)
+	})
 }

@@ -111,4 +111,12 @@ func TestToggle(t *testing.T) {
 		_, err = e.Toggle(ctx, testReason, testIP)
 		assert.NoError(t, err)
 	})
+
+	t.Run("RecordCooldown registers cooldown for IP hash", func(t *testing.T) {
+		e := NewEngine(ctx, &mockStore{})
+		e.RecordCooldown("manual_ip")
+
+		_, err := e.Toggle(ctx, testReason, "manual_ip")
+		assert.ErrorIs(t, err, ErrCooldown)
+	})
 }

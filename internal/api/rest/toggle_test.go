@@ -140,4 +140,14 @@ func TestPostToggle(t *testing.T) {
 		env.router.ServeHTTP(rec2, req2)
 		assert.Equal(t, http.StatusOK, rec2.Code)
 	})
+
+	t.Run("returns 500 when database insertion fails", func(t *testing.T) {
+		env := setupTestEnv(t)
+		_ = env.db.Close()
+
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		rec := httptest.NewRecorder()
+		env.router.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
 }

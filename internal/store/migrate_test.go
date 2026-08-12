@@ -39,4 +39,16 @@ func TestMigrate(t *testing.T) {
 		err = store.Migrate(ctx, db)
 		assert.NoError(t, err)
 	})
+
+	t.Run("returns error when context is canceled", func(t *testing.T) {
+		db, err := sql.Open("sqlite", ":memory:")
+		require.NoError(t, err)
+		defer func() { _ = db.Close() }()
+
+		ctx, cancel := context.WithCancel(context.Background())
+		cancel()
+
+		err = store.Migrate(ctx, db)
+		assert.Error(t, err)
+	})
 }

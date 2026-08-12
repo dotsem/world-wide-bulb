@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log"
 	"world-wide-bulb/internal/api"
-	"world-wide-bulb/internal/api/config"
+	"world-wide-bulb/internal/config"
 
 	_ "modernc.org/sqlite"
 )

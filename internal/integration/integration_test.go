@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"world-wide-bulb/internal/api"
-	"world-wide-bulb/internal/api/config"
+	"world-wide-bulb/internal/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

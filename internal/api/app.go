@@ -5,10 +5,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"world-wide-bulb/internal/api/config"
 	"world-wide-bulb/internal/api/rest"
 	"world-wide-bulb/internal/api/ws"
 	"world-wide-bulb/internal/bulb"
+	"world-wide-bulb/internal/config"
 	"world-wide-bulb/internal/store"
 	"world-wide-bulb/internal/utils"
 

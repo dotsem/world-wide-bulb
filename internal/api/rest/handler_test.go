@@ -20,6 +20,7 @@ type testEnv struct {
 	queries *store.Queries
 	engine  *bulb.Engine
 	hub     *ws.Hub
+	db      *sql.DB
 }
 
 func setupTestEnv(t *testing.T) *testEnv {
@@ -54,5 +55,6 @@ func setupTestEnv(t *testing.T) *testEnv {
 		queries: queries,
 		engine:  engine,
 		hub:     hub,
+		db:      db,
 	}
 }

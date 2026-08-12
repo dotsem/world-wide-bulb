@@ -67,4 +67,14 @@ func TestCooldown(t *testing.T) {
 
 		wg.Wait()
 	})
+
+	t.Run("CheckAndRecord cleans up expired history entries when maxHistoryEntries exceeded", func(t *testing.T) {
+		c := NewCooldown(1 * time.Millisecond)
+		for i := range 502 {
+			c.Record(string(rune(i)))
+		}
+		time.Sleep(2 * time.Millisecond)
+
+		assert.True(t, c.CheckAndRecord("ip_trigger_cleanup"))
+	})
 }

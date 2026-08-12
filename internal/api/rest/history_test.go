@@ -40,4 +40,15 @@ func TestGetHistory(t *testing.T) {
 		assert.NotEmpty(t, item["created_at"])
 		assert.Nil(t, item["ip_hash"])
 	})
+
+	t.Run("returns 500 when database query fails", func(t *testing.T) {
+		env := setupTestEnv(t)
+		_ = env.db.Close()
+
+		reqHistory := httptest.NewRequest(http.MethodGet, "/api/v1/history", nil)
+		recHistory := httptest.NewRecorder()
+		env.router.ServeHTTP(recHistory, reqHistory)
+
+		assert.Equal(t, http.StatusInternalServerError, recHistory.Code)
+	})
 }

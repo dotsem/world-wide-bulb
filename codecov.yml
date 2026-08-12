@@ -12,3 +12,8 @@ coverage:
   require_base: false
   require_head: true
   hide_project_coverage: false
+
+ignore:
+  - "internal/store/db.go"
+  - "internal/store/models.go"
+  - "internal/store/*.sql.go"

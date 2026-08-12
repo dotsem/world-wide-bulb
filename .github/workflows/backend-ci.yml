@@ -121,6 +121,8 @@ jobs:
         run: |
           # Run tests with gotestsum for a clear overview of failures in CI logs
           $(go env GOPATH)/bin/gotestsum --format pkgname-and-test-fails --junitfile unit-tests.xml -- -race ./... -coverprofile=coverage.out -covermode=atomic
+          grep -v -E "internal/store/(db|models|.*\.sql)\.go" coverage.out > coverage_clean.out
+          mv coverage_clean.out coverage.out
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

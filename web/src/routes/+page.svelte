@@ -1,2 +1,11 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+    import Bulb from "$lib/components/Bulb.svelte";
+
+    let state: boolean = $state(false);
+
+    function toggle() {
+        state = !state;
+    }
+</script>
+
+<Bulb isOn={state} durationMs={200} onclick={toggle} />

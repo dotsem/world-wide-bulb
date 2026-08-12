@@ -29,7 +29,13 @@ func (h *Handler) PostToggle(c *gin.Context) {
 		return
 	}
 
-	toggle, err := h.engine.Toggle(c.Request.Context(), req.Reason, h.hasher.Hash(c.ClientIP()))
+	deviceID, hasCookie := h.getOrCreateDeviceID(c)
+	clientKey := c.ClientIP()
+	if hasCookie {
+		clientKey += ":" + deviceID
+	}
+
+	toggle, err := h.engine.Toggle(c.Request.Context(), req.Reason, h.hasher.Hash(clientKey))
 	if err != nil {
 		if errors.Is(err, bulb.ErrCooldown) {
 			c.JSON(http.StatusTooManyRequests, gin.H{errKey: err.Error()})

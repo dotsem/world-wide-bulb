@@ -1,7 +1,6 @@
 package rest_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -16,8 +15,7 @@ func TestPostToggle(t *testing.T) {
 	t.Run("successfully toggles bulb state", func(t *testing.T) {
 		env := setupTestEnv(t)
 
-		body := bytes.NewBufferString(`{"reason":"testing toggle"}`)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", body)
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req.Header.Set("Content-Type", "application/json")
 		req.RemoteAddr = "192.168.1.1:12345"
 
@@ -28,14 +26,12 @@ func TestPostToggle(t *testing.T) {
 
 		var res struct {
 			State      bool   `json:"state"`
-			Reason     string `json:"reason"`
 			CreatedAt  string `json:"created_at"`
 			CooldownMs int64  `json:"cooldown_ms"`
 		}
 		err := json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
 		assert.True(t, res.State)
-		assert.Equal(t, "testing toggle", res.Reason)
 		assert.NotEmpty(t, res.CreatedAt)
 		assert.Greater(t, res.CooldownMs, int64(0))
 		assert.True(t, env.engine.GetState())
@@ -53,33 +49,16 @@ func TestPostToggle(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
-	t.Run("rejects reason exceeding 60 chars with 400", func(t *testing.T) {
-		env := setupTestEnv(t)
-
-		longReason := strings.Repeat("a", 61)
-		body := bytes.NewBufferString(`{"reason":"` + longReason + `"}`)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", body)
-		req.Header.Set("Content-Type", "application/json")
-		req.RemoteAddr = "192.168.1.3:12345"
-
-		rec := httptest.NewRecorder()
-		env.router.ServeHTTP(rec, req)
-
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-	})
-
 	t.Run("enforces cooldown for same IP with 429", func(t *testing.T) {
 		env := setupTestEnv(t)
 
-		body := bytes.NewBufferString(`{"reason":"first"}`)
-		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", body)
+		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req1.RemoteAddr = "192.168.1.4:12345"
 		rec1 := httptest.NewRecorder()
 		env.router.ServeHTTP(rec1, req1)
 		assert.Equal(t, http.StatusOK, rec1.Code)
 
-		body2 := bytes.NewBufferString(`{"reason":"second"}`)
-		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", body2)
+		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req2.RemoteAddr = "192.168.1.4:12345"
 		rec2 := httptest.NewRecorder()
 		env.router.ServeHTTP(rec2, req2)
@@ -89,13 +68,13 @@ func TestPostToggle(t *testing.T) {
 	t.Run("allows different IP during active cooldown", func(t *testing.T) {
 		env := setupTestEnv(t)
 
-		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req1.RemoteAddr = "10.0.0.1:12345"
 		rec1 := httptest.NewRecorder()
 		env.router.ServeHTTP(rec1, req1)
 		assert.Equal(t, http.StatusOK, rec1.Code)
 
-		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req2.RemoteAddr = "10.0.0.2:12345"
 		rec2 := httptest.NewRecorder()
 		env.router.ServeHTTP(rec2, req2)
@@ -105,7 +84,7 @@ func TestPostToggle(t *testing.T) {
 	t.Run("enforces cooldown when second request presents issued device_id cookie", func(t *testing.T) {
 		env := setupTestEnv(t)
 
-		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req1.RemoteAddr = "192.168.1.10:12345"
 		rec1 := httptest.NewRecorder()
 		env.router.ServeHTTP(rec1, req1)
@@ -117,7 +96,7 @@ func TestPostToggle(t *testing.T) {
 		cookieParts := strings.Split(setCookie, ";")
 		cookieValue := cookieParts[0]
 
-		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req2.RemoteAddr = "192.168.1.10:12345"
 		req2.Header.Set("Cookie", cookieValue)
 		rec2 := httptest.NewRecorder()
@@ -128,14 +107,14 @@ func TestPostToggle(t *testing.T) {
 	t.Run("allows distinct devices on same IP to toggle independently", func(t *testing.T) {
 		env := setupTestEnv(t)
 
-		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req1 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req1.RemoteAddr = "192.168.1.50:12345"
 		req1.Header.Set("Cookie", "device_id=device-A")
 		rec1 := httptest.NewRecorder()
 		env.router.ServeHTTP(rec1, req1)
 		assert.Equal(t, http.StatusOK, rec1.Code)
 
-		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req2 := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		req2.RemoteAddr = "192.168.1.50:12345"
 		req2.Header.Set("Cookie", "device_id=device-B")
 		rec2 := httptest.NewRecorder()
@@ -147,7 +126,7 @@ func TestPostToggle(t *testing.T) {
 		env := setupTestEnv(t)
 		_ = env.db.Close()
 
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", bytes.NewBufferString(`{}`))
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 		rec := httptest.NewRecorder()
 		env.router.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)

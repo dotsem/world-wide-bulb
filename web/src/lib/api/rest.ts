@@ -5,14 +5,13 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
 class RestApi {
 
-    async toggle(reason?: string): Promise<ToggleResponse> {
+    async toggle(): Promise<ToggleResponse> {
         const res = await fetch(`${API_BASE}/api/v1/toggle`, {
             method: 'POST',
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ reason }),
         });
         const data = await res.json();
         if (!res.ok) {

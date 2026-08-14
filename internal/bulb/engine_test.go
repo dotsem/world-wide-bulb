@@ -10,10 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	testIP     = "test_ip"
-	testReason = "test_reason"
-)
+const testIP = "test_ip"
 
 type mockStore struct {
 	latest    store.Toggle
@@ -31,7 +28,6 @@ func (m *mockStore) InsertToggle(_ context.Context, arg store.InsertToggleParams
 	}
 	return store.Toggle{
 		State:  arg.State,
-		Reason: arg.Reason,
 		IpHash: arg.IpHash,
 	}, nil
 }
@@ -62,40 +58,31 @@ func TestToggle(t *testing.T) {
 	t.Run("successful toggle and state flip", func(t *testing.T) {
 		e := NewEngine(ctx, &mockStore{latest: store.Toggle{State: false}})
 
-		toggle, remainingTime, err := e.Toggle(ctx, testReason, testIP)
+		toggle, remainingTime, err := e.Toggle(ctx, testIP)
 		assert.NoError(t, err)
 		assert.True(t, toggle.State)
 		assert.True(t, e.GetState())
-		assert.Equal(t, sql.NullString{String: testReason, Valid: true}, toggle.Reason)
 		assert.Equal(t, testIP, toggle.IpHash)
 		assert.NotZero(t, remainingTime)
-	})
-
-	t.Run("empty reason results in invalid null string", func(t *testing.T) {
-		e := NewEngine(ctx, &mockStore{})
-
-		toggle, _, err := e.Toggle(ctx, "", testIP)
-		assert.NoError(t, err)
-		assert.False(t, toggle.Reason.Valid)
 	})
 
 	t.Run("rate limited on rapid toggle from same IP", func(t *testing.T) {
 		e := NewEngine(ctx, &mockStore{})
 
-		_, _, err := e.Toggle(ctx, testReason, testIP)
+		_, _, err := e.Toggle(ctx, testIP)
 		assert.NoError(t, err)
 
-		_, _, err = e.Toggle(ctx, testReason, testIP)
+		_, _, err = e.Toggle(ctx, testIP)
 		assert.ErrorIs(t, err, ErrCooldown)
 	})
 
 	t.Run("different IP allowed during other IP cooldown", func(t *testing.T) {
 		e := NewEngine(ctx, &mockStore{})
 
-		_, _, err := e.Toggle(ctx, testReason, "ip_1")
+		_, _, err := e.Toggle(ctx, "ip_1")
 		assert.NoError(t, err)
 
-		toggle, remainingTime, err := e.Toggle(ctx, testReason, "ip_2")
+		toggle, remainingTime, err := e.Toggle(ctx, "ip_2")
 		assert.NoError(t, err)
 		assert.False(t, toggle.State)
 		assert.NotZero(t, remainingTime)
@@ -105,12 +92,12 @@ func TestToggle(t *testing.T) {
 		s := &mockStore{insertErr: errors.New("db error")}
 		e := NewEngine(ctx, s)
 
-		_, _, err := e.Toggle(ctx, testReason, testIP)
+		_, _, err := e.Toggle(ctx, testIP)
 		assert.Error(t, err)
 		assert.False(t, e.GetState())
 
 		s.insertErr = nil
-		_, _, err = e.Toggle(ctx, testReason, testIP)
+		_, _, err = e.Toggle(ctx, testIP)
 		assert.NoError(t, err)
 	})
 
@@ -118,7 +105,7 @@ func TestToggle(t *testing.T) {
 		e := NewEngine(ctx, &mockStore{})
 		e.RecordCooldown("manual_ip")
 
-		_, _, err := e.Toggle(ctx, testReason, "manual_ip")
+		_, _, err := e.Toggle(ctx, "manual_ip")
 		assert.ErrorIs(t, err, ErrCooldown)
 	})
 

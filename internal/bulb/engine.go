@@ -2,7 +2,6 @@ package bulb
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"log/slog"
 	"sync"
@@ -62,7 +61,7 @@ func (e *Engine) RecordCooldown(ipHash string) time.Duration {
 // Toggle flips the state of the bulb and records the toggle in the database
 // It returns the new toggle record and an error if the toggle failed
 // The toggle is rate limited based on the cooldown time
-func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (store.Toggle, time.Duration, error) {
+func (e *Engine) Toggle(ctx context.Context, ipHash string) (store.Toggle, time.Duration, error) {
 	if !e.cooldown.CanToggle(ipHash) {
 		return store.Toggle{}, time.Duration(0), ErrCooldown
 	}
@@ -76,14 +75,8 @@ func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (stor
 
 	newState := !e.state.Load()
 
-	var nullReason sql.NullString
-	if reason != "" {
-		nullReason = sql.NullString{String: reason, Valid: true}
-	}
-
 	toggle, err := e.store.InsertToggle(ctx, store.InsertToggleParams{
 		State:  newState,
-		Reason: nullReason,
 		IpHash: ipHash,
 	})
 	if err != nil {
@@ -93,7 +86,7 @@ func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (stor
 
 	remainingTime := e.cooldown.Record(ipHash)
 	e.state.Store(newState)
-	slog.Info("bulb toggled", "state", newState, "reason", reason, "id", toggle.ID, "at", toggle.CreatedAt.Time.Format(time.RFC3339))
+	slog.Info("bulb toggled", "state", newState, "id", toggle.ID, "at", toggle.CreatedAt.Time.Format(time.RFC3339))
 
 	return toggle, remainingTime, nil
 }

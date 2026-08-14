@@ -55,11 +55,10 @@ class BulbState {
         this.setCooldown(res.cooldown_ms);
     }
 
-    toggle = async (reason?: unknown) => {
+    toggle = async () => {
         if (this.isCooldownActive) return;
-        const cleanReason = typeof reason === 'string' ? reason : undefined;
         try {
-            const res = await restApi.toggle(cleanReason);
+            const res = await restApi.toggle();
             this.isOn = res.state;
             this.setCooldown(res.cooldown_ms);
         } catch (err: any) {

@@ -23,6 +23,8 @@ func (m mockResult) RowsAffected() (int64, error) { return m.rows, m.err }
 
 type mockStore struct {
 	latest       store.Toggle
+	byUUID       store.Toggle
+	byUUIDErr    error
 	getErr       error
 	insertErr    error
 	updateErr    error
@@ -31,6 +33,16 @@ type mockStore struct {
 
 func (m *mockStore) GetLatestToggle(_ context.Context) (store.Toggle, error) {
 	return m.latest, m.getErr
+}
+
+func (m *mockStore) GetToggleByUUID(_ context.Context, uuid string) (store.Toggle, error) {
+	if m.byUUIDErr != nil {
+		return store.Toggle{}, m.byUUIDErr
+	}
+	if m.byUUID.Uuid != "" {
+		return m.byUUID, nil
+	}
+	return store.Toggle{Uuid: uuid}, nil
 }
 
 func (m *mockStore) InsertToggle(_ context.Context, arg store.InsertToggleParams) (store.Toggle, error) {
@@ -149,9 +161,22 @@ func TestToggle(t *testing.T) {
 		assert.ErrorIs(t, err, ErrInvalidUUID)
 	})
 
-	t.Run("UpdateReason returns ErrNotFound when 0 rows affected", func(t *testing.T) {
-		e := NewEngine(ctx, &mockStore{rowsAffected: 0})
+	t.Run("UpdateReason returns ErrEmptyReason for whitespace-only reason", func(t *testing.T) {
+		e := NewEngine(ctx, &mockStore{})
+		err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "   ")
+		assert.ErrorIs(t, err, ErrEmptyReason)
+	})
+
+	t.Run("UpdateReason returns ErrNotFound when toggle UUID does not exist", func(t *testing.T) {
+		e := NewEngine(ctx, &mockStore{byUUIDErr: sql.ErrNoRows})
 		err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "reason")
 		assert.ErrorIs(t, err, ErrNotFound)
+	})
+
+	t.Run("UpdateReason returns ErrReasonAlreadySet when reason is already present", func(t *testing.T) {
+		id := "123e4567-e89b-12d3-a456-426614174000"
+		e := NewEngine(ctx, &mockStore{byUUID: store.Toggle{Uuid: id, Reason: sql.NullString{String: "existing", Valid: true}}})
+		err := e.UpdateReason(ctx, id, "new reason")
+		assert.ErrorIs(t, err, ErrReasonAlreadySet)
 	})
 }

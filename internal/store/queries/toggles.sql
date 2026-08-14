@@ -6,6 +6,10 @@ RETURNING *;
 -- name: UpdateToggleReason :execresult
 UPDATE toggles
 SET reason = ?
+WHERE uuid = ? AND (reason IS NULL OR reason = '');
+
+-- name: GetToggleByUUID :one
+SELECT * FROM toggles
 WHERE uuid = ?;
 
 -- name: GetRecentToggles :many

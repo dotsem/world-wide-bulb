@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -20,6 +21,10 @@ var (
 	ErrNotFound = errors.New("toggle not found")
 	// ErrInvalidUUID indicates the provided string is not a valid UUID.
 	ErrInvalidUUID = errors.New("invalid uuid format")
+	// ErrReasonAlreadySet indicates a reason has already been submitted for this toggle.
+	ErrReasonAlreadySet = errors.New("reason already set for this toggle")
+	// ErrEmptyReason indicates the submitted reason is empty or whitespace only.
+	ErrEmptyReason = errors.New("reason cannot be empty")
 	// CooldownTime is the default duration a client must wait between toggles.
 	CooldownTime = 10 * time.Second
 )
@@ -27,6 +32,7 @@ var (
 // Store defines persistence operations needed by the bulb Engine.
 type Store interface {
 	GetLatestToggle(ctx context.Context) (store.Toggle, error)
+	GetToggleByUUID(ctx context.Context, uuid string) (store.Toggle, error)
 	InsertToggle(ctx context.Context, arg store.InsertToggleParams) (store.Toggle, error)
 	UpdateToggleReason(ctx context.Context, arg store.UpdateToggleReasonParams) (sql.Result, error)
 }
@@ -104,12 +110,29 @@ func (e *Engine) Toggle(ctx context.Context, ipHash string) (store.Toggle, time.
 
 // UpdateReason attaches or updates the reason for a toggle record by its UUID.
 func (e *Engine) UpdateReason(ctx context.Context, id string, reason string) error {
+	trimmed := strings.TrimSpace(reason)
+	if trimmed == "" {
+		return ErrEmptyReason
+	}
+
 	if _, err := uuid.Parse(id); err != nil {
 		return ErrInvalidUUID
 	}
 
-	nullReason := sql.NullString{String: reason, Valid: reason != ""}
-	res, err := e.store.UpdateToggleReason(ctx, store.UpdateToggleReasonParams{
+	existingToggle, err := e.store.GetToggleByUUID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+		return err
+	}
+
+	if existingToggle.Reason.Valid && strings.TrimSpace(existingToggle.Reason.String) != "" {
+		return ErrReasonAlreadySet
+	}
+
+	nullReason := sql.NullString{String: trimmed, Valid: true}
+	_, err = e.store.UpdateToggleReason(ctx, store.UpdateToggleReasonParams{
 		Reason: nullReason,
 		Uuid:   id,
 	})
@@ -117,13 +140,6 @@ func (e *Engine) UpdateReason(ctx context.Context, id string, reason string) err
 		return err
 	}
 
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rows == 0 {
-		return ErrNotFound
-	}
 	return nil
 }
 

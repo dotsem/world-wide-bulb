@@ -1,8 +1,10 @@
 package rest
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"world-wide-bulb/internal/bulb"
 
 	"github.com/gin-gonic/gin"
@@ -22,10 +24,24 @@ func (h *Handler) PostReason(c *gin.Context) {
 		return
 	}
 
-	err := h.engine.UpdateReason(c.Request.Context(), req.ID, req.Reason)
+	trimmedReason := strings.TrimSpace(req.Reason)
+	if trimmedReason == "" {
+		c.JSON(http.StatusBadRequest, gin.H{errKey: "reason cannot be empty or whitespace only"})
+		return
+	}
+
+	err := h.engine.UpdateReason(c.Request.Context(), req.ID, trimmedReason)
 	if err != nil {
 		if errors.Is(err, bulb.ErrInvalidUUID) {
 			c.JSON(http.StatusBadRequest, gin.H{errKey: "invalid uuid format"})
+			return
+		}
+		if errors.Is(err, bulb.ErrEmptyReason) {
+			c.JSON(http.StatusBadRequest, gin.H{errKey: "reason cannot be empty or whitespace only"})
+			return
+		}
+		if errors.Is(err, bulb.ErrReasonAlreadySet) {
+			c.JSON(http.StatusBadRequest, gin.H{errKey: "reason already set for this toggle"})
 			return
 		}
 		if errors.Is(err, bulb.ErrNotFound) {
@@ -34,6 +50,15 @@ func (h *Handler) PostReason(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{errKey: errInternalServer})
 		return
+	}
+
+	wsMsg := gin.H{
+		"type":   "reason_updated",
+		"id":     req.ID,
+		"reason": trimmedReason,
+	}
+	if payload, err := json.Marshal(wsMsg); err == nil {
+		h.hub.Broadcast(payload)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})

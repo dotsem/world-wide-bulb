@@ -131,6 +131,12 @@ func TestBackendIntegration_WebSocketBroadcast(t *testing.T) {
 	defer func() { _ = resp.Body.Close() }()
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
+	var toggleRes struct {
+		ID string `json:"id"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&toggleRes)
+	require.NoError(t, err)
+
 	err = wsConn.SetReadDeadline(time.Now().Add(2 * time.Second))
 	require.NoError(t, err)
 
@@ -144,6 +150,26 @@ func TestBackendIntegration_WebSocketBroadcast(t *testing.T) {
 	err = json.Unmarshal(message, &broadcast)
 	require.NoError(t, err)
 	assert.True(t, broadcast.State)
+
+	reasonPayload := strings.NewReader(`{"id":"` + toggleRes.ID + `","reason":"broadcast reason test"}`)
+	reasonResp, err := client.Post(env.baseURL+"/api/v1/reason", "application/json", reasonPayload)
+	require.NoError(t, err)
+	defer func() { _ = reasonResp.Body.Close() }()
+	assert.Equal(t, http.StatusOK, reasonResp.StatusCode)
+
+	_, reasonMessage, err := wsConn.ReadMessage()
+	require.NoError(t, err)
+
+	var reasonBroadcast struct {
+		Type   string `json:"type"`
+		ID     string `json:"id"`
+		Reason string `json:"reason"`
+	}
+	err = json.Unmarshal(reasonMessage, &reasonBroadcast)
+	require.NoError(t, err)
+	assert.Equal(t, "reason_updated", reasonBroadcast.Type)
+	assert.Equal(t, toggleRes.ID, reasonBroadcast.ID)
+	assert.Equal(t, "broadcast reason test", reasonBroadcast.Reason)
 }
 
 func TestBackendIntegration_IPCooldown(t *testing.T) {

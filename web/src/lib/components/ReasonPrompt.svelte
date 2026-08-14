@@ -1,13 +1,19 @@
 <script lang="ts">
+    import { onDestroy } from "svelte";
     import { bulbState } from "$lib/state/bulb.svelte";
 
     let reason = $state("");
     let isSubmitting = $state(false);
     let isSuccess = $state(false);
     let errorMsg = $state<string | null>(null);
+    let successTimeout: ReturnType<typeof setTimeout> | undefined;
 
     let isVisible = $derived(bulbState.showReasonPrompt);
     let actionText = $derived(bulbState.lastActionState ? "turn on" : "turn off");
+
+    onDestroy(() => {
+        if (successTimeout) clearTimeout(successTimeout);
+    });
 
     async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
@@ -21,7 +27,8 @@
             await bulbState.submitReason(trimmed);
             isSuccess = true;
             reason = "";
-            setTimeout(() => {
+            if (successTimeout) clearTimeout(successTimeout);
+            successTimeout = setTimeout(() => {
                 isSuccess = false;
             }, 1500);
         } catch (err: any) {

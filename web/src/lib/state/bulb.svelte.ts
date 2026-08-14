@@ -79,10 +79,14 @@ class BulbState {
         if (!this.lastToggleId) return;
         await restApi.postReason(this.lastToggleId, reason);
         this.showReasonPrompt = false;
+        this.lastToggleId = null;
+        this.lastActionState = null;
     }
 
     dismissReason = () => {
         this.showReasonPrompt = false;
+        this.lastToggleId = null;
+        this.lastActionState = null;
     }
 }
 

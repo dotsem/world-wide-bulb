@@ -66,6 +66,25 @@ func (q *Queries) GetRecentToggles(ctx context.Context, limit int64) ([]Toggle, 
 	return items, nil
 }
 
+const getToggleByUUID = `-- name: GetToggleByUUID :one
+SELECT id, state, reason, created_at, ip_hash, uuid FROM toggles
+WHERE uuid = ?
+`
+
+func (q *Queries) GetToggleByUUID(ctx context.Context, uuid string) (Toggle, error) {
+	row := q.db.QueryRowContext(ctx, getToggleByUUID, uuid)
+	var i Toggle
+	err := row.Scan(
+		&i.ID,
+		&i.State,
+		&i.Reason,
+		&i.CreatedAt,
+		&i.IpHash,
+		&i.Uuid,
+	)
+	return i, err
+}
+
 const insertToggle = `-- name: InsertToggle :one
 INSERT INTO toggles (uuid, state, ip_hash)
 VALUES (?, ?, ?)
@@ -107,7 +126,7 @@ func (q *Queries) PruneOldToggles(ctx context.Context, limit int64) error {
 const updateToggleReason = `-- name: UpdateToggleReason :execresult
 UPDATE toggles
 SET reason = ?
-WHERE uuid = ?
+WHERE uuid = ? AND (reason IS NULL OR reason = '')
 `
 
 type UpdateToggleReasonParams struct {

@@ -1,7 +1,16 @@
 -- name: InsertToggle :one
-INSERT INTO toggles (state, reason, ip_hash)
+INSERT INTO toggles (uuid, state, ip_hash)
 VALUES (?, ?, ?)
 RETURNING *;
+
+-- name: UpdateToggleReason :execresult
+UPDATE toggles
+SET reason = ?
+WHERE uuid = ? AND (reason IS NULL OR reason = '');
+
+-- name: GetToggleByUUID :one
+SELECT * FROM toggles
+WHERE uuid = ?;
 
 -- name: GetRecentToggles :many
 SELECT * FROM toggles

@@ -14,4 +14,5 @@ type Toggle struct {
 	Reason    sql.NullString `json:"reason"`
 	CreatedAt sql.NullTime   `json:"created_at"`
 	IpHash    string         `json:"ip_hash"`
+	Uuid      string         `json:"uuid"`
 }

@@ -5,15 +5,26 @@ import (
 	"database/sql"
 	"errors"
 	"log/slog"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 	"world-wide-bulb/internal/store"
+
+	"github.com/google/uuid"
 )
 
 var (
 	// ErrCooldown indicates a user tried to toggle before their cooldown expired.
 	ErrCooldown = errors.New("rate limited: please wait before toggling again")
+	// ErrNotFound indicates a toggle record with the specified UUID was not found.
+	ErrNotFound = errors.New("toggle not found")
+	// ErrInvalidUUID indicates the provided string is not a valid UUID.
+	ErrInvalidUUID = errors.New("invalid uuid format")
+	// ErrReasonAlreadySet indicates a reason has already been submitted for this toggle.
+	ErrReasonAlreadySet = errors.New("reason already set for this toggle")
+	// ErrEmptyReason indicates the submitted reason is empty or whitespace only.
+	ErrEmptyReason = errors.New("reason cannot be empty")
 	// CooldownTime is the default duration a client must wait between toggles.
 	CooldownTime = 10 * time.Second
 )
@@ -21,7 +32,9 @@ var (
 // Store defines persistence operations needed by the bulb Engine.
 type Store interface {
 	GetLatestToggle(ctx context.Context) (store.Toggle, error)
+	GetToggleByUUID(ctx context.Context, uuid string) (store.Toggle, error)
 	InsertToggle(ctx context.Context, arg store.InsertToggleParams) (store.Toggle, error)
+	UpdateToggleReason(ctx context.Context, arg store.UpdateToggleReasonParams) (sql.Result, error)
 }
 
 // Engine manages the state and business logic of the bulb.
@@ -38,18 +51,19 @@ func NewEngine(ctx context.Context, s Store) *Engine {
 		store:    s,
 		cooldown: NewCooldown(CooldownTime),
 	}
-	latest, err := s.GetLatestToggle(ctx)
-	if err == nil {
-		e.state.Store(latest.State)
-		slog.Info("hydrated state from db", "state", latest.State)
-	} else {
-		e.state.Store(false)
+
+	toggle, err := s.GetLatestToggle(ctx)
+	if err != nil {
 		slog.Info("no previous state found, defaulted to false")
+		e.state.Store(false)
+		return e
 	}
+
+	e.state.Store(toggle.State)
 	return e
 }
 
-// GetState returns the current state of the bulb
+// GetState returns the current state of the bulb.
 func (e *Engine) GetState() bool {
 	return e.state.Load()
 }
@@ -62,7 +76,7 @@ func (e *Engine) RecordCooldown(ipHash string) time.Duration {
 // Toggle flips the state of the bulb and records the toggle in the database
 // It returns the new toggle record and an error if the toggle failed
 // The toggle is rate limited based on the cooldown time
-func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (store.Toggle, time.Duration, error) {
+func (e *Engine) Toggle(ctx context.Context, ipHash string) (store.Toggle, time.Duration, error) {
 	if !e.cooldown.CanToggle(ipHash) {
 		return store.Toggle{}, time.Duration(0), ErrCooldown
 	}
@@ -75,15 +89,11 @@ func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (stor
 	}
 
 	newState := !e.state.Load()
-
-	var nullReason sql.NullString
-	if reason != "" {
-		nullReason = sql.NullString{String: reason, Valid: true}
-	}
+	toggleUUID := uuid.NewString()
 
 	toggle, err := e.store.InsertToggle(ctx, store.InsertToggleParams{
+		Uuid:   toggleUUID,
 		State:  newState,
-		Reason: nullReason,
 		IpHash: ipHash,
 	})
 	if err != nil {
@@ -93,9 +103,44 @@ func (e *Engine) Toggle(ctx context.Context, reason string, ipHash string) (stor
 
 	remainingTime := e.cooldown.Record(ipHash)
 	e.state.Store(newState)
-	slog.Info("bulb toggled", "state", newState, "reason", reason, "id", toggle.ID, "at", toggle.CreatedAt.Time.Format(time.RFC3339))
+	slog.Info("bulb toggled", "state", newState, "id", toggle.ID, "uuid", toggle.Uuid, "at", toggle.CreatedAt.Time.Format(time.RFC3339))
 
 	return toggle, remainingTime, nil
+}
+
+// UpdateReason attaches or updates the reason for a toggle record by its UUID.
+func (e *Engine) UpdateReason(ctx context.Context, id string, reason string) error {
+	trimmed := strings.TrimSpace(reason)
+	if trimmed == "" {
+		return ErrEmptyReason
+	}
+
+	if _, err := uuid.Parse(id); err != nil {
+		return ErrInvalidUUID
+	}
+
+	existingToggle, err := e.store.GetToggleByUUID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNotFound
+		}
+		return err
+	}
+
+	if existingToggle.Reason.Valid && strings.TrimSpace(existingToggle.Reason.String) != "" {
+		return ErrReasonAlreadySet
+	}
+
+	nullReason := sql.NullString{String: trimmed, Valid: true}
+	_, err = e.store.UpdateToggleReason(ctx, store.UpdateToggleReasonParams{
+		Reason: nullReason,
+		Uuid:   id,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // GetRemainingCooldown returns the remaining cooldown duration for the given IP hash.

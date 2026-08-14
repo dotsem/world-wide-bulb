@@ -11,7 +11,7 @@ import (
 )
 
 const getLatestToggle = `-- name: GetLatestToggle :one
-SELECT id, state, reason, created_at, ip_hash FROM toggles
+SELECT id, state, reason, created_at, ip_hash, uuid FROM toggles
 ORDER BY created_at DESC
 LIMIT 1
 `
@@ -25,12 +25,13 @@ func (q *Queries) GetLatestToggle(ctx context.Context) (Toggle, error) {
 		&i.Reason,
 		&i.CreatedAt,
 		&i.IpHash,
+		&i.Uuid,
 	)
 	return i, err
 }
 
 const getRecentToggles = `-- name: GetRecentToggles :many
-SELECT id, state, reason, created_at, ip_hash FROM toggles
+SELECT id, state, reason, created_at, ip_hash, uuid FROM toggles
 ORDER BY created_at DESC
 LIMIT ?
 `
@@ -50,6 +51,7 @@ func (q *Queries) GetRecentToggles(ctx context.Context, limit int64) ([]Toggle, 
 			&i.Reason,
 			&i.CreatedAt,
 			&i.IpHash,
+			&i.Uuid,
 		); err != nil {
 			return nil, err
 		}
@@ -64,20 +66,13 @@ func (q *Queries) GetRecentToggles(ctx context.Context, limit int64) ([]Toggle, 
 	return items, nil
 }
 
-const insertToggle = `-- name: InsertToggle :one
-INSERT INTO toggles (state, reason, ip_hash)
-VALUES (?, ?, ?)
-RETURNING id, state, reason, created_at, ip_hash
+const getToggleByUUID = `-- name: GetToggleByUUID :one
+SELECT id, state, reason, created_at, ip_hash, uuid FROM toggles
+WHERE uuid = ?
 `
 
-type InsertToggleParams struct {
-	State  bool           `json:"state"`
-	Reason sql.NullString `json:"reason"`
-	IpHash string         `json:"ip_hash"`
-}
-
-func (q *Queries) InsertToggle(ctx context.Context, arg InsertToggleParams) (Toggle, error) {
-	row := q.db.QueryRowContext(ctx, insertToggle, arg.State, arg.Reason, arg.IpHash)
+func (q *Queries) GetToggleByUUID(ctx context.Context, uuid string) (Toggle, error) {
+	row := q.db.QueryRowContext(ctx, getToggleByUUID, uuid)
 	var i Toggle
 	err := row.Scan(
 		&i.ID,
@@ -85,6 +80,33 @@ func (q *Queries) InsertToggle(ctx context.Context, arg InsertToggleParams) (Tog
 		&i.Reason,
 		&i.CreatedAt,
 		&i.IpHash,
+		&i.Uuid,
+	)
+	return i, err
+}
+
+const insertToggle = `-- name: InsertToggle :one
+INSERT INTO toggles (uuid, state, ip_hash)
+VALUES (?, ?, ?)
+RETURNING id, state, reason, created_at, ip_hash, uuid
+`
+
+type InsertToggleParams struct {
+	Uuid   string `json:"uuid"`
+	State  bool   `json:"state"`
+	IpHash string `json:"ip_hash"`
+}
+
+func (q *Queries) InsertToggle(ctx context.Context, arg InsertToggleParams) (Toggle, error) {
+	row := q.db.QueryRowContext(ctx, insertToggle, arg.Uuid, arg.State, arg.IpHash)
+	var i Toggle
+	err := row.Scan(
+		&i.ID,
+		&i.State,
+		&i.Reason,
+		&i.CreatedAt,
+		&i.IpHash,
+		&i.Uuid,
 	)
 	return i, err
 }
@@ -99,4 +121,19 @@ WHERE id NOT IN (
 func (q *Queries) PruneOldToggles(ctx context.Context, limit int64) error {
 	_, err := q.db.ExecContext(ctx, pruneOldToggles, limit)
 	return err
+}
+
+const updateToggleReason = `-- name: UpdateToggleReason :execresult
+UPDATE toggles
+SET reason = ?
+WHERE uuid = ? AND (reason IS NULL OR reason = '')
+`
+
+type UpdateToggleReasonParams struct {
+	Reason sql.NullString `json:"reason"`
+	Uuid   string         `json:"uuid"`
+}
+
+func (q *Queries) UpdateToggleReason(ctx context.Context, arg UpdateToggleReasonParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateToggleReason, arg.Reason, arg.Uuid)
 }

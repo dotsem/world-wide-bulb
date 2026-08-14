@@ -51,4 +51,41 @@ func TestMigrate(t *testing.T) {
 		err = store.Migrate(ctx, db)
 		assert.Error(t, err)
 	})
+
+	t.Run("successfully populates uuids when migrating database with existing rows", func(t *testing.T) {
+		db, err := sql.Open("sqlite", ":memory:")
+		require.NoError(t, err)
+		defer func() { _ = db.Close() }()
+
+		ctx := context.Background()
+		_, err = db.ExecContext(ctx, `
+			CREATE TABLE toggles (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				state BOOLEAN NOT NULL,
+				reason TEXT,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				ip_hash TEXT NOT NULL
+			);
+			INSERT INTO toggles (state, ip_hash) VALUES (1, 'hash1'), (0, 'hash2');
+		`)
+		require.NoError(t, err)
+
+		err = store.Migrate(ctx, db)
+		assert.NoError(t, err)
+
+		rows, err := db.QueryContext(ctx, "SELECT uuid FROM toggles")
+		require.NoError(t, err)
+		defer func() { _ = rows.Close() }()
+
+		var uuids []string
+		for rows.Next() {
+			var u string
+			require.NoError(t, rows.Scan(&u))
+			uuids = append(uuids, u)
+		}
+		require.Len(t, uuids, 2)
+		assert.NotEmpty(t, uuids[0])
+		assert.NotEmpty(t, uuids[1])
+		assert.NotEqual(t, uuids[0], uuids[1])
+	})
 }

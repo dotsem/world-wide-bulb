@@ -32,14 +32,6 @@ func (h *Handler) PostReason(c *gin.Context) {
 
 	err := h.engine.UpdateReason(c.Request.Context(), req.ID, trimmedReason)
 	if err != nil {
-		if errors.Is(err, bulb.ErrInvalidUUID) {
-			c.JSON(http.StatusBadRequest, gin.H{errKey: "invalid uuid format"})
-			return
-		}
-		if errors.Is(err, bulb.ErrEmptyReason) {
-			c.JSON(http.StatusBadRequest, gin.H{errKey: "reason cannot be empty or whitespace only"})
-			return
-		}
 		if errors.Is(err, bulb.ErrReasonAlreadySet) {
 			c.JSON(http.StatusBadRequest, gin.H{errKey: "reason already set for this toggle"})
 			return

@@ -128,4 +128,19 @@ func TestPostReason(t *testing.T) {
 		env.router.ServeHTTP(rec2, req2)
 		assert.Equal(t, http.StatusBadRequest, rec2.Code)
 	})
+
+	t.Run("returns 500 when database failure occurs during reason update", func(t *testing.T) {
+		env := setupTestEnv(t)
+		validUUID := uuid.NewString()
+
+		_ = env.db.Close() // Close database to simulate internal DB failure
+
+		body := bytes.NewBufferString(`{"id":"` + validUUID + `","reason":"reason text"}`)
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/reason", body)
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		env.router.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
 }

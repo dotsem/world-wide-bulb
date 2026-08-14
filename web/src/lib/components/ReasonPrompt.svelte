@@ -7,12 +7,38 @@
     let isSuccess = $state(false);
     let errorMsg = $state<string | null>(null);
     let successTimeout: ReturnType<typeof setTimeout> | undefined;
+    let autoDismissTimeout: ReturnType<typeof setTimeout> | undefined;
 
     let isVisible = $derived(bulbState.showReasonPrompt);
     let actionText = $derived(bulbState.lastActionState ? "turn on" : "turn off");
 
+    $effect(() => {
+        if (isVisible) {
+            startAutoDismissTimer();
+        } else {
+            clearAutoDismissTimer();
+        }
+    });
+
+    function startAutoDismissTimer() {
+        clearAutoDismissTimer();
+        autoDismissTimeout = setTimeout(() => {
+            if (!reason.trim()) {
+                handleSkip();
+            }
+        }, 60000);
+    }
+
+    function clearAutoDismissTimer() {
+        if (autoDismissTimeout) {
+            clearTimeout(autoDismissTimeout);
+            autoDismissTimeout = undefined;
+        }
+    }
+
     onDestroy(() => {
         if (successTimeout) clearTimeout(successTimeout);
+        clearAutoDismissTimer();
     });
 
     async function handleSubmit(e: SubmitEvent) {
@@ -24,6 +50,7 @@
         errorMsg = null;
 
         try {
+            clearAutoDismissTimer();
             await bulbState.submitReason(trimmed);
             isSuccess = true;
             reason = "";
@@ -39,6 +66,7 @@
     }
 
     function handleSkip() {
+        clearAutoDismissTimer();
         reason = "";
         errorMsg = null;
         bulbState.dismissReason();

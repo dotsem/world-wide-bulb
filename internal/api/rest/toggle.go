@@ -18,6 +18,7 @@ const (
 
 // ToggleResponse defines the response payload for toggling the bulb.
 type ToggleResponse struct {
+	ID         string    `json:"id"`
 	State      bool      `json:"state"`
 	CreatedAt  time.Time `json:"created_at"`
 	CooldownMs int64     `json:"cooldown_ms"`
@@ -25,7 +26,6 @@ type ToggleResponse struct {
 
 // PostToggle flips the state of the bulb and broadcasts the change.
 func (h *Handler) PostToggle(c *gin.Context) {
-
 	primaryKey, secondaryKey := h.getOrCreateDeviceID(c)
 
 	toggle, remainingTime, err := h.engine.Toggle(c.Request.Context(), h.hasher.Hash(primaryKey))
@@ -55,6 +55,7 @@ func (h *Handler) PostToggle(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, ToggleResponse{
+		ID:         toggle.Uuid,
 		State:      toggle.State,
 		CreatedAt:  toggle.CreatedAt.Time,
 		CooldownMs: remainingTime.Milliseconds(),

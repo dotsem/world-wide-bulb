@@ -76,12 +76,20 @@ func TestBackendIntegration_RESTLifecycle(t *testing.T) {
 	assert.Equal(t, http.StatusOK, toggleResp.StatusCode)
 
 	var toggleRes struct {
+		ID        string `json:"id"`
 		State     bool   `json:"state"`
 		CreatedAt string `json:"created_at"`
 	}
 	err = json.NewDecoder(toggleResp.Body).Decode(&toggleRes)
 	require.NoError(t, err)
 	assert.True(t, toggleRes.State)
+	assert.NotEmpty(t, toggleRes.ID)
+
+	reasonPayload := strings.NewReader(`{"id":"` + toggleRes.ID + `","reason":"attached reason via post"}`)
+	reasonResp, err := client.Post(env.baseURL+"/api/v1/reason", "application/json", reasonPayload)
+	require.NoError(t, err)
+	defer func() { _ = reasonResp.Body.Close() }()
+	assert.Equal(t, http.StatusOK, reasonResp.StatusCode)
 
 	respAfter, err := client.Get(env.baseURL + "/api/v1/state")
 	require.NoError(t, err)
@@ -97,13 +105,15 @@ func TestBackendIntegration_RESTLifecycle(t *testing.T) {
 
 	var historyRes struct {
 		Toggles []struct {
-			State bool `json:"state"`
+			State  bool   `json:"state"`
+			Reason string `json:"reason"`
 		} `json:"toggles"`
 	}
 	err = json.NewDecoder(histResp.Body).Decode(&historyRes)
 	require.NoError(t, err)
 	require.Len(t, historyRes.Toggles, 1)
 	assert.True(t, historyRes.Toggles[0].State)
+	assert.Equal(t, "attached reason via post", historyRes.Toggles[0].Reason)
 }
 
 func TestBackendIntegration_WebSocketBroadcast(t *testing.T) {

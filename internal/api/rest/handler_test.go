@@ -48,6 +48,7 @@ func setupTestEnv(t *testing.T) *testEnv {
 		v1.GET("/state", handler.GetState)
 		v1.GET("/history", handler.GetHistory)
 		v1.POST("/toggle", handler.PostToggle)
+		v1.POST("/reason", handler.PostReason)
 	}
 
 	return &testEnv{

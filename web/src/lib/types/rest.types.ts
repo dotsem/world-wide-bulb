@@ -1,5 +1,6 @@
 
 export interface ToggleResponse {
+    id: string;
     state: boolean;
     created_at: string;
     cooldown_ms: number;

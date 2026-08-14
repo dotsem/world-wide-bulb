@@ -55,17 +55,25 @@ class BulbState {
         this.setCooldown(res.cooldown_ms);
     }
 
+    lastToggleId = $state<string | null>(null);
+
     toggle = async () => {
         if (this.isCooldownActive) return;
         try {
             const res = await restApi.toggle();
             this.isOn = res.state;
+            this.lastToggleId = res.id;
             this.setCooldown(res.cooldown_ms);
         } catch (err: any) {
             if (err?.cooldown_ms) {
                 this.setCooldown(err.cooldown_ms);
             }
         }
+    }
+
+    submitReason = async (reason: string) => {
+        if (!this.lastToggleId) return;
+        await restApi.postReason(this.lastToggleId, reason);
     }
 }
 

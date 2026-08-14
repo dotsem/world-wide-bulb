@@ -2,17 +2,24 @@ package bulb
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log/slog"
 	"sync"
 	"sync/atomic"
 	"time"
 	"world-wide-bulb/internal/store"
+
+	"github.com/google/uuid"
 )
 
 var (
 	// ErrCooldown indicates a user tried to toggle before their cooldown expired.
 	ErrCooldown = errors.New("rate limited: please wait before toggling again")
+	// ErrNotFound indicates a toggle record with the specified UUID was not found.
+	ErrNotFound = errors.New("toggle not found")
+	// ErrInvalidUUID indicates the provided string is not a valid UUID.
+	ErrInvalidUUID = errors.New("invalid uuid format")
 	// CooldownTime is the default duration a client must wait between toggles.
 	CooldownTime = 10 * time.Second
 )
@@ -21,6 +28,7 @@ var (
 type Store interface {
 	GetLatestToggle(ctx context.Context) (store.Toggle, error)
 	InsertToggle(ctx context.Context, arg store.InsertToggleParams) (store.Toggle, error)
+	UpdateToggleReason(ctx context.Context, arg store.UpdateToggleReasonParams) (sql.Result, error)
 }
 
 // Engine manages the state and business logic of the bulb.
@@ -37,18 +45,19 @@ func NewEngine(ctx context.Context, s Store) *Engine {
 		store:    s,
 		cooldown: NewCooldown(CooldownTime),
 	}
-	latest, err := s.GetLatestToggle(ctx)
-	if err == nil {
-		e.state.Store(latest.State)
-		slog.Info("hydrated state from db", "state", latest.State)
-	} else {
-		e.state.Store(false)
+
+	toggle, err := s.GetLatestToggle(ctx)
+	if err != nil {
 		slog.Info("no previous state found, defaulted to false")
+		e.state.Store(false)
+		return e
 	}
+
+	e.state.Store(toggle.State)
 	return e
 }
 
-// GetState returns the current state of the bulb
+// GetState returns the current state of the bulb.
 func (e *Engine) GetState() bool {
 	return e.state.Load()
 }
@@ -74,8 +83,10 @@ func (e *Engine) Toggle(ctx context.Context, ipHash string) (store.Toggle, time.
 	}
 
 	newState := !e.state.Load()
+	toggleUUID := uuid.NewString()
 
 	toggle, err := e.store.InsertToggle(ctx, store.InsertToggleParams{
+		Uuid:   toggleUUID,
 		State:  newState,
 		IpHash: ipHash,
 	})
@@ -86,9 +97,34 @@ func (e *Engine) Toggle(ctx context.Context, ipHash string) (store.Toggle, time.
 
 	remainingTime := e.cooldown.Record(ipHash)
 	e.state.Store(newState)
-	slog.Info("bulb toggled", "state", newState, "id", toggle.ID, "at", toggle.CreatedAt.Time.Format(time.RFC3339))
+	slog.Info("bulb toggled", "state", newState, "id", toggle.ID, "uuid", toggle.Uuid, "at", toggle.CreatedAt.Time.Format(time.RFC3339))
 
 	return toggle, remainingTime, nil
+}
+
+// UpdateReason attaches or updates the reason for a toggle record by its UUID.
+func (e *Engine) UpdateReason(ctx context.Context, id string, reason string) error {
+	if _, err := uuid.Parse(id); err != nil {
+		return ErrInvalidUUID
+	}
+
+	nullReason := sql.NullString{String: reason, Valid: reason != ""}
+	res, err := e.store.UpdateToggleReason(ctx, store.UpdateToggleReasonParams{
+		Reason: nullReason,
+		Uuid:   id,
+	})
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 // GetRemainingCooldown returns the remaining cooldown duration for the given IP hash.

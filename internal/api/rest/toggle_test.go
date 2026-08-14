@@ -25,12 +25,14 @@ func TestPostToggle(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 
 		var res struct {
+			ID         string `json:"id"`
 			State      bool   `json:"state"`
 			CreatedAt  string `json:"created_at"`
 			CooldownMs int64  `json:"cooldown_ms"`
 		}
 		err := json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
+		assert.NotEmpty(t, res.ID)
 		assert.True(t, res.State)
 		assert.NotEmpty(t, res.CreatedAt)
 		assert.Greater(t, res.CooldownMs, int64(0))

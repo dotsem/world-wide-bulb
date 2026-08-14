@@ -20,6 +20,7 @@ func NewRouter(restH *rest.Handler, wsH *ws.Handler) *gin.Engine {
 		v1.GET("/state", restH.GetState)
 		v1.GET("/history", restH.GetHistory)
 		v1.POST("/toggle", restH.PostToggle)
+		v1.POST("/reason", restH.PostReason)
 	}
 
 	r.GET("/ws", wsH.ServeWS)

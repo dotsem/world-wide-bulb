@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"embed"
 	"io/fs"
+	"strings"
 )
 
 //go:embed schema/*.sql
@@ -27,6 +28,9 @@ func Migrate(ctx context.Context, db *sql.DB) error {
 			return err
 		}
 		if _, err := db.ExecContext(ctx, string(content)); err != nil {
+			if strings.Contains(err.Error(), "duplicate column name") {
+				continue
+			}
 			return err
 		}
 	}

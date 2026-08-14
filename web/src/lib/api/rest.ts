@@ -34,6 +34,21 @@ class RestApi {
         return res.json();
     }
 
+    async postReason(id: string, reason: string): Promise<void> {
+        const res = await fetch(`${API_BASE}/api/v1/reason`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id, reason }),
+        });
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error || 'Failed to submit reason');
+        }
+    }
+
     async history() {
 
     }

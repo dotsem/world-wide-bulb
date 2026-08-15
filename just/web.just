@@ -10,7 +10,7 @@ fmt:
 
 # Lint Web code
 lint:
-    cd web && pnpm exec eslint .
+    cd web && pnpm exec eslint . --fix
 
 # Run Svelte type-checking
 check:

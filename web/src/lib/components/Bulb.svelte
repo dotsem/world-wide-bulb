@@ -14,10 +14,12 @@
 
 <button
 	type="button"
-	{disabled}
 	{onclick}
+	aria-disabled={disabled}
 	style="--duration: {durationMs}ms;"
-	class="group relative inline-flex items-center justify-center rounded-full p-8 sm:p-12 transition-all focus:outline-none disabled:cursor-not-allowed disabled:opacity-75 duration-(--duration)"
+	class="group relative inline-flex items-center justify-center rounded-full p-8 sm:p-12 transition-all focus:outline-none duration-(--duration) {disabled
+		? 'cursor-not-allowed'
+		: 'cursor-pointer'}"
 	aria-label={isOn ? 'Turn off lightbulb' : 'Turn on lightbulb'}
 >
 	<!-- Outer Broad Ambient Glow -->

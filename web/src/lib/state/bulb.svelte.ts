@@ -57,9 +57,17 @@ class BulbState {
 	lastToggleId = $state<string | null>(null);
 	lastActionState = $state<boolean | null>(null);
 	showReasonPrompt = $state(false);
+	cooldownPulseKey = $state(0);
+
+	triggerCooldownPulse = () => {
+		this.cooldownPulseKey += 1;
+	};
 
 	toggle = async () => {
-		if (this.isCooldownActive) return;
+		if (this.isCooldownActive) {
+			this.triggerCooldownPulse();
+			return;
+		}
 		try {
 			const res = await restApi.toggle();
 			this.isOn = res.state;

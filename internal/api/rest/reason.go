@@ -30,7 +30,7 @@ func (h *Handler) PostReason(c *gin.Context) {
 		return
 	}
 
-	err := h.engine.UpdateReason(c.Request.Context(), req.ID, trimmedReason)
+	toggle, err := h.engine.UpdateReason(c.Request.Context(), req.ID, trimmedReason)
 	if err != nil {
 		if errors.Is(err, bulb.ErrReasonAlreadySet) {
 			c.JSON(http.StatusBadRequest, gin.H{errKey: "reason already set for this toggle"})
@@ -45,9 +45,10 @@ func (h *Handler) PostReason(c *gin.Context) {
 	}
 
 	wsMsg := gin.H{
-		"type":   "reason_updated",
-		"id":     req.ID,
-		"reason": trimmedReason,
+		"type":      "reason_updated",
+		"id":        req.ID,
+		"toggle_id": toggle.ID,
+		"reason":    trimmedReason,
 	}
 	if payload, err := json.Marshal(wsMsg); err == nil {
 		h.hub.Broadcast(payload)

@@ -66,6 +66,49 @@ func (q *Queries) GetRecentToggles(ctx context.Context, limit int64) ([]Toggle, 
 	return items, nil
 }
 
+const getTogglesBefore = `-- name: GetTogglesBefore :many
+SELECT id, state, reason, created_at, ip_hash, uuid FROM toggles
+WHERE id < ?
+ORDER BY id DESC
+LIMIT ?
+`
+
+type GetTogglesBeforeParams struct {
+	ID    int64 `json:"id"`
+	Limit int64 `json:"limit"`
+}
+
+func (q *Queries) GetTogglesBefore(ctx context.Context, arg GetTogglesBeforeParams) ([]Toggle, error) {
+	rows, err := q.db.QueryContext(ctx, getTogglesBefore, arg.ID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Toggle
+	for rows.Next() {
+		var i Toggle
+		if err := rows.Scan(
+			&i.ID,
+			&i.State,
+			&i.Reason,
+			&i.CreatedAt,
+			&i.IpHash,
+			&i.Uuid,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+
 const getToggleByUUID = `-- name: GetToggleByUUID :one
 SELECT id, state, reason, created_at, ip_hash, uuid FROM toggles
 WHERE uuid = ?

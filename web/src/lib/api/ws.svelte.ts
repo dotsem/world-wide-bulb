@@ -1,6 +1,20 @@
 const WS_BASE = import.meta.env.VITE_WS_BASE || 'ws://localhost:5000';
 
 
+export interface StateChangedEvent {
+    id?: number;
+    state: boolean;
+    reason?: string;
+    created_at?: string;
+}
+
+export interface ReasonUpdatedEvent {
+    type: 'reason_updated';
+    id?: string;
+    toggle_id?: number;
+    reason: string;
+}
+
 class WsClient {
     private socket?: WebSocket;
     private handlers: Record<string, Array<(msg: any) => void>> = {};
@@ -38,11 +52,25 @@ class WsClient {
         }
     }
 
-    on(eventType: string, handler: (msg: any) => void) {
+    on(eventType: string, handler: (msg: any) => void): () => void {
         if (!this.handlers[eventType]) {
             this.handlers[eventType] = [];
         }
         this.handlers[eventType].push(handler);
+        return () => this.off(eventType, handler);
+    }
+
+    off(eventType: string, handler: (msg: any) => void) {
+        if (!this.handlers[eventType]) return;
+        this.handlers[eventType] = this.handlers[eventType].filter((h) => h !== handler);
+    }
+
+    onStateChange(handler: (msg: StateChangedEvent) => void): () => void {
+        return this.on('state_changed', handler);
+    }
+
+    onReasonUpdate(handler: (msg: ReasonUpdatedEvent) => void): () => void {
+        return this.on('reason_updated', handler);
     }
 }
 

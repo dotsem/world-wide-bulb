@@ -17,6 +17,12 @@ SELECT * FROM toggles
 ORDER BY created_at DESC
 LIMIT ?;
 
+-- name: GetTogglesBefore :many
+SELECT * FROM toggles
+WHERE id < ?
+ORDER BY id DESC
+LIMIT ?;
+
 -- name: GetLatestToggle :one
 SELECT * FROM toggles
 ORDER BY created_at DESC

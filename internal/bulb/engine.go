@@ -109,26 +109,26 @@ func (e *Engine) Toggle(ctx context.Context, ipHash string) (store.Toggle, time.
 }
 
 // UpdateReason attaches or updates the reason for a toggle record by its UUID.
-func (e *Engine) UpdateReason(ctx context.Context, id string, reason string) error {
+func (e *Engine) UpdateReason(ctx context.Context, id string, reason string) (store.Toggle, error) {
 	trimmed := strings.TrimSpace(reason)
 	if trimmed == "" {
-		return ErrEmptyReason
+		return store.Toggle{}, ErrEmptyReason
 	}
 
 	if _, err := uuid.Parse(id); err != nil {
-		return ErrInvalidUUID
+		return store.Toggle{}, ErrInvalidUUID
 	}
 
 	existingToggle, err := e.store.GetToggleByUUID(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNotFound
+			return store.Toggle{}, ErrNotFound
 		}
-		return err
+		return store.Toggle{}, err
 	}
 
 	if existingToggle.Reason.Valid && strings.TrimSpace(existingToggle.Reason.String) != "" {
-		return ErrReasonAlreadySet
+		return store.Toggle{}, ErrReasonAlreadySet
 	}
 
 	nullReason := sql.NullString{String: trimmed, Valid: true}
@@ -137,10 +137,10 @@ func (e *Engine) UpdateReason(ctx context.Context, id string, reason string) err
 		Uuid:   id,
 	})
 	if err != nil {
-		return err
+		return store.Toggle{}, err
 	}
 
-	return nil
+	return existingToggle, nil
 }
 
 // GetRemainingCooldown returns the remaining cooldown duration for the given IP hash.

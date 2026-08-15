@@ -22,4 +22,3 @@ func FromToggle(t store.Toggle) StateMessage {
 		CreatedAt: t.CreatedAt.Time,
 	}
 }
-

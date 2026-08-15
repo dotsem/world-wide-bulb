@@ -108,7 +108,6 @@ func (q *Queries) GetTogglesBefore(ctx context.Context, arg GetTogglesBeforePara
 	return items, nil
 }
 
-
 const getToggleByUUID = `-- name: GetToggleByUUID :one
 SELECT id, state, reason, created_at, ip_hash, uuid FROM toggles
 WHERE uuid = ?

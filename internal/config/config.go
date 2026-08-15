@@ -33,7 +33,7 @@ func Load() (*Config, error) {
 		hosts = strings.Split(rawHosts, ",")
 	}
 	cfg := &Config{
-		Port:         getEnv("PORT", "8080"),
+		Port:         getEnv("BACKEND_PORT", "8080"),
 		IsProd:       os.Getenv("APP_ENV") == "production",
 		IPSalt:       os.Getenv("IP_SALT"),
 		DBPath:       getEnv("DB_PATH", "bulb.db"),
@@ -53,5 +53,6 @@ func getEnv(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
 	}
+	slog.Warn("using default value for key", slog.String("key", key), slog.String("default", fallback))
 	return fallback
 }

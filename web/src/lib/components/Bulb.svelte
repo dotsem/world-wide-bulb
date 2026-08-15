@@ -3,11 +3,13 @@
 		isOn = false,
 		disabled = false,
 		durationMs = 500,
+		class: className = 'h-56 w-56 sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-96 lg:w-96',
 		onclick
 	}: {
 		isOn?: boolean;
 		disabled?: boolean;
 		durationMs?: number;
+		class?: string;
 		onclick?: () => void;
 	} = $props();
 </script>
@@ -19,7 +21,7 @@
 	style="--duration: {durationMs}ms;"
 	class="group relative inline-flex items-center justify-center rounded-full p-8 sm:p-12 transition-all focus:outline-none duration-(--duration) {disabled
 		? 'cursor-not-allowed'
-		: 'cursor-pointer'}"
+		: 'cursor-pointer'} {className}"
 	aria-label={isOn ? 'Turn off lightbulb' : 'Turn on lightbulb'}
 >
 	<!-- Outer Broad Ambient Glow -->
@@ -48,7 +50,7 @@
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 600 600"
 		style="transition-duration: var(--duration);"
-		class="relative h-56 w-56 sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-96 lg:w-96 transition-all transform group-hover:scale-105 group-active:scale-95"
+		class="relative {className} transition-all transform group-hover:scale-105 group-active:scale-95"
 		class:drop-shadow-[0_0_40px_rgba(251,191,36,0.85)]={isOn}
 		class:drop-shadow-none={!isOn}
 	>

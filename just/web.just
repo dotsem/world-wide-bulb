@@ -18,7 +18,7 @@ check:
 
 # Run Web tests
 test:
-    cd web && pnpm exec vitest run
+    cd web && pnpm test
 
 # Build Svelte static assets
 build:

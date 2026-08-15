@@ -1,5 +1,5 @@
 *.env
-./wwb
+bin/
 
 idea.md
 

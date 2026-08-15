@@ -16,7 +16,7 @@ func TestLoad(t *testing.T) {
 		cfg, err := config.Load()
 		require.NoError(t, err)
 
-		assert.Equal(t, "8080", cfg.Port)
+		assert.Equal(t, "8080", cfg.BackendPort)
 		assert.False(t, cfg.IsProd)
 		assert.Equal(t, "dev_fallback", cfg.IPSalt)
 		assert.Equal(t, "bulb.db", cfg.DBPath)
@@ -44,7 +44,7 @@ func TestLoad(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.True(t, cfg.IsProd)
-		assert.Equal(t, "3000", cfg.Port)
+		assert.Equal(t, "3000", cfg.BackendPort)
 		assert.Equal(t, "super_secret_salt", cfg.IPSalt)
 		assert.Equal(t, "/data/prod.db", cfg.DBPath)
 		assert.Equal(t, []string{"example.com", "bulb.example.com"}, cfg.AllowedHosts)

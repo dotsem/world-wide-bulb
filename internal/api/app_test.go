@@ -19,7 +19,7 @@ func TestNewApp(t *testing.T) {
 		defer func() { _ = db.Close() }()
 
 		cfg := &config.Config{
-			Port:         "5000",
+			BackendPort:  "5000",
 			IPSalt:       "test_salt",
 			DBPath:       ":memory:",
 			AllowedHosts: []string{"localhost"},
@@ -43,7 +43,7 @@ func TestNewApp(t *testing.T) {
 		_ = db.Close()
 
 		cfg := &config.Config{
-			Port:         "5000",
+			BackendPort:  "5000",
 			IPSalt:       "test_salt",
 			DBPath:       ":memory:",
 			AllowedHosts: []string{"localhost"},

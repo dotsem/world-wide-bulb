@@ -11,6 +11,7 @@ import (
 	"world-wide-bulb/internal/config"
 	"world-wide-bulb/internal/store"
 	"world-wide-bulb/internal/utils"
+	"world-wide-bulb/web"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,7 +42,13 @@ func NewApp(ctx context.Context, cfg *config.Config, db *sql.DB) (*App, error) {
 
 	restHandler := rest.NewHandler(queries, engine, hub, hasher, cfg.IsProd)
 	wsHandler := ws.NewHandler(hub, cfg.IsProd, cfg.AllowedHosts)
-	router := NewRouter(restHandler, wsHandler)
+
+	staticFS, err := web.GetFS()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load embedded static filesystem: %w", err)
+	}
+
+	router := NewRouter(restHandler, wsHandler, staticFS)
 
 	return &App{
 		Router:  router,

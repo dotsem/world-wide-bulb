@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { bulbState } from '$lib/state/bulb.svelte';
+	import { fly } from 'svelte/transition';
 	import FloatingInput from './ui/FloatingInput.svelte';
 
 	let reason = $state('');
@@ -76,7 +77,8 @@
 
 {#if isVisible}
 	<div
-		class="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-md p-5 rounded-2xl bg-app-surface border border-app-border text-app-text shadow-2xl shadow-black/50 backdrop-blur-md transition-all duration-300 animate-in fade-in slide-in-from-bottom-4"
+		transition:fly={{ y: 100, duration: 300 }}
+		class="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-md p-5 rounded-2xl bg-app-surface border border-app-border text-app-text shadow-2xl shadow-black/50 backdrop-blur-md transition-all duration-300"
 		role="dialog"
 		aria-labelledby="reason-prompt-title"
 	>

@@ -46,10 +46,10 @@
 
 		<label
 			for={inputId}
-			class="absolute left-3 transition-all duration-200 pointer-events-none select-none z-10 {isFloating
-				? 'top-0 -translate-y-1/2 text-xs px-1.5 py-0.5 leading-none rounded-sm bg-app-surface-solid font-medium ' +
+			class="absolute left-3 transition-all duration-200 pointer-events-none select-none z-10 truncate {isFloating
+				? 'top-0 -translate-y-1/2 text-xs px-1.5 py-0.5 leading-none rounded-sm bg-app-surface-solid font-medium max-w-[calc(100%-1.5rem)] ' +
 					(isFocused ? 'text-amber-400 font-semibold' : 'text-app-muted')
-				: 'top-1/2 -translate-y-1/2 text-sm text-app-muted/70'}"
+				: 'top-1/2 -translate-y-1/2 text-sm text-app-muted/70 max-w-[calc(100%-4.5rem)]'}"
 		>
 			{label}
 		</label>

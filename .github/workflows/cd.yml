@@ -101,7 +101,8 @@ jobs:
             mkdir -p ${{ vars.DEPLOY_PATH }}
             cd ${{ vars.DEPLOY_PATH }}
             echo "APP_ENV=${{ vars.APP_ENV }}" > .env
-            echo "PORT=${{ vars.PORT }}" >> .env
+            echo "BACKEND_PORT=${{ vars.BACKEND_PORT }}" >> .env
+            echo "FRONTEND_PORT=${{ vars.FRONTEND_PORT}}" >> .env
             echo "IP_SALT=${{ secrets.IP_SALT }}" >> .env
             echo "DB_PATH=${{ vars.DB_PATH }}" >> .env
             echo "ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }}" >> .env

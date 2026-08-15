@@ -9,7 +9,7 @@ import (
 
 func TestRun(t *testing.T) {
 	t.Setenv("DB_PATH", ":memory:")
-	t.Setenv("PORT", "-1")
+	t.Setenv("BACKEND_PORT", "-1")
 
 	ctx := context.Background()
 	err := run(ctx)

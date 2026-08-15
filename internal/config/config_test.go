@@ -36,7 +36,7 @@ func TestLoad(t *testing.T) {
 		os.Clearenv()
 		t.Setenv("APP_ENV", "production")
 		t.Setenv("IP_SALT", "super_secret_salt")
-		t.Setenv("PORT", "3000")
+		t.Setenv("BACKEND_PORT", "3000")
 		t.Setenv("DB_PATH", "/data/prod.db")
 		t.Setenv("ALLOWED_HOSTS", "example.com,bulb.example.com")
 

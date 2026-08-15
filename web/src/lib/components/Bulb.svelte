@@ -52,18 +52,6 @@
 	>
 		<g id="objects">
 			<g>
-				<!-- Drop Shadow Base Ellipse -->
-				<ellipse
-					style="fill:#DBDBDB; transition-duration: var(--duration);"
-					class="transition-opacity"
-					class:opacity-80={isOn}
-					class:opacity-30={!isOn}
-					cx="300"
-					cy="534.793"
-					rx="104.588"
-					ry="14.208"
-				/>
-
 				<!-- Inner Filament Glass Mount Stem -->
 				<path
 					style="transition-duration: var(--duration);"

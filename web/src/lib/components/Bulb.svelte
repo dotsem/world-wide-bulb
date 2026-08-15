@@ -17,17 +17,27 @@
 	{disabled}
 	{onclick}
 	style="--duration: {durationMs}ms;"
-	class="group relative inline-flex items-center justify-center rounded-full p-6 transition-all focus:outline-none disabled:cursor-not-allowed disabled:opacity-75 duration-(--duration)"
+	class="group relative inline-flex items-center justify-center rounded-full p-8 sm:p-12 transition-all focus:outline-none disabled:cursor-not-allowed disabled:opacity-75 duration-(--duration)"
 	aria-label={isOn ? 'Turn off lightbulb' : 'Turn on lightbulb'}
 >
-	<!-- Ambient Radial Light Halo (Visible when ON) -->
+	<!-- Outer Broad Ambient Glow -->
 	<div
 		style="transition-duration: var(--duration);"
-		class="absolute inset-0 rounded-full bg-amber-400/30 blur-3xl transition-all pointer-events-none"
+		class="absolute inset-0 rounded-full bg-amber-400/25 blur-3xl transition-all duration-300 pointer-events-none"
 		class:opacity-100={isOn}
 		class:opacity-0={!isOn}
-		class:scale-125={isOn}
+		class:scale-150={isOn}
 		class:scale-75={!isOn}
+	></div>
+
+	<!-- Inner Core Ambient Glow -->
+	<div
+		style="transition-duration: var(--duration);"
+		class="absolute inset-4 rounded-full bg-amber-300/35 blur-xl transition-all duration-300 pointer-events-none"
+		class:opacity-100={isOn}
+		class:opacity-0={!isOn}
+		class:scale-110={isOn}
+		class:scale-90={!isOn}
 	></div>
 
 	<!-- Vector Lightbulb SVG -->
@@ -36,8 +46,8 @@
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 600 600"
 		style="transition-duration: var(--duration);"
-		class="relative h-64 w-64 transition-all transform group-hover:scale-105 group-active:scale-95"
-		class:drop-shadow-[0_0_35px_rgba(251,191,36,0.85)]={isOn}
+		class="relative h-56 w-56 sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-96 lg:w-96 transition-all transform group-hover:scale-105 group-active:scale-95"
+		class:drop-shadow-[0_0_40px_rgba(251,191,36,0.85)]={isOn}
 		class:drop-shadow-none={!isOn}
 	>
 		<g id="objects">

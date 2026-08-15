@@ -3,7 +3,6 @@ import { wsClient } from '$lib/api/ws.svelte';
 
 class BulbState {
 	isOn = $state(false);
-	history = $state<Array<{ id: number; state: boolean; reason?: string }>>([]);
 	cooldownUntil = $state<number | null>(null);
 	remainingMs = $state(0);
 	private timer?: ReturnType<typeof setInterval>;

@@ -19,7 +19,7 @@
 	{onclick}
 	aria-disabled={disabled}
 	style="--duration: {durationMs}ms;"
-	class="group relative inline-flex items-center justify-center rounded-full p-8 sm:p-12 transition-all focus:outline-none duration-(--duration) {disabled
+	class="group relative inline-flex items-center justify-center rounded-full p-8 transition-all focus:outline-none duration-(--duration) {disabled
 		? 'cursor-not-allowed'
 		: 'cursor-pointer'} {className}"
 	aria-label={isOn ? 'Turn off lightbulb' : 'Turn on lightbulb'}
@@ -50,7 +50,7 @@
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 600 600"
 		style="transition-duration: var(--duration);"
-		class="relative {className} transition-all transform group-hover:scale-105 group-active:scale-95"
+		class="relative h-full w-full transition-all transform group-hover:scale-105 group-active:scale-95"
 		class:drop-shadow-[0_0_40px_rgba(251,191,36,0.85)]={isOn}
 		class:drop-shadow-none={!isOn}
 	>

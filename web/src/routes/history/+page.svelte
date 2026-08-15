@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { LoaderCircle, BadgeQuestionMark } from '@lucide/svelte';
 	import { bulbState, historyState, HistoryTile, Bulb } from '$lib';
 
 	let sentinelEl = $state<HTMLElement | null>(null);
@@ -36,14 +37,14 @@
 </svelte:head>
 
 <div
-	class="sticky top-0 z-40 px-4 py-4 sm:px-8 bg-app-surface/50 backdrop-blur-xl mb-8 flex items-center justify-between border-b border-app-border overflow-hidden"
+	class="sticky top-0 z-40 px-4 py-4 sm:px-8 bg-app-surface-solid mb-8 flex items-center justify-between border-b border-app-border overflow-hidden"
 >
 	<div>
 		<h1 class="text-3xl font-extrabold tracking-tight text-app-text flex items-center gap-3">
 			Toggle History
 		</h1>
 		<p class="text-sm text-app-muted mt-1">
-			The bulb has been toggled {historyState.totalToggles} times
+			Total: {historyState.totalToggles} toggles
 		</p>
 	</div>
 </div>
@@ -58,55 +59,43 @@
 
 <div class="w-full px-4 sm:px-8 mb-20">
 	{#if historyState.initialLoading}
-		<div class="space-y-4">
-			{#each Array(5) as _}
+		<div class="space-y-3.5">
+			{#each Array(5) as _, i (i)}
 				<div
-					class="h-20 w-full animate-pulse rounded-2xl bg-app-surface border border-app-border/50"
-				></div>
+					class="animate-pulse flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-app-border bg-app-surface/40 p-4 sm:p-5"
+				>
+					<div class="h-11 w-11 shrink-0 rounded-xl bg-app-border/40"></div>
+					<div class="flex flex-col gap-2 min-w-0 flex-1">
+						<div class="flex items-center gap-2">
+							<div class="h-3.5 w-28 rounded-md bg-app-border/50"></div>
+							<div class="h-3 w-16 rounded-md bg-app-border/30"></div>
+						</div>
+						<div class="h-4 w-3/5 rounded-md bg-app-border/40"></div>
+					</div>
+					<div class="h-4 w-10 shrink-0 rounded-md bg-app-border/40"></div>
+				</div>
 			{/each}
 		</div>
 	{:else if historyState.error && historyState.items.length === 0}
 		<div
-			class="rounded-2xl border border-app-danger/30 bg-app-danger/10 p-8 text-center text-app-danger backdrop-blur-md"
+			class="rounded-2xl border border-app-danger/30 bg-app-surface-solid p-8 text-center text-app-danger"
 		>
 			<p class="font-medium">{historyState.error}</p>
 			<button
 				onclick={() => historyState.loadMore()}
-				class="mt-4 rounded-xl bg-app-danger/20 px-5 py-2.5 text-sm font-semibold text-app-danger hover:bg-app-danger/30 transition-all shadow-sm"
+				class="mt-4 rounded-xl bg-app-danger/20 cursor-pointer px-5 py-2.5 text-sm font-semibold text-app-danger hover:bg-app-danger/30 transition-all shadow-sm"
 			>
 				Try Again
 			</button>
 		</div>
 	{:else if historyState.items.length === 0}
-		<div
-			class="rounded-2xl border border-app-border bg-app-surface/60 p-12 text-center backdrop-blur-md"
-		>
+		<div class="rounded-2xl border border-app-border bg-app-surface-solid p-12 text-center">
 			<div
 				class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-app-accent/10 text-app-accent mb-4 border border-app-accent/20"
 			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-7 w-7"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-					/>
-				</svg>
+				<BadgeQuestionMark class="h-7 w-7" />
 			</div>
-			<h3 class="text-lg font-semibold text-app-text">No toggle history found</h3>
-			<p class="mt-1 text-sm text-app-muted">Be the first to flip the switch!</p>
-			<a
-				href="/"
-				class="mt-5 inline-block rounded-xl bg-app-accent/20 border border-app-accent/40 px-5 py-2.5 text-sm font-semibold text-app-accent hover:bg-app-accent/30 transition-all shadow-md shadow-app-accent/10"
-			>
-				Go to Bulb
-			</a>
+			<h3 class="text-lg font-semibold text-app-text">No one toggled the bulb, I guess</h3>
 		</div>
 	{:else}
 		<div class="space-y-3.5">
@@ -120,20 +109,7 @@
 				<div
 					class="flex items-center gap-2.5 text-sm text-app-muted bg-app-surface border border-app-border px-4 py-2 rounded-full shadow-sm"
 				>
-					<svg
-						class="h-5 w-5 animate-spin text-app-accent"
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-					>
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
-						></circle>
-						<path
-							class="opacity-75"
-							fill="currentColor"
-							d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-						></path>
-					</svg>
+					<LoaderCircle class="h-5 w-5 animate-spin text-app-accent" />
 					<span>Loading more history...</span>
 				</div>
 			{:else if !historyState.hasMore}

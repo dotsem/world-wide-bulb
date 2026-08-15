@@ -23,7 +23,7 @@
 {#if isActive}
 	<div
 		transition:fly={{ y: -40, duration: 300 }}
-		class="fixed top-0 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-8 py-2.5 rounded-b-full bg-app-surface border border-t-0 border-app-border text-app-text shadow-xl shadow-black/40 backdrop-blur-xl transition-all duration-300 whitespace-nowrap {isPulsing
+		class="fixed top-0 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-8 py-2.5 rounded-b-full bg-app-surface-solid border border-t-0 border-app-border text-app-text shadow-xl shadow-black/40 transition-all duration-300 whitespace-nowrap {isPulsing
 			? 'scale-110 border-app-accent text-app-text shadow-app-glow ring-2 ring-app-accent/40'
 			: ''}"
 		role="status"

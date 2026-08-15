@@ -78,7 +78,7 @@
 {#if isVisible}
 	<div
 		transition:fly={{ y: 100, duration: 300 }}
-		class="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-md p-5 rounded-2xl bg-app-surface border border-app-border text-app-text shadow-2xl shadow-black/50 backdrop-blur-md transition-all duration-300"
+		class="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 w-[90vw] max-w-md p-5 rounded-2xl bg-app-surface-solid border border-app-border text-app-text shadow-2xl shadow-black/50 transition-all duration-300"
 		role="dialog"
 		aria-labelledby="reason-prompt-title"
 	>

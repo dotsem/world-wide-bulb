@@ -112,8 +112,8 @@ Before writing any code, stop at the first rung that holds:
 
 | Action | Go (Backend) | Svelte (Frontend) |
 | :--- | :--- | :--- |
-| **Format** | `just go fmt` | `pnpm exec prettier --write .` |
-| **Lint / Analyze** | `just go lint` | `pnpm exec eslint .` |
-| **Type Check** | — | `pnpm exec svelte-check` |
-| **Test** | `go test ./...` | `pnpm exec vitest run` |
-| **Build** | `go build ./cmd/server` | `pnpm build` |
+| **Format** | `just go fmt` | `just web fmt` |
+| **Lint / Analyze** | `just go lint` | `just web lint` |
+| **Type Check** | — | `just web check` |
+| **Test** | `go test ./...` | `just web test` |
+| **Build** | `go build ./cmd/server` | `just web build` |

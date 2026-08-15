@@ -13,7 +13,7 @@
 </script>
 
 <nav
-	class="relative flex items-center p-1.5 rounded-full bg-slate-900/90 border border-slate-800/80 shadow-lg shadow-black/30 backdrop-blur-md w-full"
+	class="relative flex items-center p-1.5 rounded-full bg-app-surface border border-app-border shadow-xl shadow-black/40 backdrop-blur-xl w-full transition-colors duration-300"
 >
 	<div
 		class="absolute inset-1.5 grid pointer-events-none"

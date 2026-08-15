@@ -11,7 +11,9 @@
 	let activeIndex = $derived(page.url.pathname === '/history' ? 1 : 0);
 </script>
 
-<nav class="fixed bottom-4 left-4 right-4 flex justify-center items-center z-50">
+<nav
+	class="fixed bottom-6 left-1/2 -translate-x-1/2 flex justify-center items-center z-50 pointer-events-auto"
+>
 	<div class="w-64 sm:w-72">
 		<ToolBar {activeIndex} count={links.length}>
 			{#each links as link, i (link.href)}

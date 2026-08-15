@@ -64,12 +64,37 @@
 					ry="14.208"
 				/>
 
-				<!-- Main Bulb Glass Body -->
+				<!-- Inner Filament Glass Mount Stem -->
+				<path
+					style="transition-duration: var(--duration);"
+					class="transition-all stroke-[2px] {isOn
+						? 'fill-amber-400/30 stroke-amber-300/60'
+						: 'fill-slate-400/15 stroke-slate-400/30'}"
+					d="M 285,418 L 285,345 C 285,335 315,335 315,345 L 315,418 Z"
+				/>
+
+				<!-- Inner Filament Support Wires & Coiled Filament Loop -->
+				<path
+					style="transition-duration: var(--duration);"
+					class="transition-all fill-none {isOn
+						? 'stroke-[#FFFBEB] stroke-[3.5px] drop-shadow-[0_0_10px_rgba(255,251,235,0.9)]'
+						: 'stroke-slate-300/40 stroke-[2px]'}"
+					d="M 290,345 L 272,215 M 310,345 L 328,215"
+				/>
+				<path
+					style="transition-duration: var(--duration);"
+					class="transition-all fill-none {isOn
+						? 'stroke-[#FFFBEB] stroke-[4.5px] drop-shadow-[0_0_14px_rgba(255,251,235,1)]'
+						: 'stroke-slate-300/60 stroke-[2.5px]'}"
+					d="M 272,215 C 272,170 328,170 328,215"
+				/>
+
+				<!-- Main Bulb Glass Body (Translucent when OFF, Glowing Yellow when ON) -->
 				<path
 					style="transition-duration: var(--duration);"
 					class="transition-all {isOn
-						? 'fill-[#FDC10D] stroke-none'
-						: 'fill-slate-400/15 stroke-slate-400/70 stroke-[6px]'}"
+						? 'fill-[#FDC10D] stroke-amber-300/40 stroke-[3px]'
+						: 'fill-slate-100/8 stroke-slate-300/50 stroke-[4px]'}"
 					d="M435.995,186.014c0.22,30.926-9.883,59.482-27.068,82.433
 					c-21.043,28.103-32.929,61.996-32.929,97.104v4.452c0,16.569-13.431,30-30,30h-92c-16.569,0-30-13.431-30-30v-2.959
 					c0-35.773-11.975-70.352-33.29-99.082c-16.783-22.622-26.71-50.631-26.71-80.96c0-75.441,61.428-136.537,136.995-135.996
@@ -102,33 +127,23 @@
 					d="M313.16,507.003h-26.324c-6.524,0-12.603-2.94-16.147-7.808l-6.691-9.192h72l-6.691,9.192C325.763,504.063,319.684,507.003,313.16,507.003z"
 				/>
 
-				<!-- Right Side Glance / Inner Reflection -->
+				<!-- Right Side Rim Reflection -->
 				<path
-					style="fill:#EAA60F; transition-duration: var(--duration);"
-					class="transition-opacity"
-					class:opacity-100={isOn}
-					class:opacity-10={!isOn}
+					style="transition-duration: var(--duration);"
+					class="transition-all {isOn ? 'fill-[#EAA60F] opacity-100' : 'fill-white/12 opacity-80'}"
 					d="M435.998,186.013c0.22,30.93-9.89,59.48-27.07,82.43c-21.04,28.11-32.93,62-32.93,97.11v4.45c0,16.57-13.43,30-30,30h-92c-16.57,0-30-13.43-30-30v-2.96c0-1.53-0.02-3.06-0.08-4.59c5.79,7.36,15.31,15.55,29.08,15.55c24.87,0,48.17-8.37,66.86-22.74c18.68-14.38,32.76-34.76,39.16-58.8c4.46-16.76,11.737-33.687,18.98-50.46c38-88,8-206-135.73-182.17c17.8-8.37,37.72-12.98,58.72-12.83C375.018,51.533,435.468,111.983,435.998,186.013z"
 				/>
 
-				<!-- Top-Left Glass Glare / Reflection Paths -->
+				<!-- Top-Left Glossy Glass Glare / Specular Highlight Paths -->
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all"
-					class:fill-[#FFE67D]={isOn}
-					class:fill-slate-300={!isOn}
-					class:opacity-100={isOn}
-					class:opacity-60={!isOn}
+					class="transition-all {isOn ? 'fill-[#FFE67D] opacity-100' : 'fill-white/30 opacity-90'}"
 					d="M242,285c0,0-100.101-55.825-42.511-159.922c1.906-3.446,6.164-4.826,9.724-3.144l22.259,10.511
 					c3.875,1.83,5.408,6.53,3.371,10.3C225.474,160.092,206.19,210.197,242,285z"
 				/>
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all"
-					class:fill-[#FFE67D]={isOn}
-					class:fill-slate-300={!isOn}
-					class:opacity-100={isOn}
-					class:opacity-70={!isOn}
+					class="transition-all {isOn ? 'fill-[#FFE67D] opacity-100' : 'fill-white/45 opacity-95'}"
 					d="M215.412,108.706l22.549,11.274c2.292,1.146,5.062,0.543,6.676-1.447
 					c3.118-3.847,8.937-10.334,17.103-16.539c3.179-2.416,2.728-7.333-0.82-9.164l-20.567-10.615
 					c-1.549-0.799-3.379-0.809-4.939-0.032c-4.599,2.291-14.425,8.047-21.968,18.422

@@ -1,1 +1,73 @@
 @import 'tailwindcss';
+
+@theme {
+	--color-app-bg: var(--app-bg);
+	--color-app-surface: var(--app-surface);
+	--color-app-surface-solid: var(--app-surface-solid);
+	--color-app-surface-hover: var(--app-surface-hover);
+	--color-app-border: var(--app-border);
+	--color-app-text: var(--app-text);
+	--color-app-muted: var(--app-muted);
+	--color-app-accent: var(--app-accent);
+	--color-app-accent-contrast: var(--app-accent-contrast);
+	--color-app-glow: var(--app-glow);
+	--color-app-danger: var(--app-danger);
+	--color-app-success: var(--app-success);
+	--color-app-bulb-fill: var(--app-bulb-fill);
+	--color-app-bulb-rim: var(--app-bulb-rim);
+	--color-app-bulb-glare: var(--app-bulb-glare);
+	--color-app-bulb-base: var(--app-bulb-base);
+}
+
+html,
+body {
+	scrollbar-gutter: stable;
+	background-color: var(--app-bg);
+	color: var(--app-text);
+	margin: 0;
+	padding: 0;
+	transition:
+		background-color 300ms ease-out,
+		color 300ms ease-out;
+}
+
+:root,
+html[data-theme='off'],
+[data-theme='off'] {
+	--app-bg: #090d16;
+	--app-surface: rgba(15, 23, 42, 0.7);
+	--app-surface-solid: #0f172a;
+	--app-surface-hover: rgba(30, 41, 59, 0.8);
+	--app-border: rgba(51, 65, 85, 0.6);
+	--app-text: #f1f5f9;
+	--app-muted: #94a3b8;
+	--app-accent: #f59e0b;
+	--app-accent-contrast: #090d16;
+	--app-glow: rgba(245, 158, 11, 0.15);
+	--app-danger: #f43f5e;
+	--app-success: #10b981;
+	--app-bulb-fill: #fdc10d;
+	--app-bulb-rim: #eaa60f;
+	--app-bulb-glare: #ffe67d;
+	--app-bulb-base: #575553;
+}
+
+html[data-theme='on'],
+[data-theme='on'] {
+	--app-bg: #1c1816;
+	--app-surface: rgba(44, 36, 32, 0.75);
+	--app-surface-solid: #2c2420;
+	--app-surface-hover: rgba(60, 48, 42, 0.85);
+	--app-border: rgba(217, 119, 6, 0.25);
+	--app-text: #fffbeb;
+	--app-muted: #d6d3d1;
+	--app-accent: #fbbf24;
+	--app-accent-contrast: #1c1816;
+	--app-glow: rgba(251, 191, 36, 0.35);
+	--app-danger: #ef4444;
+	--app-success: #34d399;
+	--app-bulb-fill: #fdc10d;
+	--app-bulb-rim: #eaa60f;
+	--app-bulb-glare: #ffe67d;
+	--app-bulb-base: #575553;
+}

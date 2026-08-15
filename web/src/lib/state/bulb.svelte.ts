@@ -3,7 +3,6 @@ import { wsClient } from '$lib/api/ws.svelte';
 
 class BulbState {
 	isOn = $state(false);
-	history = $state<Array<{ id: number; state: boolean; reason?: string }>>([]);
 	cooldownUntil = $state<number | null>(null);
 	remainingMs = $state(0);
 	private timer?: ReturnType<typeof setInterval>;
@@ -57,9 +56,17 @@ class BulbState {
 	lastToggleId = $state<string | null>(null);
 	lastActionState = $state<boolean | null>(null);
 	showReasonPrompt = $state(false);
+	cooldownPulseKey = $state(0);
+
+	triggerCooldownPulse = () => {
+		this.cooldownPulseKey += 1;
+	};
 
 	toggle = async () => {
-		if (this.isCooldownActive) return;
+		if (this.isCooldownActive) {
+			this.triggerCooldownPulse();
+			return;
+		}
 		try {
 			const res = await restApi.toggle();
 			this.isOn = res.state;

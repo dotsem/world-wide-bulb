@@ -14,10 +14,10 @@
 
 <a
 	{href}
-	class={`flex items-center justify-center gap-2 py-2 px-4 rounded-full text-xs sm:text-sm font-medium transition-colors duration-200 ${
+	class={`flex items-center justify-center gap-2 py-2 px-4 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
 		active
-			? 'text-amber-300 font-semibold'
-			: 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+			? 'text-app-accent shadow-inner'
+			: 'text-app-muted hover:text-app-text hover:bg-app-surface-hover/60'
 	}`}
 >
 	{@render children?.()}

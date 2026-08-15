@@ -6,7 +6,7 @@ fmt:
 
 # Lint Go code
 lint:
-    golangci-lint run ./...
+    golangci-lint run --fix ./...
 
 # Run Go tests
 test:

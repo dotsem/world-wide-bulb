@@ -44,6 +44,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Run ESLint
+        run: pnpm lint
+
+      - name: Run Prettier check
+        run: pnpm format:check
+
       - name: Run Svelte type check
         run: pnpm check
 

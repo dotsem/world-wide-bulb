@@ -129,7 +129,7 @@
 
     {#if initialLoading}
         <div class="space-y-4">
-            {#each Array(5) as _}
+            {#each Array(5) as _, i (i)}
                 <div
                     class="h-20 w-full animate-pulse rounded-xl bg-slate-900/60 border border-slate-800/50"
                 ></div>

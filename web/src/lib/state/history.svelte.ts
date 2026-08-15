@@ -7,8 +7,6 @@ export interface FormattedHistoryItem extends HistoryItem {
 	relativeTime: string;
 }
 
-const MAX_ITEMS = 100;
-
 function formatDate(dateStr: string): string {
 	try {
 		return new Date(dateStr).toLocaleString(undefined, {
@@ -64,9 +62,9 @@ class HistoryState {
 		try {
 			const res = await restApi.history(20, this.nextCursor);
 			const formatted = res.toggles.map(prepareItem);
-			this.items = [...this.items, ...formatted].slice(0, MAX_ITEMS);
+			this.items = [...this.items, ...formatted];
 			this.nextCursor = res.next_cursor;
-			this.hasMore = res.has_more && this.items.length < MAX_ITEMS;
+			this.hasMore = res.has_more;
 		} catch (err: any) {
 			this.error = err?.message || 'Failed to load history items';
 		} finally {
@@ -84,7 +82,7 @@ class HistoryState {
 				reason: msg.reason || '',
 				created_at: msg.created_at || new Date().toISOString()
 			};
-			this.items = [prepareItem(newItem), ...this.items].slice(0, MAX_ITEMS);
+			this.items = [prepareItem(newItem), ...this.items];
 		});
 
 		const unsubReason = wsClient.onReasonUpdate((msg) => {

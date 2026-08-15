@@ -2,7 +2,10 @@ package rest
 
 import (
 	"net/http"
+	"strconv"
 	"time"
+
+	"world-wide-bulb/internal/store"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,9 +18,34 @@ type HistoryItem struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// GetHistory returns recent toggle events from the database.
+// GetHistory returns recent toggle events from the database with position-pointer pagination.
 func (h *Handler) GetHistory(c *gin.Context) {
-	toggles, err := h.queries.GetRecentToggles(c.Request.Context(), 100)
+	limit := int64(20)
+	if lStr := c.Query("limit"); lStr != "" {
+		if parsed, err := strconv.ParseInt(lStr, 10, 64); err == nil && parsed > 0 {
+			limit = min(parsed, 100)
+		}
+	}
+
+	var before int64
+	if bStr := c.Query("before"); bStr != "" {
+		if parsed, err := strconv.ParseInt(bStr, 10, 64); err == nil && parsed > 0 {
+			before = parsed
+		}
+	}
+
+	var toggles []store.Toggle
+	var err error
+
+	if before > 0 {
+		toggles, err = h.queries.GetTogglesBefore(c.Request.Context(), store.GetTogglesBeforeParams{
+			ID:    before,
+			Limit: limit,
+		})
+	} else {
+		toggles, err = h.queries.GetRecentToggles(c.Request.Context(), limit)
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "internal server error",
@@ -35,7 +63,16 @@ func (h *Handler) GetHistory(c *gin.Context) {
 		}
 	}
 
+	var nextCursor int64
+	hasMore := false
+	if len(toggles) > 0 {
+		nextCursor = toggles[len(toggles)-1].ID
+		hasMore = int64(len(toggles)) == limit
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"toggles": items,
+		"toggles":     items,
+		"next_cursor": nextCursor,
+		"has_more":    hasMore,
 	})
 }

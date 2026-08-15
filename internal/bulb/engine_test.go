@@ -151,46 +151,46 @@ func TestToggle(t *testing.T) {
 		toggle, _, err := e.Toggle(ctx, testIP)
 		require.NoError(t, err)
 
-		err = e.UpdateReason(ctx, toggle.Uuid, "new reason")
+		_, err = e.UpdateReason(ctx, toggle.Uuid, "new reason")
 		assert.NoError(t, err)
 	})
 
 	t.Run("UpdateReason returns ErrInvalidUUID for invalid string", func(t *testing.T) {
 		e := NewEngine(ctx, &mockStore{})
-		err := e.UpdateReason(ctx, "invalid-uuid", "reason")
+		_, err := e.UpdateReason(ctx, "invalid-uuid", "reason")
 		assert.ErrorIs(t, err, ErrInvalidUUID)
 	})
 
 	t.Run("UpdateReason returns ErrEmptyReason for whitespace-only reason", func(t *testing.T) {
 		e := NewEngine(ctx, &mockStore{})
-		err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "   ")
+		_, err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "   ")
 		assert.ErrorIs(t, err, ErrEmptyReason)
 	})
 
 	t.Run("UpdateReason returns ErrNotFound when toggle UUID does not exist", func(t *testing.T) {
 		e := NewEngine(ctx, &mockStore{byUUIDErr: sql.ErrNoRows})
-		err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "reason")
+		_, err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "reason")
 		assert.ErrorIs(t, err, ErrNotFound)
 	})
 
 	t.Run("UpdateReason returns ErrReasonAlreadySet when reason is already present", func(t *testing.T) {
 		id := "123e4567-e89b-12d3-a456-426614174000"
 		e := NewEngine(ctx, &mockStore{byUUID: store.Toggle{Uuid: id, Reason: sql.NullString{String: "existing", Valid: true}}})
-		err := e.UpdateReason(ctx, id, "new reason")
+		_, err := e.UpdateReason(ctx, id, "new reason")
 		assert.ErrorIs(t, err, ErrReasonAlreadySet)
 	})
 
 	t.Run("UpdateReason returns error when GetToggleByUUID returns unexpected db error", func(t *testing.T) {
 		dbErr := errors.New("db error")
 		e := NewEngine(ctx, &mockStore{byUUIDErr: dbErr})
-		err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "reason")
+		_, err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "reason")
 		assert.ErrorIs(t, err, dbErr)
 	})
 
 	t.Run("UpdateReason returns error when UpdateToggleReason fails", func(t *testing.T) {
 		dbErr := errors.New("db update error")
 		e := NewEngine(ctx, &mockStore{updateErr: dbErr})
-		err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "reason")
+		_, err := e.UpdateReason(ctx, "123e4567-e89b-12d3-a456-426614174000", "reason")
 		assert.ErrorIs(t, err, dbErr)
 	})
 }

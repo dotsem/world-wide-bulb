@@ -1,4 +1,4 @@
-import type { StateResponse, ToggleResponse } from "$lib/types/rest.types";
+import type { HistoryResponse, StateResponse, ToggleResponse } from "$lib/types/rest.types";
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
 
@@ -49,9 +49,25 @@ class RestApi {
         }
     }
 
-    async history() {
+    async history(limit = 20, before?: number): Promise<HistoryResponse> {
+        const params = new URLSearchParams();
+        if (limit) params.set('limit', limit.toString());
+        if (before) params.set('before', before.toString());
 
+        const query = params.toString() ? `?${params.toString()}` : '';
+        const res = await fetch(`${API_BASE}/api/v1/history${query}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!res.ok) {
+            throw new Error('Failed to get bulb history');
+        }
+        return res.json();
     }
 }
+
 
 export const restApi = new RestApi();

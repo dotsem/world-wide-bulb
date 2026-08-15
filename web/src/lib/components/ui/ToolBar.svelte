@@ -20,7 +20,7 @@
 		style="grid-template-columns: repeat({count}, minmax(0, 1fr));"
 	>
 		<div
-			class="h-full w-full rounded-full bg-amber-500/20 border border-amber-500/40 shadow-sm shadow-amber-500/10 transition-transform duration-300 ease-out"
+			class="h-full w-full rounded-full bg-app-accent/20 border border-app-accent/40 shadow-sm shadow-app-glow transition-transform duration-300 ease-out"
 			style="transform: translateX({activeIndex * 100}%);"
 		></div>
 	</div>

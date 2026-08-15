@@ -67,12 +67,12 @@
 		</div>
 	{:else if historyState.error && historyState.items.length === 0}
 		<div
-			class="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-8 text-center text-rose-300 backdrop-blur-md"
+			class="rounded-2xl border border-app-danger/30 bg-app-danger/10 p-8 text-center text-app-danger backdrop-blur-md"
 		>
 			<p class="font-medium">{historyState.error}</p>
 			<button
 				onclick={() => historyState.loadMore()}
-				class="mt-4 rounded-xl bg-rose-500/20 px-5 py-2.5 text-sm font-semibold text-rose-200 hover:bg-rose-500/30 transition-all shadow-sm"
+				class="mt-4 rounded-xl bg-app-danger/20 px-5 py-2.5 text-sm font-semibold text-app-danger hover:bg-app-danger/30 transition-all shadow-sm"
 			>
 				Try Again
 			</button>
@@ -82,7 +82,7 @@
 			class="rounded-2xl border border-app-border bg-app-surface/60 p-12 text-center backdrop-blur-md"
 		>
 			<div
-				class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 mb-4 border border-amber-500/20"
+				class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-app-accent/10 text-app-accent mb-4 border border-app-accent/20"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +103,7 @@
 			<p class="mt-1 text-sm text-app-muted">Be the first to flip the switch!</p>
 			<a
 				href="/"
-				class="mt-5 inline-block rounded-xl bg-amber-500/20 border border-amber-500/40 px-5 py-2.5 text-sm font-semibold text-amber-300 hover:bg-amber-500/30 transition-all shadow-md shadow-amber-500/10"
+				class="mt-5 inline-block rounded-xl bg-app-accent/20 border border-app-accent/40 px-5 py-2.5 text-sm font-semibold text-app-accent hover:bg-app-accent/30 transition-all shadow-md shadow-app-accent/10"
 			>
 				Go to Bulb
 			</a>
@@ -121,7 +121,7 @@
 					class="flex items-center gap-2.5 text-sm text-app-muted bg-app-surface border border-app-border px-4 py-2 rounded-full shadow-sm"
 				>
 					<svg
-						class="h-5 w-5 animate-spin text-amber-400"
+						class="h-5 w-5 animate-spin text-app-accent"
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
 						viewBox="0 0 24 24"
@@ -139,7 +139,7 @@
 			{:else if !historyState.hasMore}
 				<div class="text-xs text-app-muted/60 italic flex items-center gap-3">
 					<span class="h-px w-12 bg-app-border"></span>
-					<span>You scrolled far, maybe too far...</span>
+					<span>Yes, the lamp started toggled off :)</span>
 					<span class="h-px w-12 bg-app-border"></span>
 				</div>
 			{/if}

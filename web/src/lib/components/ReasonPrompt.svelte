@@ -84,7 +84,7 @@
 	>
 		{#if isSuccess}
 			<div
-				class="flex items-center gap-2 py-2 text-emerald-400 text-sm font-medium animate-in fade-in"
+				class="flex items-center gap-2 py-2 text-app-success text-sm font-medium animate-in fade-in"
 			>
 				Thank you for your feedback!
 			</div>
@@ -109,7 +109,7 @@
 					<button
 						type="submit"
 						disabled={!reason.trim() || isSubmitting}
-						class="px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer text-amber-950 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+						class="px-4 py-1.5 rounded-lg text-xs font-semibold cursor-pointer text-app-accent-contrast bg-app-accent hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-app-accent/50"
 					>
 						{isSubmitting ? 'Saving...' : 'Submit'}
 					</button>

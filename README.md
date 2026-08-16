@@ -1,3 +1,5 @@
+<img width="200" alt="bulb on" src="web/src/lib/assets/bulb_on.svg" align="right">
+
 # World Wide Bulb
 
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev/)

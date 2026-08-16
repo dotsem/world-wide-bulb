@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import bulb_on from '$lib/assets/bulb_on.svg';
+	import bulb_off from '$lib/assets/bulb_off.svg';
 	import NavToolBar from '$lib/components/NavToolBar.svelte';
 	import InfoDialog from '$lib/components/InfoDialog.svelte';
 	import { bulbState } from '$lib';
@@ -16,6 +17,8 @@
 			document.documentElement.setAttribute('data-theme', theme);
 		}
 	});
+
+	let favicon = $derived(bulbState.isOn ? bulb_on : bulb_off);
 </script>
 
 <svelte:head>

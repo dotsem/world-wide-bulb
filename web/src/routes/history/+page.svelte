@@ -22,9 +22,7 @@
 	});
 
 	onMount(() => {
-		historyState.loadMore();
-		const cleanupWs = historyState.initWsListeners();
-		return cleanupWs;
+		historyState.refresh();
 	});
 </script>
 
@@ -82,7 +80,7 @@
 		>
 			<p class="font-medium">{historyState.error}</p>
 			<button
-				onclick={() => historyState.loadMore()}
+				onclick={() => historyState.refresh()}
 				class="mt-4 rounded-xl bg-app-danger/20 cursor-pointer px-5 py-2.5 text-sm font-semibold text-app-danger hover:bg-app-danger/30 transition-all shadow-sm"
 			>
 				Try Again

@@ -104,4 +104,42 @@ func TestHub(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 		assert.Equal(t, 0, hub.ClientCount(), "all viewers disconnected")
 	})
+
+	t.Run("broadcasts viewer count update on interval when viewer count changes", func(t *testing.T) {
+		hub := newHubWithInterval(20 * time.Millisecond)
+		client := &Client{hub: hub, send: make(chan []byte, 10), viewerID: "viewer_live"}
+
+		hub.Register(client)
+
+		select {
+		case msg := <-client.send:
+			assert.Contains(t, string(msg), `"type":"viewer_count"`)
+			assert.Contains(t, string(msg), `"count":1`)
+		case <-time.After(150 * time.Millisecond):
+			t.Fatal("client did not receive viewer count broadcast")
+		}
+	})
+
+	t.Run("evicts slow client during viewer count broadcast without blocking others", func(t *testing.T) {
+		hub := newHubWithInterval(20 * time.Millisecond)
+		slowClient := &Client{hub: hub, send: make(chan []byte, 1), viewerID: "slow_user"}
+		fastClient := &Client{hub: hub, send: make(chan []byte, 10), viewerID: "fast_user"}
+
+		slowClient.send <- []byte("already_full")
+
+		hub.Register(slowClient)
+		hub.Register(fastClient)
+
+		select {
+		case msg := <-fastClient.send:
+			assert.Contains(t, string(msg), `"type":"viewer_count"`)
+		case <-time.After(150 * time.Millisecond):
+			t.Fatal("fast client did not receive viewer count broadcast")
+		}
+
+		time.Sleep(40 * time.Millisecond)
+		<-slowClient.send
+		_, ok := <-slowClient.send
+		assert.False(t, ok, "slow client should be closed and evicted during viewer count broadcast")
+	})
 }

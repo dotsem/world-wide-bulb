@@ -19,7 +19,7 @@ fmt:
 
 # Check formatting for all code (Go + Web)
 fmt-check:
-    just go fmt
+    just go fmt-check
     just web fmt-check
 
 # Lint all code (Go + Web)

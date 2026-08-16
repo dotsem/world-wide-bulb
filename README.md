@@ -107,6 +107,7 @@ The resulting binary will be output to `bin/wwb`. You can execute it directly:
 | Command | Description |
 | :--- | :--- |
 | `just go fmt` | Format Go code |
+| `just go fmt-check` | Check Go formatting |
 | `just go lint` | Lint Go code |
 | `just go test` | Run Go tests |
 | `just go test-ci` | Run Go tests for CI with gotestsum and coverage |

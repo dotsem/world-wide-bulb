@@ -78,6 +78,20 @@ func TestCooldown(t *testing.T) {
 		assert.True(t, c.CheckAndRecord("ip_trigger_cleanup"))
 	})
 
+	t.Run("Record cleans up expired history entries when maxHistoryEntries exceeded", func(t *testing.T) {
+		c := NewCooldown(1 * time.Millisecond)
+		for i := range 502 {
+			c.Record(string(rune(i)))
+		}
+		time.Sleep(2 * time.Millisecond)
+
+		c.Record("ip_trigger_cleanup")
+		c.mu.Lock()
+		count := len(c.history)
+		c.mu.Unlock()
+		assert.Equal(t, 1, count)
+	})
+
 	t.Run("GetRemainingCooldown returns 0 for unrecorded IP", func(t *testing.T) {
 		c := NewCooldown(100 * time.Millisecond)
 		assert.Equal(t, time.Duration(0), c.GetRemainingCooldown("unknown_ip"))

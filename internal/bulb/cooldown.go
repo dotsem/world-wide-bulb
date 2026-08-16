@@ -23,6 +23,16 @@ func NewCooldown(cooldownTime time.Duration) *Cooldown {
 	}
 }
 
+func (c *Cooldown) cleanupExpiredLocked(now time.Time) {
+	if len(c.history) > maxHistoryEntries {
+		for k, t := range c.history {
+			if now.Sub(t) >= c.cooldownTime {
+				delete(c.history, k)
+			}
+		}
+	}
+}
+
 // CheckAndRecord atomically checks if an IP can toggle and records the timestamp.
 func (c *Cooldown) CheckAndRecord(ipHash string) bool {
 	c.mu.Lock()
@@ -36,14 +46,7 @@ func (c *Cooldown) CheckAndRecord(ipHash string) bool {
 	}
 
 	c.history[ipHash] = now
-
-	if len(c.history) > maxHistoryEntries {
-		for k, t := range c.history {
-			if now.Sub(t) >= c.cooldownTime {
-				delete(c.history, k)
-			}
-		}
-	}
+	c.cleanupExpiredLocked(now)
 
 	return true
 }
@@ -61,13 +64,16 @@ func (c *Cooldown) CanToggle(ipHash string) bool {
 	return time.Since(lastTime) >= c.cooldownTime
 }
 
-// Record saves the current timestamp for this IP
-// Returns the remaining time until the next toggle
+// Record saves the current timestamp for this IP and prunes expired records if capacity exceeded.
+// Returns the remaining time until the next toggle.
 func (c *Cooldown) Record(ipHash string) time.Duration {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	c.history[ipHash] = time.Now()
+	now := time.Now()
+	c.history[ipHash] = now
+	c.cleanupExpiredLocked(now)
+
 	return c.cooldownTime
 }
 

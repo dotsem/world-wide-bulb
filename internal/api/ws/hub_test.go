@@ -10,8 +10,8 @@ import (
 func TestHub(t *testing.T) {
 	t.Run("broadcasts payload to all registered clients", func(t *testing.T) {
 		hub := NewHub()
-		c1 := NewClient(hub, nil)
-		c2 := NewClient(hub, nil)
+		c1 := NewClient(hub, nil, "viewer_1")
+		c2 := NewClient(hub, nil, "viewer_2")
 
 		hub.Register(c1)
 		hub.Register(c2)
@@ -37,8 +37,8 @@ func TestHub(t *testing.T) {
 
 	t.Run("evicts slow client with full send buffer without blocking others", func(t *testing.T) {
 		hub := NewHub()
-		slowClient := &Client{hub: hub, send: make(chan []byte, 1)}
-		fastClient := &Client{hub: hub, send: make(chan []byte, 10)}
+		slowClient := &Client{hub: hub, send: make(chan []byte, 1), viewerID: "viewer_slow"}
+		fastClient := &Client{hub: hub, send: make(chan []byte, 10), viewerID: "viewer_fast"}
 
 		hub.Register(slowClient)
 		hub.Register(fastClient)
@@ -63,7 +63,7 @@ func TestHub(t *testing.T) {
 
 	t.Run("unregisters client cleanly", func(t *testing.T) {
 		hub := NewHub()
-		client := NewClient(hub, nil)
+		client := NewClient(hub, nil, "viewer_1")
 
 		hub.Register(client)
 		time.Sleep(10 * time.Millisecond)
@@ -73,5 +73,73 @@ func TestHub(t *testing.T) {
 
 		_, ok := <-client.send
 		assert.False(t, ok, "unregistered client send channel should be closed")
+	})
+
+	t.Run("tracks client count accurately with viewer deduplication", func(t *testing.T) {
+		hub := NewHub()
+		assert.Equal(t, 0, hub.ClientCount())
+
+		c1Tab1 := NewClient(hub, nil, "user_A")
+		c1Tab2 := NewClient(hub, nil, "user_A")
+		c2Tab1 := NewClient(hub, nil, "user_B")
+
+		hub.Register(c1Tab1)
+		hub.Register(c1Tab2)
+		time.Sleep(10 * time.Millisecond)
+		assert.Equal(t, 1, hub.ClientCount(), "multiple tabs from user_A should count as 1 viewer")
+
+		hub.Register(c2Tab1)
+		time.Sleep(10 * time.Millisecond)
+		assert.Equal(t, 2, hub.ClientCount(), "user_A + user_B should count as 2 viewers")
+
+		hub.Unregister(c1Tab1)
+		time.Sleep(10 * time.Millisecond)
+		assert.Equal(t, 2, hub.ClientCount(), "closing one tab from user_A should keep viewer count at 2")
+
+		hub.Unregister(c1Tab2)
+		time.Sleep(10 * time.Millisecond)
+		assert.Equal(t, 1, hub.ClientCount(), "closing all tabs from user_A should decrement count to 1")
+
+		hub.Unregister(c2Tab1)
+		time.Sleep(10 * time.Millisecond)
+		assert.Equal(t, 0, hub.ClientCount(), "all viewers disconnected")
+	})
+
+	t.Run("broadcasts viewer count update on interval when viewer count changes", func(t *testing.T) {
+		hub := newHubWithInterval(20 * time.Millisecond)
+		client := &Client{hub: hub, send: make(chan []byte, 10), viewerID: "viewer_live"}
+
+		hub.Register(client)
+
+		select {
+		case msg := <-client.send:
+			assert.Contains(t, string(msg), `"type":"viewer_count"`)
+			assert.Contains(t, string(msg), `"count":1`)
+		case <-time.After(150 * time.Millisecond):
+			t.Fatal("client did not receive viewer count broadcast")
+		}
+	})
+
+	t.Run("evicts slow client during viewer count broadcast without blocking others", func(t *testing.T) {
+		hub := newHubWithInterval(20 * time.Millisecond)
+		slowClient := &Client{hub: hub, send: make(chan []byte, 1), viewerID: "slow_user"}
+		fastClient := &Client{hub: hub, send: make(chan []byte, 10), viewerID: "fast_user"}
+
+		slowClient.send <- []byte("already_full")
+
+		hub.Register(slowClient)
+		hub.Register(fastClient)
+
+		select {
+		case msg := <-fastClient.send:
+			assert.Contains(t, string(msg), `"type":"viewer_count"`)
+		case <-time.After(150 * time.Millisecond):
+			t.Fatal("fast client did not receive viewer count broadcast")
+		}
+
+		time.Sleep(40 * time.Millisecond)
+		<-slowClient.send
+		_, ok := <-slowClient.send
+		assert.False(t, ok, "slow client should be closed and evicted during viewer count broadcast")
 	})
 }

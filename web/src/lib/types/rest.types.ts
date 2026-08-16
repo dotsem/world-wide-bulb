@@ -8,6 +8,7 @@ export interface ToggleResponse {
 export interface StateResponse {
 	state: boolean;
 	cooldown_ms: number;
+	viewers?: number;
 }
 
 export interface HistoryItem {

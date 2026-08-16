@@ -61,7 +61,12 @@ func (h *Handler) ServeWS(c *gin.Context) {
 		slog.Error("failed to upgrade websocket connection", slog.Any("err", err))
 		return
 	}
-	client := NewClient(h.hub, conn)
+	deviceID, _ := c.Cookie("device_id")
+	if deviceID == "" {
+		deviceID = c.ClientIP()
+	}
+
+	client := NewClient(h.hub, conn, deviceID)
 	h.hub.Register(client)
 	go client.WritePump()
 	go client.ReadPump()

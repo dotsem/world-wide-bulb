@@ -31,13 +31,21 @@ export interface ViewerCountEvent {
 class WsClient {
 	private socket?: WebSocket;
 	private handlers: Record<string, Array<(msg: any) => void>> = {};
+	private isUnloading = false;
 	isConnected = $state(false);
 
 	constructor() {
+		if (typeof window !== 'undefined') {
+			window.addEventListener('beforeunload', () => {
+				this.isUnloading = true;
+				this.socket?.close();
+			});
+		}
 		this.connect();
 	}
 
 	private connect() {
+		if (this.isUnloading) return;
 		const url = getWsUrl();
 		if (!url) {
 			return;
@@ -52,7 +60,9 @@ class WsClient {
 		};
 		this.socket.onclose = () => {
 			this.isConnected = false;
-			setTimeout(() => this.connect(), 1000);
+			if (!this.isUnloading) {
+				setTimeout(() => this.connect(), 1000);
+			}
 		};
 	}
 

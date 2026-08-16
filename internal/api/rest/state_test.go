@@ -24,11 +24,13 @@ func TestGetState(t *testing.T) {
 		var res struct {
 			State      bool  `json:"state"`
 			CooldownMs int64 `json:"cooldown_ms"`
+			Viewers    int   `json:"viewers"`
 		}
 		err := json.Unmarshal(rec.Body.Bytes(), &res)
 		require.NoError(t, err)
 		assert.False(t, res.State)
 		assert.Equal(t, int64(0), res.CooldownMs)
+		assert.Equal(t, 0, res.Viewers)
 	})
 
 	t.Run("returns active cooldown_ms after toggling", func(t *testing.T) {
@@ -54,10 +56,12 @@ func TestGetState(t *testing.T) {
 		var res struct {
 			State      bool  `json:"state"`
 			CooldownMs int64 `json:"cooldown_ms"`
+			Viewers    int   `json:"viewers"`
 		}
 		err := json.Unmarshal(recState.Body.Bytes(), &res)
 		require.NoError(t, err)
 		assert.True(t, res.State)
 		assert.Greater(t, res.CooldownMs, int64(0))
+		assert.Equal(t, 0, res.Viewers)
 	})
 }

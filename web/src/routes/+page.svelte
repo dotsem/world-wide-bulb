@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { bulbState, Bulb, CooldownNotice, ReasonPrompt } from '$lib';
+	import Header from '$lib/components/Header.svelte';
 </script>
 
+<Header />
 <div
 	class="flex-1 flex flex-col items-center justify-center relative overflow-hidden px-4 py-8 min-h-[calc(100vh-5rem)]"
 >

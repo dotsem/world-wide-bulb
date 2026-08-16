@@ -17,10 +17,20 @@ fmt:
     just go fmt
     just web fmt
 
+# Check formatting for all code (Go + Web)
+fmt-check:
+    just go fmt
+    just web fmt-check
+
 # Lint all code (Go + Web)
 lint:
     just go lint
     just web lint
+
+# Audit frontend dependencies
+audit:
+    just web audit
+
 
 # Run all test suites (Go + Web)
 test:

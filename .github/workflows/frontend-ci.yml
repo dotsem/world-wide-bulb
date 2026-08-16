@@ -9,7 +9,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: web
+    working-directory: .
 
 on:
   push:
@@ -44,14 +44,17 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Setup Just runner
+        uses: extractions/setup-just@v2
+
       - name: Run ESLint
-        run: pnpm lint
+        run: just web lint
 
       - name: Run Prettier check
-        run: pnpm format:check
+        run: just web fmt-check
 
       - name: Run Svelte type check
-        run: pnpm check
+        run: just web check
 
   build:
     name: Build
@@ -70,8 +73,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Setup Just runner
+        uses: extractions/setup-just@v2
+
       - name: Build frontend
-        run: pnpm build
+        run: just web build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -79,3 +85,4 @@ jobs:
           name: frontend-build
           path: web/build/
           retention-days: 7
+

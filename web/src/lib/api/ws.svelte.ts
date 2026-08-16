@@ -1,4 +1,13 @@
-const WS_BASE = import.meta.env.VITE_WS_BASE || 'ws://localhost:5000';
+function getWsUrl(): string {
+	if (import.meta.env.VITE_WS_BASE) {
+		return `${import.meta.env.VITE_WS_BASE}/ws`;
+	}
+	if (typeof window === 'undefined') {
+		return '';
+	}
+	const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+	return `${protocol}//${window.location.host}/ws`;
+}
 
 export interface StateChangedEvent {
 	id?: number;
@@ -14,6 +23,11 @@ export interface ReasonUpdatedEvent {
 	reason: string;
 }
 
+export interface ViewerCountEvent {
+	type: 'viewer_count';
+	count: number;
+}
+
 class WsClient {
 	private socket?: WebSocket;
 	private handlers: Record<string, Array<(msg: any) => void>> = {};
@@ -24,10 +38,10 @@ class WsClient {
 	}
 
 	private connect() {
-		if (typeof window === 'undefined') {
+		const url = getWsUrl();
+		if (!url) {
 			return;
 		}
-		const url = `${WS_BASE}/ws`;
 		this.socket = new WebSocket(url);
 		this.socket.onopen = () => {
 			this.isConnected = true;
@@ -70,6 +84,10 @@ class WsClient {
 
 	onReasonUpdate(handler: (msg: ReasonUpdatedEvent) => void): () => void {
 		return this.on('reason_updated', handler);
+	}
+
+	onViewerCount(handler: (msg: ViewerCountEvent) => void): () => void {
+		return this.on('viewer_count', handler);
 	}
 }
 

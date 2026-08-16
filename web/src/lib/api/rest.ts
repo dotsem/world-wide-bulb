@@ -1,6 +1,6 @@
 import type { HistoryResponse, StateResponse, ToggleResponse } from '$lib/types/rest.types';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 
 class RestApi {
 	async toggle(): Promise<ToggleResponse> {

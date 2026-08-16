@@ -93,7 +93,7 @@
 				<FloatingInput
 					label="Why did you decide to {actionText} the lamp?"
 					bind:value={reason}
-					maxlength={100}
+					maxlength={60}
 					disabled={isSubmitting}
 					error={errorMsg}
 				/>

@@ -50,11 +50,11 @@ func TestPostReason(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 	})
 
-	t.Run("rejects reason exceeding 100 characters with 400", func(t *testing.T) {
+	t.Run("rejects reason exceeding 60 characters with 400", func(t *testing.T) {
 		env := setupTestEnv(t)
 
 		validUUID := uuid.NewString()
-		longReason := strings.Repeat("a", 101)
+		longReason := strings.Repeat("a", 61)
 		body := bytes.NewBufferString(`{"id":"` + validUUID + `","reason":"` + longReason + `"}`)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/reason", body)
 		req.Header.Set("Content-Type", "application/json")
@@ -62,6 +62,32 @@ func TestPostReason(t *testing.T) {
 		env.router.ServeHTTP(rec, req)
 
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("rejects reason containing URLs with 400", func(t *testing.T) {
+		env := setupTestEnv(t)
+		validUUID := uuid.NewString()
+
+		testCases := []string{
+			"check out https://example.com for info",
+			"visit http://spam.net",
+			"go to www.google.com please",
+			"check google.com for details",
+			"visit my-app.io now",
+			"look at crypto.xyz",
+			"join discord.gg/server",
+		}
+
+		for _, tc := range testCases {
+			body := bytes.NewBufferString(`{"id":"` + validUUID + `","reason":"` + tc + `"}`)
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/reason", body)
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+			env.router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.Contains(t, rec.Body.String(), "urls are not allowed")
+		}
 	})
 
 	t.Run("returns 404 for non-existent toggle UUID", func(t *testing.T) {

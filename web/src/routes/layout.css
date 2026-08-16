@@ -17,6 +17,8 @@
 	--color-app-bulb-rim: var(--app-bulb-rim);
 	--color-app-bulb-glare: var(--app-bulb-glare);
 	--color-app-bulb-base: var(--app-bulb-base);
+	--color-app-bulb-base-dark: var(--app-bulb-base-dark);
+	--color-app-bulb-base-light: var(--app-bulb-base-light);
 }
 
 html,
@@ -50,6 +52,8 @@ html[data-theme='off'],
 	--app-bulb-rim: #eaa60f;
 	--app-bulb-glare: #ffe67d;
 	--app-bulb-base: #575553;
+	--app-bulb-base-dark: #423f3c;
+	--app-bulb-base-light: #8e8a86;
 }
 
 html[data-theme='on'],
@@ -70,4 +74,6 @@ html[data-theme='on'],
 	--app-bulb-rim: #eaa60f;
 	--app-bulb-glare: #ffe67d;
 	--app-bulb-base: #575553;
+	--app-bulb-base-dark: #423f3c;
+	--app-bulb-base-light: #8e8a86;
 }

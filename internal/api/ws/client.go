@@ -18,17 +18,19 @@ const (
 
 // Client manages an active WebSocket connection and message routing.
 type Client struct {
-	hub  *Hub
-	conn *websocket.Conn
-	send chan []byte
+	hub      *Hub
+	conn     *websocket.Conn
+	send     chan []byte
+	viewerID string
 }
 
 // NewClient instantiates a new Client for an upgraded WebSocket connection.
-func NewClient(hub *Hub, conn *websocket.Conn) *Client {
+func NewClient(hub *Hub, conn *websocket.Conn, viewerID string) *Client {
 	return &Client{
-		hub:  hub,
-		conn: conn,
-		send: make(chan []byte, sendBufferSize),
+		hub:      hub,
+		conn:     conn,
+		send:     make(chan []byte, sendBufferSize),
+		viewerID: viewerID,
 	}
 }
 

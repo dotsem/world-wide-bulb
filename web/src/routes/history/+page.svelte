@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { LoaderCircle } from '@lucide/svelte';
 	import { bulbState, historyState, HistoryTile, Bulb } from '$lib';
+	import Header from '$lib/components/Header.svelte';
 
 	let sentinelEl = $state<HTMLElement | null>(null);
 
@@ -115,3 +116,4 @@
 		</div>
 	{/if}
 </div>
+<Header position="bottom" />

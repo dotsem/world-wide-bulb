@@ -10,6 +10,7 @@ import (
 type StateResponse struct {
 	State      bool  `json:"state"`
 	CooldownMs int64 `json:"cooldown_ms"`
+	Viewers    int   `json:"viewers"`
 }
 
 // GetState returns the current state of the bulb.
@@ -22,5 +23,6 @@ func (h *Handler) GetState(c *gin.Context) {
 	c.JSON(http.StatusOK, StateResponse{
 		State:      state,
 		CooldownMs: remaining.Milliseconds(),
+		Viewers:    h.hub.ClientCount(),
 	})
 }

@@ -5,11 +5,15 @@ class BulbState {
 	isOn = $state(false);
 	cooldownUntil = $state<number | null>(null);
 	remainingMs = $state(0);
+	viewers = $state(1);
 	private timer?: ReturnType<typeof setInterval>;
 
 	constructor() {
 		wsClient.on('state_changed', (msg) => {
 			this.isOn = msg.state;
+		});
+		wsClient.onViewerCount((msg) => {
+			this.viewers = msg.count;
 		});
 	}
 
@@ -50,6 +54,9 @@ class BulbState {
 	async init() {
 		const res = await restApi.state();
 		this.isOn = res.state;
+		if (res.viewers !== undefined) {
+			this.viewers = res.viewers;
+		}
 		this.setCooldown(res.cooldown_ms);
 	}
 

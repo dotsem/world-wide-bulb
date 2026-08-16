@@ -19,3 +19,8 @@ pre-commit:
     web-check:
       glob: "web/**/*.{ts,svelte}"
       run: just web check
+    docgen:
+      glob: "{justfile,just/*.just,cmd/docgen/*.go}"
+      run: just docgen
+      stage_fixed: true
+

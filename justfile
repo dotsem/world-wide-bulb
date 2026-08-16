@@ -47,7 +47,17 @@ build:
 swagger:
     swag init -g cmd/wwb/main.go -o internal/api/docs
 
+# Generate Markdown documentation for just commands
+docgen *args='':
+    go run ./cmd/docgen {{args}}
+
+# Verify documentation is in sync with justfiles
+check-docs:
+    go run ./cmd/docgen -check
+
+
 # Clean build artifacts and local sqlite databases
 clean:
     rm -rf bin/ *.db *.db-wal *.db-shm
     find web/build -mindepth 1 ! -name '.gitkeep' -delete
+

@@ -32,8 +32,10 @@ Everything compiles into a **single standalone binary**. This makes it easy to h
 To build or develop World Wide Bulb, the following tools are required:
 
 - **Go** (1.26+)
+- **[`golangci-lint`](https://golangci-lint.run/)**: Fast Go linters runner for code quality and pre-commit validation.
 - **node.js** & **pnpm** (for frontend asset compilation and development)
-- **`just`**: It is recommended to install [`just`](https://github.com/casey/just) for the best development experience. `just` acts as the primary task runner, unifying commands for building, linting, formatting, and running tests across Go and Svelte components.
+- **[`just`](https://github.com/casey/just)**: It is recommended to install [`just`](https://github.com/casey/just) for the best development experience. `just` acts as the primary task runner, unifying commands for building, linting, formatting, and running tests across Go and Svelte components.
+- **[`lefthook`](https://github.com/evilmartians/lefthook)**: Required for automated pre-commit checks (`just install` hooks it up).
 
 ## Getting Started
 
@@ -49,7 +51,7 @@ cp .env.template .env
 
 ### 2. Dependency Installation
 
-Use `just` to install web dependencies and Git hooks:
+Use `just` to install web dependencies and Git hooks (lefthook):
 
 ```bash
 just install

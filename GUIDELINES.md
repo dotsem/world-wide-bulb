@@ -110,10 +110,49 @@ Before writing any code, stop at the first rung that holds:
 
 ## 4. Verification Commands Reference
 
-| Action | Go (Backend) | Svelte (Frontend) |
-| :--- | :--- | :--- |
-| **Format** | `just go fmt` | `just web fmt` |
-| **Lint / Analyze** | `just go lint` | `just web lint` |
-| **Type Check** | — | `just web check` |
-| **Test** | `go test ./...` | `just web test` |
-| **Build** | `go build ./cmd/server` | `just web build` |
+<!-- JUST_COMMANDS_START -->
+
+### Root Commands
+
+| Command | Description |
+| :--- | :--- |
+| `just default` | List available recipes |
+| `just install` | Install web dependencies and git hooks |
+| `just fmt` | Format all code (Go + Web) |
+| `just fmt-check` | Check formatting for all code (Go + Web) |
+| `just lint` | Lint all code (Go + Web) |
+| `just audit` | Audit frontend dependencies |
+| `just test` | Run all test suites (Go + Web) |
+| `just build` | Build complete single binary with embedded frontend |
+| `just swagger` | Generate OpenAPI / Swagger docs |
+| `just docgen` | Generate Markdown documentation for just commands |
+| `just check-docs` | Verify documentation is in sync with justfiles |
+| `just clean` | Clean build artifacts and local sqlite databases |
+
+### Backend (`just go <cmd>`)
+
+| Command | Description |
+| :--- | :--- |
+| `just go fmt` | Format Go code |
+| `just go lint` | Lint Go code |
+| `just go test` | Run Go tests |
+| `just go test-ci` | Run Go tests for CI with gotestsum and coverage |
+| `just go coverage` | Run Go tests with coverage report (excluding generated sqlc files) |
+| `just go dev` | Run Go development server |
+
+### Frontend (`just web <cmd>`)
+
+| Command | Description |
+| :--- | :--- |
+| `just web install` | Install web dependencies |
+| `just web fmt` | Format Web code |
+| `just web fmt-check` | Check Web formatting |
+| `just web lint` | Lint Web code |
+| `just web check` | Run Svelte type-checking |
+| `just web test` | Run Web tests |
+| `just web build` | Build Svelte static assets |
+| `just web audit` | Audit frontend dependencies |
+| `just web dev` | Run frontend development server |
+
+<!-- JUST_COMMANDS_END -->
+

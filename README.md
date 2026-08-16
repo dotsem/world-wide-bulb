@@ -16,6 +16,7 @@ Everything compiles into a **single standalone binary**. This makes it easy to h
 [![Backend CI](https://github.com/dotsem/world-wide-bulb/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/dotsem/world-wide-bulb/actions/workflows/backend-ci.yml)
 [![Frontend CI](https://github.com/dotsem/world-wide-bulb/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/dotsem/world-wide-bulb/actions/workflows/frontend-ci.yml)
 [![Build Single Binary CI](https://github.com/dotsem/world-wide-bulb/actions/workflows/build-bin-ci.yml/badge.svg)](https://github.com/dotsem/world-wide-bulb/actions/workflows/build-bin-ci.yml)
+[![Documentation CI](https://github.com/dotsem/world-wide-bulb/actions/workflows/docs-ci.yml/badge.svg)](https://github.com/dotsem/world-wide-bulb/actions/workflows/docs-ci.yml)
 [![Codecov](https://codecov.io/gh/dotsem/world-wide-bulb/branch/main/graph/badge.svg)](https://codecov.io/gh/dotsem/world-wide-bulb)
 
 
@@ -80,14 +81,51 @@ The resulting binary will be output to `bin/wwb`. You can execute it directly:
 
 ## Task Runner Reference (`just`)
 
-| Task | Command | Description |
-| :--- | :--- | :--- |
-| **Install** | `just install` | Installs frontend dependencies (`pnpm install`) and Git hooks (`lefthook`). |
-| **Format** | `just fmt` | Formats Go source code (`gofmt`) and Svelte/TS code (`prettier`). |
-| **Lint** | `just lint` | Runs static analysis via `golangci-lint` and `eslint`. |
-| **Test** | `just test` | Executes unit and integration test suites. |
-| **Build** | `just build` | Compiles frontend assets and builds the embedded single binary `bin/wwb`. |
-| **Clean** | `just clean` | Removes compiled binaries, build artifacts, and local SQLite databases. |
+<!-- JUST_COMMANDS_START -->
+
+### Root Commands
+
+| Command | Description |
+| :--- | :--- |
+| `just default` | List available recipes |
+| `just install` | Install web dependencies and git hooks |
+| `just fmt` | Format all code (Go + Web) |
+| `just fmt-check` | Check formatting for all code (Go + Web) |
+| `just lint` | Lint all code (Go + Web) |
+| `just audit` | Audit frontend dependencies |
+| `just test` | Run all test suites (Go + Web) |
+| `just build` | Build complete single binary with embedded frontend |
+| `just swagger` | Generate OpenAPI / Swagger docs |
+| `just docgen` | Generate Markdown documentation for just commands |
+| `just check-docs` | Verify documentation is in sync with justfiles |
+| `just clean` | Clean build artifacts and local sqlite databases |
+
+### Backend (`just go <cmd>`)
+
+| Command | Description |
+| :--- | :--- |
+| `just go fmt` | Format Go code |
+| `just go lint` | Lint Go code |
+| `just go test` | Run Go tests |
+| `just go test-ci` | Run Go tests for CI with gotestsum and coverage |
+| `just go coverage` | Run Go tests with coverage report (excluding generated sqlc files) |
+| `just go dev` | Run Go development server |
+
+### Frontend (`just web <cmd>`)
+
+| Command | Description |
+| :--- | :--- |
+| `just web install` | Install web dependencies |
+| `just web fmt` | Format Web code |
+| `just web fmt-check` | Check Web formatting |
+| `just web lint` | Lint Web code |
+| `just web check` | Run Svelte type-checking |
+| `just web test` | Run Web tests |
+| `just web build` | Build Svelte static assets |
+| `just web audit` | Audit frontend dependencies |
+| `just web dev` | Run frontend development server |
+
+<!-- JUST_COMMANDS_END -->
 
 ## Contribution Guidelines
 

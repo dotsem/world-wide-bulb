@@ -8,6 +8,10 @@ install:
 fmt:
     cd web && pnpm exec prettier --write .
 
+# Check Web formatting
+fmt-check:
+    cd web && pnpm exec prettier --check .
+
 # Lint Web code
 lint:
     cd web && pnpm exec eslint . --fix
@@ -24,6 +28,11 @@ test:
 build:
     cd web && pnpm build
 
+# Audit frontend dependencies
+audit:
+    cd web && pnpm audit --audit-level high
+
 # Run frontend development server
 dev:
     cd web && pnpm dev
+

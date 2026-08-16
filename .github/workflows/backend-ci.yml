@@ -51,8 +51,11 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
+      - name: Setup Just runner
+        uses: extractions/setup-just@v2
+
       - name: Check formatting (gofmt)
-        run: gofmt -l -w -s .
+        run: just go fmt
 
       - name: Commit Changes
         id: auto_commit
@@ -73,9 +76,7 @@ jobs:
         run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 
       - name: Run golangci-lint
-        run: |
-          # The binary is installed to GOPATH/bin
-          $(go env GOPATH)/bin/golangci-lint run --config=.golangci.yml
+        run: just go lint
 
       - name: Mark formatting commit as green
         if: steps.auto_commit.outputs.changes_detected == 'true'
@@ -106,6 +107,9 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
+      - name: Setup Just runner
+        uses: extractions/setup-just@v2
+
       - name: Cache gotestsum binary
         id: cache-gotestsum
         uses: actions/cache@v4
@@ -118,11 +122,8 @@ jobs:
         run: go install gotest.tools/gotestsum@latest
 
       - name: Run tests with coverage
-        run: |
-          # Run tests with gotestsum for a clear overview of failures in CI logs
-          $(go env GOPATH)/bin/gotestsum --format pkgname-and-test-fails --junitfile unit-tests.xml -- -race ./... -coverprofile=coverage.out -covermode=atomic
-          grep -v -E "internal/store/(db|models|.*\.sql)\.go" coverage.out > coverage_clean.out
-          mv coverage_clean.out coverage.out
+        run: just go test-ci
+
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

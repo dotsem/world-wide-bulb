@@ -1,5 +1,5 @@
 import { restApi } from '$lib/api/rest';
-import { wsClient } from '$lib/api/ws.svelte';
+import { wsClient, type StateChangedEvent, type ReasonUpdatedEvent } from '$lib/api/ws.svelte';
 import type { HistoryItem } from '$lib/types/rest.types';
 
 export interface FormattedHistoryItem extends HistoryItem {
@@ -49,20 +49,56 @@ class HistoryState {
 	initialLoading = $state(true);
 	error = $state<string | null>(null);
 
+	constructor() {
+		wsClient.onStateChange((msg) => this.handleStateChange(msg));
+		wsClient.onReasonUpdate((msg) => this.handleReasonUpdate(msg));
+	}
+
 	get totalToggles(): number {
 		return this.items[0]?.id ?? 0;
 	}
 
-	loadMore = async () => {
-		if (this.loading || !this.hasMore) return;
+	private handleStateChange(msg: StateChangedEvent) {
+		if (msg.id === undefined) return;
 
+		const existingIdx = this.items.findIndex((t) => t.id === msg.id);
+		if (existingIdx !== -1) {
+			this.items[existingIdx] = {
+				...this.items[existingIdx],
+				state: msg.state,
+				...(msg.reason ? { reason: msg.reason } : {})
+			};
+			return;
+		}
+
+		const newItem: HistoryItem = {
+			id: msg.id,
+			state: msg.state,
+			reason: msg.reason || '',
+			created_at: msg.created_at || new Date().toISOString()
+		};
+
+		if (this.items.length > 0 && msg.id > this.items[0].id + 1) {
+			this.refresh();
+			return;
+		}
+
+		this.items = [prepareItem(newItem), ...this.items];
+	}
+
+	private handleReasonUpdate(msg: ReasonUpdatedEvent) {
+		const targetId = msg.toggle_id ?? (typeof msg.id === 'number' ? msg.id : undefined);
+		if (targetId === undefined) return;
+		this.items = this.items.map((t) => (t.id === targetId ? { ...t, reason: msg.reason } : t));
+	}
+
+	refresh = async () => {
 		this.loading = true;
 		this.error = null;
 
 		try {
-			const res = await restApi.history(20, this.nextCursor);
-			const formatted = res.toggles.map(prepareItem);
-			this.items = [...this.items, ...formatted];
+			const res = await restApi.history(20);
+			this.items = res.toggles.map(prepareItem);
 			this.nextCursor = res.next_cursor;
 			this.hasMore = res.has_more;
 		} catch (err: any) {
@@ -73,28 +109,27 @@ class HistoryState {
 		}
 	};
 
-	initWsListeners = (): (() => void) => {
-		const unsubState = wsClient.onStateChange((msg) => {
-			if (msg.id === undefined || this.items.some((t) => t.id === msg.id)) return;
-			const newItem: HistoryItem = {
-				id: msg.id,
-				state: msg.state,
-				reason: msg.reason || '',
-				created_at: msg.created_at || new Date().toISOString()
-			};
-			this.items = [prepareItem(newItem), ...this.items];
-		});
+	loadMore = async () => {
+		if (this.loading || !this.hasMore) return;
 
-		const unsubReason = wsClient.onReasonUpdate((msg) => {
-			const targetId = msg.toggle_id ?? (typeof msg.id === 'number' ? msg.id : undefined);
-			if (targetId === undefined) return;
-			this.items = this.items.map((t) => (t.id === targetId ? { ...t, reason: msg.reason } : t));
-		});
+		this.loading = true;
+		this.error = null;
 
-		return () => {
-			unsubState();
-			unsubReason();
-		};
+		try {
+			const res = await restApi.history(20, this.nextCursor);
+			const formatted = res.toggles.map(prepareItem);
+			const existingIds = new Set(this.items.map((i) => i.id));
+			const newItems = formatted.filter((i) => !existingIds.has(i.id));
+
+			this.items = [...this.items, ...newItems];
+			this.nextCursor = res.next_cursor;
+			this.hasMore = res.has_more;
+		} catch (err: any) {
+			this.error = err?.message || 'Failed to load history items';
+		} finally {
+			this.loading = false;
+			this.initialLoading = false;
+		}
 	};
 }
 

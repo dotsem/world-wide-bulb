@@ -1,5 +1,7 @@
 set dotenv-load := true
 
+db_path := env_var_or_default('DB_PATH', 'bulb.db')
+
 mod go 'just/go.just'
 mod web 'just/web.just'
 
@@ -58,6 +60,7 @@ check-docs:
 
 # Clean build artifacts and local sqlite databases
 clean:
-    rm -rf bin/ *.db *.db-wal *.db-shm
+    rm -rf {{db_path}} {{db_path}}-wal {{db_path}}-shm
     find web/build -mindepth 1 ! -name '.gitkeep' -delete
+
 

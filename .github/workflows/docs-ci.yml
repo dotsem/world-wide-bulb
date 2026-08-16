@@ -1,0 +1,45 @@
+name: Documentation CI
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "justfile"
+      - "just/**"
+      - "cmd/docgen/**"
+      - "README.md"
+      - "GUIDELINES.md"
+      - ".github/workflows/docs-ci.yml"
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "justfile"
+      - "just/**"
+      - "cmd/docgen/**"
+      - "README.md"
+      - "GUIDELINES.md"
+      - ".github/workflows/docs-ci.yml"
+
+jobs:
+  check-docs:
+    name: Verify Documentation Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Backend Environment
+        uses: ./.github/actions/setup-backend
+
+      - name: Setup Just runner
+        uses: extractions/setup-just@v2
+
+      - name: Verify Documentation Sync
+        run: just check-docs

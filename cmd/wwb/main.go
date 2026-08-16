@@ -4,10 +4,15 @@ package main
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
-	"log"
+	"log/slog"
+	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
+	"time"
 	"world-wide-bulb/internal/api"
 	"world-wide-bulb/internal/config"
 
@@ -15,9 +20,20 @@ import (
 )
 
 func main() {
-	if err := run(context.Background()); err != nil {
-		log.Fatalf("server error: %v", err)
+	if err := runRoot(); err != nil {
+		os.Exit(1)
 	}
+}
+
+func runRoot() error {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	if err := run(ctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		slog.Error("server error", slog.Any("error", err))
+		return err
+	}
+	return nil
 }
 
 func run(ctx context.Context) error {
@@ -45,9 +61,49 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	if err := app.Router.Run(":" + cfg.BackendPort); err != nil {
-		return fmt.Errorf("failed to start server: %w", err)
+	if cfg.RetentionLimit > 0 {
+		// ponytail: single background ticker for pruning; upgrade to cron scheduler if retention rules expand
+		go func() {
+			ticker := time.NewTicker(1 * time.Hour)
+			defer ticker.Stop()
+			_ = app.Queries.PruneOldToggles(ctx, cfg.RetentionLimit)
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case <-ticker.C:
+					if err := app.Queries.PruneOldToggles(ctx, cfg.RetentionLimit); err != nil {
+						slog.Warn("failed to prune old toggles", slog.Any("err", err))
+					}
+				}
+			}
+		}()
 	}
 
-	return nil
+	srv := &http.Server{
+		Addr:              ":" + cfg.BackendPort,
+		Handler:           app.Router,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+
+	serverErr := make(chan error, 1)
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			serverErr <- err
+		}
+		close(serverErr)
+	}()
+
+	select {
+	case err := <-serverErr:
+		return fmt.Errorf("failed to start server: %w", err)
+	case <-ctx.Done():
+		slog.Info("shutting down server gracefully")
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			return fmt.Errorf("server forced to shutdown: %w", err)
+		}
+		return nil
+	}
 }

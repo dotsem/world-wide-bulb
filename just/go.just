@@ -4,6 +4,16 @@ set working-directory := '..'
 fmt:
     gofmt -l -w -s .
 
+# Check Go formatting
+fmt-check:
+    #!/usr/bin/env bash
+    UNFORMATTED=$(gofmt -s -l .)
+    if [ -n "$UNFORMATTED" ]; then
+        echo "The following Go files are not formatted:"
+        echo "$UNFORMATTED"
+        exit 1
+    fi
+
 # Lint Go code
 lint:
     golangci-lint run --config=.golangci.yml

@@ -1,9 +1,8 @@
 name: Backend CI
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
-  statuses: write
 
 concurrency:
   group: backend-ci-${{ github.ref }}
@@ -33,9 +32,6 @@ jobs:
   lint:
     name: Static Code Analysis
     runs-on: ubuntu-latest
-    outputs:
-      commit_hash: ${{ steps.auto_commit.outputs.commit_hash }}
-      changes_detected: ${{ steps.auto_commit.outputs.changes_detected }}
     strategy:
       matrix:
         go-version: ["1.26"]
@@ -43,8 +39,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref }}
 
       - name: Setup Backend Environment
         uses: ./.github/actions/setup-backend
@@ -55,14 +49,7 @@ jobs:
         uses: extractions/setup-just@v2
 
       - name: Check formatting (gofmt)
-        run: just go fmt
-
-      - name: Commit Changes
-        id: auto_commit
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: fix gofmt errors"
+        run: just go fmt-check
 
       - name: Cache golangci-lint binary
         id: cache-golangci-lint
@@ -78,15 +65,6 @@ jobs:
       - name: Run golangci-lint
         run: just go lint
 
-      - name: Mark formatting commit as green
-        if: steps.auto_commit.outputs.changes_detected == 'true'
-        run: |
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/statuses/${{ steps.auto_commit.outputs.commit_hash }} \
-            -d '{"state":"success", "target_url":"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}", "description":"gofmt auto-formatting applied", "context":"Static Code Analysis"}'
-
   test:
     name: Build & Test
     if: ${{ always() }}
@@ -99,8 +77,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref }}
 
       - name: Setup Backend Environment
         uses: ./.github/actions/setup-backend
@@ -219,19 +195,3 @@ jobs:
         run: |
           echo "### ❌ CI Failed" >> $GITHUB_STEP_SUMMARY
           echo "Backend CI failed. Review the logs above to see test/lint failures." >> $GITHUB_STEP_SUMMARY
-
-      - name: Post test status to formatting commit
-        if: always() && needs.lint.outputs.changes_detected == 'true'
-        env:
-          JOB_STATUS: ${{ job.status }}
-          COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
-        run: |
-          STATE="success"
-          if [ "$JOB_STATUS" = "failure" ] || [ "$JOB_STATUS" = "cancelled" ] || [ "$COVERAGE_OUTCOME" = "failure" ]; then
-            STATE="failure"
-          fi
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/statuses/${{ needs.lint.outputs.commit_hash }} \
-            -d "{\"state\":\"$STATE\", \"target_url\":\"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\", \"description\":\"Unit tests and coverage validation\", \"context\":\"Build & Test\"}"

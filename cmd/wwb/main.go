@@ -45,7 +45,7 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	if err := app.Router.Run(":" + cfg.Port); err != nil {
+	if err := app.Router.Run(":" + cfg.BackendPort); err != nil {
 		return fmt.Errorf("failed to start server: %w", err)
 	}
 

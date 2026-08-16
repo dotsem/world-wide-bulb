@@ -2,6 +2,7 @@
 package api
 
 import (
+	"io/fs"
 	"world-wide-bulb/internal/api/middleware"
 	"world-wide-bulb/internal/api/rest"
 	"world-wide-bulb/internal/api/ws"
@@ -9,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// NewRouter creates and initializes the Gin engine with all API routes.
-func NewRouter(restH *rest.Handler, wsH *ws.Handler) *gin.Engine {
+// NewRouter creates and initializes the Gin engine with all API routes and embedded static frontend.
+func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS) *gin.Engine {
 	r := gin.Default()
 	_ = r.SetTrustedProxies(nil)
 	r.Use(middleware.CORS())
@@ -24,6 +25,10 @@ func NewRouter(restH *rest.Handler, wsH *ws.Handler) *gin.Engine {
 	}
 
 	r.GET("/ws", wsH.ServeWS)
+
+	if staticFS != nil {
+		r.NoRoute(ServeStatic(staticFS))
+	}
 
 	return r
 }

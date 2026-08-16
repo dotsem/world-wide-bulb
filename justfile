@@ -39,4 +39,5 @@ swagger:
 
 # Clean build artifacts and local sqlite databases
 clean:
-    rm -rf bin/ web/dist/ *.db *.db-wal *.db-shm
+    rm -rf bin/ *.db *.db-wal *.db-shm
+    find web/build -mindepth 1 ! -name '.gitkeep' -delete

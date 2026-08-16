@@ -12,7 +12,8 @@ import (
 
 // Config holds runtime configuration settings for the service.
 type Config struct {
-	Port         string
+	BackendPort  string
+	FrontendPort string
 	IsProd       bool
 	IPSalt       string
 	DBPath       string
@@ -33,10 +34,11 @@ func Load() (*Config, error) {
 		hosts = strings.Split(rawHosts, ",")
 	}
 	cfg := &Config{
-		Port:         getEnv("BACKEND_PORT", "8080"),
+		BackendPort:  getEnv("8080", "BACKEND_PORT", "PORT"),
+		FrontendPort: getEnv("5001", "FRONTEND_PORT"),
 		IsProd:       os.Getenv("APP_ENV") == "production",
 		IPSalt:       os.Getenv("IP_SALT"),
-		DBPath:       getEnv("DB_PATH", "bulb.db"),
+		DBPath:       getEnv("bulb.db", "DB_PATH"),
 		AllowedHosts: hosts,
 	}
 	if cfg.IsProd && cfg.IPSalt == "" {
@@ -49,10 +51,12 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
-func getEnv(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
+func getEnv(fallback string, keys ...string) string {
+	for _, key := range keys {
+		if v := os.Getenv(key); v != "" {
+			return v
+		}
 	}
-	slog.Warn("using default value for key", slog.String("key", key), slog.String("default", fallback))
+	slog.Debug("using default value for keys", slog.Any("keys", keys), slog.String("default", fallback))
 	return fallback
 }

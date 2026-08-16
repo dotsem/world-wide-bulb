@@ -1,0 +1,46 @@
+name: Build Single Binary CI
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-bin-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "**"
+      - "!**.md"
+  pull_request:
+    branches: ["**"]
+    paths:
+      - "**"
+      - "!**.md"
+
+jobs:
+  verify-build:
+    name: Verify Single Binary Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Setup Backend Environment
+        uses: ./.github/actions/setup-backend
+
+      - name: Setup Just runner
+        uses: extractions/setup-just@v2
+
+      - name: Build Single Binary with Embedded Svelte
+        run: just build
+
+      - name: Verify Binary Output & Execution
+        run: |
+          test -f bin/wwb
+          test -x bin/wwb
+          echo "Single binary build verified successfully."

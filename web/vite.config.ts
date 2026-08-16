@@ -1,5 +1,4 @@
 import tailwindcss from '@tailwindcss/vite';
-import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig, loadEnv } from 'vite';
 import process from 'node:process';
@@ -11,18 +10,9 @@ export default defineConfig(({ mode }) => {
 
 	return {
 		envDir,
-		plugins: [
-			tailwindcss(),
-			sveltekit({
-				compilerOptions: {
-					runes: ({ filename }) =>
-						filename.split(/[/\\]/).includes('node_modules') ? undefined : true
-				},
-				adapter: adapter()
-			})
-		],
+		plugins: [tailwindcss(), sveltekit()],
 		server: {
-			port: env.FRONTEND_PORT ? Number(env.FRONTEND_PORT) : 5173
+			port: env.FRONTEND_PORT ? Number(env.FRONTEND_PORT) : 5001
 		}
 	};
 });

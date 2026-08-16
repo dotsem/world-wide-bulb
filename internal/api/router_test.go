@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"testing/fstest"
 	"world-wide-bulb/internal/api"
 	"world-wide-bulb/internal/api/rest"
 	"world-wide-bulb/internal/api/ws"
@@ -37,11 +38,34 @@ func TestNewRouter(t *testing.T) {
 	restH := rest.NewHandler(queries, engine, hub, hasher, false)
 	wsH := ws.NewHandler(hub, false, []string{"*"})
 
-	router := api.NewRouter(restH, wsH)
+	testFS := fstest.MapFS{
+		"index.html": &fstest.MapFile{Data: []byte("<html>SPA</html>")},
+		"test.js":    &fstest.MapFile{Data: []byte("console.log('hi');")},
+	}
+
+	router := api.NewRouter(restH, wsH, testFS)
 	assert.NotNil(t, router)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/state", nil)
-	rec := httptest.NewRecorder()
-	router.ServeHTTP(rec, req)
-	assert.Equal(t, http.StatusOK, rec.Code)
+	t.Run("API endpoint", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/state", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("Static asset", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/test.js", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Contains(t, rec.Body.String(), "console.log")
+	})
+
+	t.Run("SPA Fallback route", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/history", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Contains(t, rec.Body.String(), "<html>SPA</html>")
+	})
 }

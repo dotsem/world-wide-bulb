@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { LoaderCircle, BadgeQuestionMark } from '@lucide/svelte';
+	import { LoaderCircle } from '@lucide/svelte';
 	import { bulbState, historyState, HistoryTile, Bulb } from '$lib';
 
 	let sentinelEl = $state<HTMLElement | null>(null);
@@ -87,13 +87,8 @@
 			</button>
 		</div>
 	{:else if historyState.items.length === 0}
-		<div class="rounded-2xl border border-app-border bg-app-surface-solid p-12 text-center">
-			<div
-				class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-app-accent/10 text-app-accent mb-4 border border-app-accent/20"
-			>
-				<BadgeQuestionMark class="h-7 w-7" />
-			</div>
-			<h3 class="text-lg font-semibold text-app-text">No one toggled the bulb, I guess</h3>
+		<div class="fixed left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+			<h3 class="text-lg font-semibold text-app-text">No one toggled the bulb, I guess...</h3>
 		</div>
 	{:else}
 		<div class="space-y-3.5">

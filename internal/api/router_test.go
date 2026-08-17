@@ -43,7 +43,8 @@ func TestNewRouter(t *testing.T) {
 		"test.js":    &fstest.MapFile{Data: []byte("console.log('hi');")},
 	}
 
-	router := api.NewRouter(restH, wsH, testFS)
+	isProd := false
+	router := api.NewRouter(restH, wsH, testFS, isProd)
 	assert.NotNil(t, router)
 
 	t.Run("API endpoint", func(t *testing.T) {

@@ -25,7 +25,7 @@
 
 <div
 	data-theme={theme}
-	class="min-h-screen bg-app-bg text-app-text flex flex-col font-sans selection:bg-app-accent/30 selection:text-app-accent transition-colors duration-300 ease-out relative"
+	class="min-h-screen bg-app-bg text-app-text flex flex-col font-sans selection:bg-app-accent/30 selection:text-app-accent relative"
 >
 	<NavToolBar />
 

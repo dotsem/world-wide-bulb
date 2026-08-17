@@ -1,0 +1,19 @@
+services:
+  wwb:
+    image: ghcr.io/dotsem/world-wide-bulb:${TAG:-latest}
+    container_name: world-wide-bulb
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - BACKEND_PORT=8080
+      - DB_PATH=${DB_PATH:-data/bulb.db}
+      - IP_SALT=${IP_SALT:-}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-}
+      - RETENTION_LIMIT=${RETENTION_LIMIT:-}
+    volumes:
+      - wwb-data:/app/data
+
+volumes:
+  wwb-data:

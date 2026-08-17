@@ -81,6 +81,26 @@ The resulting binary will be output to `bin/wwb`. You can execute it directly:
 ./bin/wwb
 ```
 
+### 5. Running with Docker & Compose
+
+Run World Wide Bulb with Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+Or run directly with Docker:
+
+```bash
+docker run -d \
+  --name world-wide-bulb \
+  -p 8080:8080 \
+  -e APP_ENV=production \
+  -e IP_SALT=your_secret_salt \
+  -v wwb-data:/app/data \
+  ghcr.io/dotsem/world-wide-bulb:latest
+```
+
 ## Task Runner Reference (`just`)
 
 <!-- JUST_COMMANDS_START -->

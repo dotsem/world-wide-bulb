@@ -1,0 +1,13 @@
+.git
+.github
+.agents
+data/
+*.db
+*.db-wal
+*.db-shm
+coverage.out
+node_modules/
+web/
+.env
+.env.*
+!.env.template

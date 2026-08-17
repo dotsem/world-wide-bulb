@@ -22,6 +22,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Frontend Environment
+        uses: ./.github/actions/setup-frontend
+
+      - name: Setup Backend Environment
+        uses: ./.github/actions/setup-backend
+
+      - name: Setup Just runner
+        uses: extractions/setup-just@v2
+
+      - name: Build Single Binary with Embedded Svelte
+        run: |
+          just web build
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/wwb ./cmd/wwb
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -50,28 +64,16 @@ jobs:
           fi
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
 
-      - name: Build and push Backend
+      - name: Build and push container
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ steps.prep.outputs.repo_lower }}/backend:${{ steps.prep.outputs.tag }}
-            ghcr.io/${{ steps.prep.outputs.repo_lower }}/backend:latest
-
-      - name: Build and push Frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./web
-          file: ./web/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/${{ steps.prep.outputs.repo_lower }}/frontend:${{ steps.prep.outputs.tag }}
-            ghcr.io/${{ steps.prep.outputs.repo_lower }}/frontend:latest
-          build-args: |
-            VITE_API_BASE=${{ vars.VITE_API_BASE }}
-            VITE_WS_BASE=${{ vars.VITE_WS_BASE }}
+            ghcr.io/${{ steps.prep.outputs.repo_lower }}:${{ steps.prep.outputs.tag }}
+            ghcr.io/${{ steps.prep.outputs.repo_lower }}:sha-${{ github.sha }}
+            ghcr.io/${{ steps.prep.outputs.repo_lower }}:latest
 
       - name: Connect to Tailscale
         uses: tailscale/github-action@v3
@@ -80,6 +82,25 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
 
+      - name: Generate deployment .env
+        env:
+          APP_ENV: ${{ vars.APP_ENV }}
+          BACKEND_PORT: ${{ vars.BACKEND_PORT }}
+          IP_SALT: ${{ secrets.IP_SALT }}
+          DB_PATH: ${{ vars.DB_PATH }}
+          ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
+          RETENTION_LIMIT: ${{ vars.RETENTION_LIMIT }}
+        run: |
+          cat <<EOF > .env
+          APP_ENV=${APP_ENV}
+          BACKEND_PORT=${BACKEND_PORT}
+          IP_SALT=${IP_SALT}
+          DB_PATH=${DB_PATH}
+          ALLOWED_HOSTS=${ALLOWED_HOSTS}
+          RETENTION_LIMIT=${RETENTION_LIMIT}
+          TAG=${{ steps.prep.outputs.tag }}
+          EOF
+
       - name: Copy deployment files
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -87,7 +108,7 @@ jobs:
           username: ${{ vars.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: "docker-compose.prod.yml"
+          source: "docker-compose.yaml,.env"
           target: ${{ vars.DEPLOY_PATH }}
 
       - name: Deploy to VM
@@ -100,15 +121,5 @@ jobs:
           script: |
             mkdir -p ${{ vars.DEPLOY_PATH }}
             cd ${{ vars.DEPLOY_PATH }}
-            echo "APP_ENV=${{ vars.APP_ENV }}" > .env
-            echo "BACKEND_PORT=${{ vars.BACKEND_PORT }}" >> .env
-            echo "FRONTEND_PORT=${{ vars.FRONTEND_PORT}}" >> .env
-            echo "IP_SALT=${{ secrets.IP_SALT }}" >> .env
-            echo "DB_PATH=${{ vars.DB_PATH }}" >> .env
-            echo "ALLOWED_HOSTS=${{ vars.ALLOWED_HOSTS }}" >> .env
-            echo "REPO_LOWER=${{ steps.prep.outputs.repo_lower }}" >> .env
-            echo "VITE_API_BASE=${{ vars.VITE_API_BASE }}" >> .env
-            echo "VITE_WS_BASE=${{ vars.VITE_WS_BASE }}" >> .env
-            # Pull and restart
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+            docker compose pull
+            docker compose up -d

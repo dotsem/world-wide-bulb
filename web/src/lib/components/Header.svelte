@@ -13,7 +13,10 @@
 </script>
 
 <header
-	class="fixed {position}-4 left-4 right-4 z-40 flex items-center justify-between pointer-events-none"
+	class="fixed left-4 right-4 z-40 flex items-center justify-between pointer-events-none {position ===
+	'bottom'
+		? 'bottom-4'
+		: 'top-4'}"
 >
 	<ViewerBadge />
 	<button

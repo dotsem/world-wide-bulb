@@ -11,7 +11,11 @@ import (
 )
 
 // NewRouter creates and initializes the Gin engine with all API routes and embedded static frontend.
-func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS) *gin.Engine {
+func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool) *gin.Engine {
+	if isProd {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	r := gin.Default()
 	_ = r.SetTrustedProxies(nil)
 	r.Use(middleware.CORS())

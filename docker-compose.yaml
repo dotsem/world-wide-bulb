@@ -13,7 +13,7 @@ services:
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-}
       - RETENTION_LIMIT=${RETENTION_LIMIT:-}
     volumes:
-      - wwb-data:/app/data
+      - ${DATA_DIR:-wwb-data}:/app/data
 
 volumes:
   wwb-data:

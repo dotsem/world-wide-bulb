@@ -3,7 +3,7 @@ FROM alpine:3.21
 RUN apk --no-cache add ca-certificates tzdata && \
     addgroup -g 10001 -S wwb && \
     adduser -u 10001 -S wwb -G wwb && \
-    mkdir -p /app && \
+    mkdir -p /app/data && \
     chown -R wwb:wwb /app
 
 WORKDIR /app

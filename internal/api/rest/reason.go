@@ -8,6 +8,7 @@ import (
 	"strings"
 	"world-wide-bulb/internal/bulb"
 
+	goaway "github.com/TwiN/go-away"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,6 +37,11 @@ func (h *Handler) PostReason(c *gin.Context) {
 
 	if urlPattern.MatchString(trimmedReason) {
 		c.JSON(http.StatusBadRequest, gin.H{errKey: "urls are not allowed in reasons"})
+		return
+	}
+
+	if goaway.IsProfane(trimmedReason) {
+		c.JSON(http.StatusBadRequest, gin.H{errKey: "profanity is not allowed in reasons"})
 		return
 	}
 

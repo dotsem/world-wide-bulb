@@ -90,6 +90,28 @@ func TestPostReason(t *testing.T) {
 		}
 	})
 
+	t.Run("rejects profane reasons with 400", func(t *testing.T) {
+		env := setupTestEnv(t)
+		validUUID := uuid.NewString()
+
+		testCases := []string{
+			"fuck this lamp",
+			"sh!t happens",
+			"you are an @$$hole",
+		}
+
+		for _, tc := range testCases {
+			body := bytes.NewBufferString(`{"id":"` + validUUID + `","reason":"` + tc + `"}`)
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/reason", body)
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+			env.router.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.Contains(t, rec.Body.String(), "profanity is not allowed")
+		}
+	})
+
 	t.Run("returns 404 for non-existent toggle UUID", func(t *testing.T) {
 		env := setupTestEnv(t)
 

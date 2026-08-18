@@ -2,7 +2,7 @@
 	let {
 		isOn = false,
 		disabled = false,
-		durationMs = 500,
+		durationMs = 200,
 		class: className = 'h-56 w-56 sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-96 lg:w-96',
 		onclick
 	}: {
@@ -19,7 +19,7 @@
 	{onclick}
 	aria-disabled={disabled}
 	style="--duration: {durationMs}ms;"
-	class="group relative inline-flex items-center justify-center rounded-full p-8 focus:outline-none {disabled
+	class="group relative inline-flex items-center justify-center rounded-full p-8 focus:outline-none touch-manipulation {disabled
 		? 'cursor-not-allowed'
 		: 'cursor-pointer'} {className}"
 	aria-label={isOn ? 'Turn off lightbulb' : 'Turn on lightbulb'}
@@ -27,7 +27,7 @@
 	<!-- Outer Broad Ambient Glow -->
 	<div
 		style="transition-duration: var(--duration);"
-		class="absolute inset-0 rounded-full bg-app-accent/25 blur-xl md:blur-3xl transition-transform pointer-events-none will-change-transform"
+		class="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.35)_0%,transparent_70%)] transition pointer-events-none will-change-transform"
 		class:opacity-100={isOn}
 		class:opacity-0={!isOn}
 		class:scale-150={isOn}
@@ -37,7 +37,7 @@
 	<!-- Inner Core Ambient Glow -->
 	<div
 		style="transition-duration: var(--duration);"
-		class="absolute inset-4 rounded-full bg-app-accent/35 blur-md md:blur-xl transition-opacity pointer-events-none will-change-transform"
+		class="absolute inset-4 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.5)_0%,transparent_60%)] transition pointer-events-none will-change-transform"
 		class:opacity-100={isOn}
 		class:opacity-0={!isOn}
 		class:scale-110={isOn}

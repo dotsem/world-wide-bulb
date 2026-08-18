@@ -2,7 +2,7 @@
 	let {
 		isOn = false,
 		disabled = false,
-		durationMs = 200,
+		durationMs,
 		class: className = 'h-56 w-56 sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-96 lg:w-96',
 		onclick
 	}: {
@@ -12,13 +12,15 @@
 		class?: string;
 		onclick?: () => void;
 	} = $props();
+
+	let effectiveDuration = $derived(durationMs ?? (isOn ? 50 : 150));
 </script>
 
 <button
 	type="button"
 	{onclick}
 	aria-disabled={disabled}
-	style="--duration: {durationMs}ms;"
+	style="--duration: {effectiveDuration}ms;"
 	class="group relative inline-flex items-center justify-center rounded-full p-8 focus:outline-none touch-manipulation {disabled
 		? 'cursor-not-allowed'
 		: 'cursor-pointer'} {className}"
@@ -27,21 +29,17 @@
 	<!-- Outer Broad Ambient Glow -->
 	<div
 		style="transition-duration: var(--duration);"
-		class="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.35)_0%,transparent_70%)] transition pointer-events-none will-change-transform"
+		class="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.35)_0%,transparent_70%)] transition-opacity pointer-events-none will-change-transform"
 		class:opacity-100={isOn}
 		class:opacity-0={!isOn}
-		class:scale-150={isOn}
-		class:scale-75={!isOn}
 	></div>
 
 	<!-- Inner Core Ambient Glow -->
 	<div
 		style="transition-duration: var(--duration);"
-		class="absolute inset-4 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.5)_0%,transparent_60%)] transition pointer-events-none will-change-transform"
+		class="absolute inset-4 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.5)_0%,transparent_60%)] transition-opacity pointer-events-none will-change-transform"
 		class:opacity-100={isOn}
 		class:opacity-0={!isOn}
-		class:scale-110={isOn}
-		class:scale-90={!isOn}
 	></div>
 
 	<!-- Vector Lightbulb SVG -->

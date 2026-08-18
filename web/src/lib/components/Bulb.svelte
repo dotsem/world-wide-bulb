@@ -2,7 +2,7 @@
 	let {
 		isOn = false,
 		disabled = false,
-		durationMs = 500,
+		durationMs,
 		class: className = 'h-56 w-56 sm:h-72 sm:w-72 md:h-80 md:w-80 lg:h-96 lg:w-96',
 		onclick
 	}: {
@@ -12,14 +12,16 @@
 		class?: string;
 		onclick?: () => void;
 	} = $props();
+
+	let effectiveDuration = $derived(durationMs ?? (isOn ? 50 : 150));
 </script>
 
 <button
 	type="button"
 	{onclick}
 	aria-disabled={disabled}
-	style="--duration: {durationMs}ms;"
-	class="group relative inline-flex items-center justify-center rounded-full p-8 transition-all focus:outline-none duration-(--duration) {disabled
+	style="--duration: {effectiveDuration}ms;"
+	class="group relative inline-flex items-center justify-center rounded-full p-8 focus:outline-none touch-manipulation {disabled
 		? 'cursor-not-allowed'
 		: 'cursor-pointer'} {className}"
 	aria-label={isOn ? 'Turn off lightbulb' : 'Turn on lightbulb'}
@@ -27,21 +29,17 @@
 	<!-- Outer Broad Ambient Glow -->
 	<div
 		style="transition-duration: var(--duration);"
-		class="absolute inset-0 rounded-full bg-app-accent/25 blur-3xl transition-all duration-300 pointer-events-none"
+		class="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.35)_0%,transparent_70%)] transition-opacity pointer-events-none will-change-transform"
 		class:opacity-100={isOn}
 		class:opacity-0={!isOn}
-		class:scale-150={isOn}
-		class:scale-75={!isOn}
 	></div>
 
 	<!-- Inner Core Ambient Glow -->
 	<div
 		style="transition-duration: var(--duration);"
-		class="absolute inset-4 rounded-full bg-app-accent/35 blur-xl transition-all duration-300 pointer-events-none"
+		class="absolute inset-4 rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.5)_0%,transparent_60%)] transition-opacity pointer-events-none will-change-transform"
 		class:opacity-100={isOn}
 		class:opacity-0={!isOn}
-		class:scale-110={isOn}
-		class:scale-90={!isOn}
 	></div>
 
 	<!-- Vector Lightbulb SVG -->
@@ -49,9 +47,8 @@
 		version="1.1"
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 600 600"
-		style="transition-duration: var(--duration);"
-		class="relative h-full w-full transition-all transform group-hover:scale-105 group-active:scale-95"
-		class:drop-shadow-[0_0_40px_rgba(251,191,36,0.85)]={isOn}
+		class="relative h-full w-full transition-transform duration-200 transform group-hover:scale-105 group-active:scale-95"
+		class:md:drop-shadow-[0_0_40px_rgba(251,191,36,0.85)]={isOn}
 		class:drop-shadow-none={!isOn}
 	>
 		<g id="objects">
@@ -59,7 +56,7 @@
 				<!-- Inner Filament Glass Mount Stem -->
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all stroke-[2px] {isOn
+					class="transition-colors stroke-[2px] {isOn
 						? 'fill-app-accent/30 stroke-app-accent/60'
 						: 'fill-app-muted/15 stroke-app-muted/30'}"
 					d="M 285,418 L 285,345 C 285,335 315,335 315,345 L 315,418 Z"
@@ -68,15 +65,15 @@
 				<!-- Inner Filament Support Wires & Coiled Filament Loop -->
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all fill-none {isOn
-						? 'stroke-[#FFFBEB] stroke-[3.5px] drop-shadow-[0_0_10px_rgba(255,251,235,0.9)]'
+					class="transition-colors fill-none {isOn
+						? 'stroke-[#FFFBEB] stroke-[3.5px] md:drop-shadow-[0_0_10px_rgba(255,251,235,0.9)]'
 						: 'stroke-app-muted/40 stroke-[2px]'}"
 					d="M 290,345 L 272,215 M 310,345 L 328,215"
 				/>
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all fill-none {isOn
-						? 'stroke-[#FFFBEB] stroke-[4.5px] drop-shadow-[0_0_14px_rgba(255,251,235,1)]'
+					class="transition-colors fill-none {isOn
+						? 'stroke-[#FFFBEB] stroke-[4.5px] md:drop-shadow-[0_0_14px_rgba(255,251,235,1)]'
 						: 'stroke-app-muted/60 stroke-[2.5px]'}"
 					d="M 272,215 C 272,170 328,170 328,215"
 				/>
@@ -84,7 +81,7 @@
 				<!-- Main Bulb Glass Body (Translucent when OFF, Glowing Yellow when ON) -->
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all {isOn
+					class="transition-colors {isOn
 						? 'fill-app-bulb-fill stroke-app-accent/40 stroke-[3px]'
 						: 'fill-app-surface-hover/30 stroke-app-muted/50 stroke-[4px]'}"
 					d="M435.995,186.014c0.22,30.926-9.883,59.482-27.068,82.433
@@ -174,7 +171,7 @@
 				<!-- Right Side Rim Reflection -->
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all {isOn
+					class="transition-opacity {isOn
 						? 'fill-app-bulb-rim opacity-100'
 						: 'fill-white/12 opacity-80'}"
 					d="M435.998,186.013c0.22,30.93-9.89,59.48-27.07,82.43c-21.04,28.11-32.93,62-32.93,97.11v4.45c0,16.57-13.43,30-30,30h-92c-16.57,0-30-13.43-30-30v-2.96c0-1.53-0.02-3.06-0.08-4.59c5.79,7.36,15.31,15.55,29.08,15.55c24.87,0,48.17-8.37,66.86-22.74c18.68-14.38,32.76-34.76,39.16-58.8c4.46-16.76,11.737-33.687,18.98-50.46c38-88,8-206-135.73-182.17c17.8-8.37,37.72-12.98,58.72-12.83C375.018,51.533,435.468,111.983,435.998,186.013z"
@@ -183,7 +180,7 @@
 				<!-- Top-Left Glossy Glass Glare / Specular Highlight Paths -->
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all {isOn
+					class="transition-opacity {isOn
 						? 'fill-app-bulb-glare opacity-100'
 						: 'fill-white/30 opacity-90'}"
 					d="M242,285c0,0-100.101-55.825-42.511-159.922c1.906-3.446,6.164-4.826,9.724-3.144l22.259,10.511
@@ -191,7 +188,7 @@
 				/>
 				<path
 					style="transition-duration: var(--duration);"
-					class="transition-all {isOn
+					class="transition-opacity {isOn
 						? 'fill-app-bulb-glare opacity-100'
 						: 'fill-white/45 opacity-95'}"
 					d="M215.412,108.706l22.549,11.274c2.292,1.146,5.062,0.543,6.676-1.447

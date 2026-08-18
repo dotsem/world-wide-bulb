@@ -74,6 +74,10 @@ class BulbState {
 			this.triggerCooldownPulse();
 			return;
 		}
+
+		const prevState = this.isOn;
+		this.isOn = !prevState;
+
 		try {
 			const res = await restApi.toggle();
 			this.isOn = res.state;
@@ -82,6 +86,7 @@ class BulbState {
 			this.showReasonPrompt = true;
 			this.setCooldown(res.cooldown_ms);
 		} catch (err: any) {
+			this.isOn = prevState;
 			if (err?.cooldown_ms) {
 				this.setCooldown(err.cooldown_ms);
 			}

@@ -11,7 +11,6 @@
 	<Bulb
 		isOn={bulbState.isOn}
 		disabled={bulbState.isCooldownActive}
-		durationMs={300}
 		class="h-[60vh] w-[60vh] md:h-[70vh] md:w-[70vh]"
 		onclick={bulbState.toggle}
 	/>

@@ -36,8 +36,8 @@
 
 <div
 	title="{bulbState.viewers} {bulbState.viewers === 1
-		? 'person'
-		: 'people'} are currently watching this lamp somewhere in this world, god knows what they use it for..."
+		? 'person is'
+		: 'people are'} currently watching this lamp somewhere in this world, god knows what they use it for..."
 	class="pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-full bg-app-surface-solid/80 backdrop-blur-md border border-app-border text-xs font-medium text-app-text shadow-sm transition-all"
 >
 	{#if isBlinking}

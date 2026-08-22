@@ -105,3 +105,10 @@ runs:
           cd ${{ inputs.deploy-path }}
           docker compose pull
           docker compose up -d
+          sleep 3
+          if ! docker compose ps wwb --format '{{.State}}' | grep -iq "running"; then
+            echo "::error::Container failed to start or crashed!"
+            docker compose logs --tail=50
+            exit 1
+          fi
+          docker image prune -f

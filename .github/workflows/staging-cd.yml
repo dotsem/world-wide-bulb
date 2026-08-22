@@ -1,0 +1,41 @@
+name: Staging CD
+
+permissions:
+  contents: read
+  packages: read
+
+on:
+  workflow_run:
+    workflows: ["Build Single Binary CI"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    if: ${{ (github.event_name == 'workflow_dispatch') || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging VM
+        uses: ./.github/actions/deploy
+        with:
+          tag: staging
+          app-env: ${{ vars.APP_ENV }}
+          backend-port: ${{ vars.BACKEND_PORT }}
+          ip-salt: ${{ secrets.IP_SALT }}
+          db-path: ${{ vars.DB_PATH }}
+          allowed-hosts: ${{ vars.ALLOWED_HOSTS }}
+          retention-limit: ${{ vars.RETENTION_LIMIT }}
+          ssh-host: ${{ vars.SSH_HOST }}
+          ssh-user: ${{ vars.SSH_USER }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          deploy-path: ${{ vars.DEPLOY_PATH }}
+          container-name: world-wide-bulb-staging
+          ts-oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          ts-oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}

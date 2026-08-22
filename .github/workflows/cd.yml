@@ -18,6 +18,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,51 +84,20 @@ jobs:
             ghcr.io/${{ steps.prep.outputs.repo_lower }}:sha-${{ github.sha }}
             ghcr.io/${{ steps.prep.outputs.repo_lower }}:latest
 
-      - name: Connect to Tailscale
-        uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
-
-      - name: Generate deployment .env
-        env:
-          APP_ENV: ${{ vars.APP_ENV }}
-          BACKEND_PORT: ${{ vars.BACKEND_PORT }}
-          IP_SALT: ${{ secrets.IP_SALT }}
-          DB_PATH: ${{ vars.DB_PATH }}
-          ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
-          RETENTION_LIMIT: ${{ vars.RETENTION_LIMIT }}
-        run: |
-          cat <<EOF > .env
-          APP_ENV=${APP_ENV}
-          BACKEND_PORT=${BACKEND_PORT}
-          IP_SALT=${IP_SALT}
-          DB_PATH=${DB_PATH}
-          ALLOWED_HOSTS=${ALLOWED_HOSTS}
-          RETENTION_LIMIT=${RETENTION_LIMIT}
-          TAG=${{ steps.prep.outputs.tag }}
-          EOF
-
-      - name: Copy deployment files
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ vars.SSH_HOST }}
-          username: ${{ vars.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: "docker-compose.yaml,.env"
-          target: ${{ vars.DEPLOY_PATH }}
-
       - name: Deploy to VM
-        uses: appleboy/ssh-action@v1.0.3
+        uses: ./.github/actions/deploy
         with:
-          host: ${{ vars.SSH_HOST }}
-          username: ${{ vars.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          script: |
-            mkdir -p ${{ vars.DEPLOY_PATH }}
-            cd ${{ vars.DEPLOY_PATH }}
-            docker compose pull
-            docker compose up -d
+          tag: ${{ steps.prep.outputs.tag }}
+          app-env: ${{ vars.APP_ENV }}
+          backend-port: ${{ vars.BACKEND_PORT }}
+          ip-salt: ${{ secrets.IP_SALT }}
+          db-path: ${{ vars.DB_PATH }}
+          allowed-hosts: ${{ vars.ALLOWED_HOSTS }}
+          retention-limit: ${{ vars.RETENTION_LIMIT }}
+          ssh-host: ${{ vars.SSH_HOST }}
+          ssh-user: ${{ vars.SSH_USER }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          deploy-path: ${{ vars.DEPLOY_PATH }}
+          ts-oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          ts-oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}

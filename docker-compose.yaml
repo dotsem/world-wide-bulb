@@ -1,7 +1,7 @@
 services:
   wwb:
     image: ghcr.io/dotsem/world-wide-bulb:${TAG:-latest}
-    container_name: world-wide-bulb
+    container_name: ${CONTAINER_NAME:-world-wide-bulb}
     restart: unless-stopped
     ports:
       - "${BACKEND_PORT:-8080}:8080"

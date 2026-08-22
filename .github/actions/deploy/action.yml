@@ -1,0 +1,107 @@
+name: "Deploy Application"
+description: "Deploys WWB Docker container to VM over Tailscale and SSH"
+
+inputs:
+  tag:
+    description: "Target container image tag"
+    required: true
+  app-env:
+    description: "APP_ENV variable"
+    required: true
+  backend-port:
+    description: "BACKEND_PORT variable"
+    required: true
+  ip-salt:
+    description: "IP_SALT secret"
+    required: true
+  db-path:
+    description: "DB_PATH variable"
+    required: true
+  allowed-hosts:
+    description: "ALLOWED_HOSTS variable"
+    required: true
+  retention-limit:
+    description: "RETENTION_LIMIT variable"
+    required: true
+  ssh-host:
+    description: "SSH target host"
+    required: true
+  ssh-user:
+    description: "SSH user"
+    required: true
+  ssh-private-key:
+    description: "SSH private key secret"
+    required: true
+  ssh-passphrase:
+    description: "SSH key passphrase secret"
+    required: false
+    default: ""
+  deploy-path:
+    description: "Remote deployment path"
+    required: true
+  container-name:
+    description: "Docker container name"
+    required: false
+    default: "world-wide-bulb"
+  ts-oauth-client-id:
+    description: "Tailscale OAuth Client ID secret"
+    required: true
+  ts-oauth-secret:
+    description: "Tailscale OAuth Secret"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Connect to Tailscale
+      uses: tailscale/github-action@v3
+      with:
+        oauth-client-id: ${{ inputs.ts-oauth-client-id }}
+        oauth-secret: ${{ inputs.ts-oauth-secret }}
+        tags: tag:ci
+
+    - name: Generate deployment .env
+      shell: bash
+      env:
+        APP_ENV: ${{ inputs.app-env }}
+        BACKEND_PORT: ${{ inputs.backend-port }}
+        IP_SALT: ${{ inputs.ip-salt }}
+        DB_PATH: ${{ inputs.db-path }}
+        ALLOWED_HOSTS: ${{ inputs.allowed-hosts }}
+        RETENTION_LIMIT: ${{ inputs.retention-limit }}
+        TAG: ${{ inputs.tag }}
+        CONTAINER_NAME: ${{ inputs.container-name }}
+      run: |
+        cat <<EOF > .env
+        APP_ENV=${APP_ENV}
+        BACKEND_PORT=${BACKEND_PORT}
+        IP_SALT=${IP_SALT}
+        DB_PATH=${DB_PATH}
+        ALLOWED_HOSTS=${ALLOWED_HOSTS}
+        RETENTION_LIMIT=${RETENTION_LIMIT}
+        TAG=${TAG}
+        CONTAINER_NAME=${CONTAINER_NAME}
+        EOF
+
+    - name: Copy deployment files
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ inputs.ssh-host }}
+        username: ${{ inputs.ssh-user }}
+        key: ${{ inputs.ssh-private-key }}
+        passphrase: ${{ inputs.ssh-passphrase }}
+        source: "docker-compose.yaml,.env"
+        target: ${{ inputs.deploy-path }}
+
+    - name: Deploy to VM
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ inputs.ssh-host }}
+        username: ${{ inputs.ssh-user }}
+        key: ${{ inputs.ssh-private-key }}
+        passphrase: ${{ inputs.ssh-passphrase }}
+        script: |
+          mkdir -p ${{ inputs.deploy-path }}
+          cd ${{ inputs.deploy-path }}
+          docker compose pull
+          docker compose up -d

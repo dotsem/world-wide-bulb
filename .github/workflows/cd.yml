@@ -38,8 +38,7 @@ jobs:
 
       - name: Build Single Binary with Embedded Svelte
         run: |
-          just web build
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/wwb ./cmd/wwb
+          just build-prod
           cp bin/wwb bin/wwb-bin
 
       - name: Set up QEMU

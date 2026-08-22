@@ -117,6 +117,7 @@ docker run -d \
 | `just audit` | Audit frontend dependencies |
 | `just test` | Run all test suites (Go + Web) |
 | `just build` | Build complete single binary with embedded frontend |
+| `just build-prod` | Build static Linux amd64 binary for containers/production |
 | `just swagger` | Generate OpenAPI / Swagger docs |
 | `just docgen` | Generate Markdown documentation for just commands |
 | `just check-docs` | Verify documentation is in sync with justfiles |

@@ -45,6 +45,11 @@ build:
     mkdir -p bin
     go build -ldflags="-s -w" -o bin/wwb ./cmd/wwb
 
+# Build static Linux amd64 binary for containers/production
+build-prod:
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 just build
+
+
 # Generate OpenAPI / Swagger docs
 swagger:
     swag init -g cmd/wwb/main.go -o internal/api/docs

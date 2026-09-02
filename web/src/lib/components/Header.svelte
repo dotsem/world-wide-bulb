@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { CircleQuestionMark } from '@lucide/svelte';
+	import { CircleQuestionMark, Webhook } from '@lucide/svelte';
 	import ViewerBadge from './ViewerBadge.svelte';
-	import { InfoDialog } from '$lib';
+	import { HookDialog, InfoDialog } from '$lib';
 
 	type HeaderPosition = 'top' | 'bottom';
 
@@ -10,6 +10,10 @@
 	}>();
 
 	let isInfoOpen = $state(false);
+	let hookInfoOpen = $state(false);
+
+	// TODO: maybe create new component?
+	const buttonStyle = `pointer-events-auto p-2 rounded-full text-app-muted hover:text-app-text hover:bg-app-surface-hover transition-all border border-transparent hover:border-app-border focus:outline-none focus:ring-2 focus:ring-app-accent/50 cursor-pointer`;
 </script>
 
 <header
@@ -19,15 +23,25 @@
 		: 'top-4'}"
 >
 	<ViewerBadge />
-	<button
-		type="button"
-		onclick={() => (isInfoOpen = true)}
-		aria-label="About World Wide Bulb"
-		title="About World Wide Bulb"
-		class="pointer-events-auto p-2 rounded-full text-app-muted hover:text-app-text hover:bg-app-surface-hover transition-all border border-transparent hover:border-app-border focus:outline-none focus:ring-2 focus:ring-app-accent/50 cursor-pointer"
-	>
-		<CircleQuestionMark size={22} />
-	</button>
+	<div class="flex items-center gap-1">
+		<button
+			onclick={() => (hookInfoOpen = true)}
+			aria-label="Hook into the lamp"
+			title="Hook into the lamp"
+			class={buttonStyle}
+		>
+			<Webhook size={22} />
+		</button>
+		<button
+			onclick={() => (isInfoOpen = true)}
+			aria-label="About World Wide Bulb"
+			title="About World Wide Bulb"
+			class={buttonStyle}
+		>
+			<CircleQuestionMark size={22} />
+		</button>
+	</div>
 </header>
 
 <InfoDialog bind:isOpen={isInfoOpen} />
+<HookDialog bind:isOpen={hookInfoOpen} />

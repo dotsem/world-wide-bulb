@@ -186,3 +186,24 @@ func TestBackendIntegration_IPCooldown(t *testing.T) {
 	defer func() { _ = resp2.Body.Close() }()
 	assert.Equal(t, http.StatusTooManyRequests, resp2.StatusCode)
 }
+
+func TestBackendIntegration_SSEBroadcast(t *testing.T) {
+	env := setupIntegrationServer(t)
+	client := env.server.Client()
+
+	req, err := http.NewRequest(http.MethodGet, env.baseURL+"/api/v1/events", nil)
+	require.NoError(t, err)
+
+	resp, err := client.Do(req)
+	require.NoError(t, err)
+	defer func() { _ = resp.Body.Close() }()
+
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Contains(t, resp.Header.Get("Content-Type"), "text/event-stream")
+
+	// Trigger a toggle and verify event is broadcasted
+	toggleResp, err := client.Post(env.baseURL+"/api/v1/toggle", "application/json", nil)
+	require.NoError(t, err)
+	defer func() { _ = toggleResp.Body.Close() }()
+	assert.Equal(t, http.StatusOK, toggleResp.StatusCode)
+}

@@ -60,13 +60,12 @@ func (h *Handler) PostReason(c *gin.Context) {
 	}
 
 	wsMsg := gin.H{
-		"type":      "reason_updated",
-		"id":        req.ID,
 		"toggle_id": toggle.ID,
 		"reason":    trimmedReason,
 	}
 	if payload, err := json.Marshal(wsMsg); err == nil {
 		h.hub.Broadcast(payload)
+		h.broker.Broadcast("reason_updated", payload)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})

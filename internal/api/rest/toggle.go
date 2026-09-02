@@ -54,6 +54,16 @@ func (h *Handler) PostToggle(c *gin.Context) {
 		h.hub.Broadcast(payload)
 	}
 
+	if eventPayload, err := json.Marshal(gin.H{
+		"id":         toggle.ID,
+		stateKey:     toggle.State,
+		"reason":     toggle.Reason.String,
+		"created_at": toggle.CreatedAt.Time,
+	}); err == nil {
+		h.broker.Broadcast("state_changed", eventPayload)
+	}
+	// note: we publish the ID to everyone & the UUID to the original user
+
 	c.JSON(http.StatusOK, ToggleResponse{
 		ID:         toggle.Uuid,
 		State:      toggle.State,

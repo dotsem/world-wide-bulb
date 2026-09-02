@@ -24,6 +24,7 @@ func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool
 	{
 		v1.GET("/state", restH.GetState)
 		v1.GET("/history", restH.GetHistory)
+		v1.GET("/events", restH.StreamEvents)
 		v1.POST("/toggle", restH.PostToggle)
 		v1.POST("/reason", restH.PostReason)
 	}

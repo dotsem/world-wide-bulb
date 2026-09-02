@@ -6,31 +6,28 @@ import goCode from '../../../../examples/sse/go/main.go?raw';
 export const prerender = true;
 
 export async function load() {
-	const themes = {
-		off: 'tokyo-night',
-		on: 'gruvbox-dark-soft'
-	};
+	const theme = "tokyo-night";
 
 	const [jsHtml, pyHtml, goHtml, curlHtml, stateChangedHtml, reasonUpdatedHtml, pingHtml] =
 		await Promise.all([
 			codeToHtml(jsCode, {
 				lang: 'javascript',
-				themes,
+				theme,
 				defaultColor: false
 			}),
 			codeToHtml(pyCode, {
 				lang: 'python',
-				themes,
+				theme,
 				defaultColor: false
 			}),
 			codeToHtml(goCode, {
 				lang: 'go',
-				themes,
+				theme,
 				defaultColor: false
 			}),
 			codeToHtml('curl -N https://wwb.dotsem.be/api/v1/events', {
 				lang: 'bash',
-				themes,
+				theme,
 				defaultColor: false
 			}),
 			codeToHtml(
@@ -47,7 +44,7 @@ export async function load() {
 				),
 				{
 					lang: 'json',
-					themes,
+					theme,
 					defaultColor: false
 				}
 			),
@@ -63,13 +60,13 @@ export async function load() {
 				),
 				{
 					lang: 'json',
-					themes,
+					theme,
 					defaultColor: false
 				}
 			),
 			codeToHtml('""', {
 				lang: 'json',
-				themes,
+				theme,
 				defaultColor: false
 			})
 		]);

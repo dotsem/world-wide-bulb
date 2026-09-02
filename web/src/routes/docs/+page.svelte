@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { ArrowLeft, Webhook } from '@lucide/svelte';
-	import { bulbState, Bulb } from '$lib';
 	import CodeExamples from './CodeExamples.svelte';
 	import EventPayloads from './EventPayloads.svelte';
 	import type { PageData } from './$types';
@@ -39,21 +38,10 @@
 	</div>
 </div>
 
-<div class="fixed -top-24 -right-24 z-40 pointer-events-none shrink-0">
-	<Bulb
-		isOn={bulbState.isOn}
-		disabled={true}
-		durationMs={300}
-		class="h-72 w-72 rotate-215 transition-all"
-	/>
-</div>
-
 <div class="max-w-7xl mx-auto w-full px-4 sm:px-8 pb-32">
 	<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
 		<div class="lg:col-span-5 space-y-6">
-			<section
-				class="rounded-2xl border border-app-border bg-app-surface/60 p-5 sm:p-6 space-y-4 backdrop-blur-sm shadow-sm"
-			>
+			<section class="rounded-2xl border border-app-border bg-app-surface/60 p-5 sm:p-6 space-y-4">
 				<div class="flex items-center gap-2.5 text-app-accent">
 					<Webhook size={20} />
 					<h2 class="text-base font-bold text-app-text">Server-Sent Events (SSE) Endpoint</h2>

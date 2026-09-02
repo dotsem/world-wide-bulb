@@ -8,8 +8,8 @@
 
 	let { children } = $props();
 
-	let theme = $derived(bulbState.isOn ? 'on' : 'off');
 	let isDocsPage = $derived(page.url.pathname.startsWith('/docs'));
+	let theme = $derived(isDocsPage ? 'off' : (bulbState.isOn ? 'on' : 'off'));
 
 	$effect(() => {
 		if (typeof document !== 'undefined') {

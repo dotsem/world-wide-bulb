@@ -1,5 +1,6 @@
 <script lang="ts">
 	import './layout.css';
+	import { page } from '$app/state';
 	import bulb_on from '$lib/assets/bulb_on.svg';
 	import bulb_off from '$lib/assets/bulb_off.svg';
 	import NavToolBar from '$lib/components/NavToolBar.svelte';
@@ -8,6 +9,7 @@
 	let { children } = $props();
 
 	let theme = $derived(bulbState.isOn ? 'on' : 'off');
+	let isDocsPage = $derived(page.url.pathname.startsWith('/docs'));
 
 	$effect(() => {
 		if (typeof document !== 'undefined') {
@@ -27,7 +29,9 @@
 	data-theme={theme}
 	class="min-h-screen bg-app-bg text-app-text flex flex-col font-sans selection:bg-app-accent/30 selection:text-app-accent relative"
 >
-	<NavToolBar />
+	{#if !isDocsPage}
+		<NavToolBar />
+	{/if}
 
 	<main class="flex-1 flex flex-col">
 		{@render children()}

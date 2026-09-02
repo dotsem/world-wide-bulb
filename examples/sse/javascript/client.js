@@ -1,0 +1,19 @@
+// Connect to World Wide Bulb SSE stream in Node.js (v18+) or Browser
+const sseUrl = process.env.WWB_URL || 'http://localhost:8080/api/v1/events';
+
+console.log(`Connecting to ${sseUrl}...`);
+const events = new EventSource(sseUrl);
+
+events.addEventListener('state_changed', (e) => {
+	const data = JSON.parse(e.data);
+	console.log('Lamp state changed:', data.state ? 'ON' : 'OFF', data);
+});
+
+events.addEventListener('reason_updated', (e) => {
+	const data = JSON.parse(e.data);
+	console.log('Reason updated:', data.reason);
+});
+
+events.onerror = (err) => {
+	console.error('SSE connection error:', err);
+};

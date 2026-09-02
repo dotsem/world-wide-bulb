@@ -12,11 +12,11 @@ func TestBroker_SubscribeAndBroadcast(t *testing.T) {
 	ch := broker.Subscribe()
 	defer broker.Unsubscribe(ch)
 
-	msg := []byte(`{"event":"state_changed","state":true}`)
-	broker.Broadcast(msg)
+	event := sse.NewEvent("state_changed", []byte(`{"state":true}`))
+	broker.Broadcast(event.Name, event.Data)
 
 	received := <-ch
-	assert.Equal(t, msg, received)
+	assert.Equal(t, event, received)
 }
 
 func TestBroker_UnsubscribeClosesChannel(t *testing.T) {
@@ -36,7 +36,7 @@ func TestBroker_SlowClientDrop(t *testing.T) {
 
 	// Fill the 16-element buffer + 1 overflow
 	for range 20 {
-		broker.Broadcast([]byte("ping"))
+		broker.Broadcast("ping", []byte(""))
 	}
 
 	assert.Len(t, ch, 16)

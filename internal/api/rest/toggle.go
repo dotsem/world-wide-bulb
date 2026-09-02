@@ -55,13 +55,12 @@ func (h *Handler) PostToggle(c *gin.Context) {
 	}
 
 	if eventPayload, err := json.Marshal(gin.H{
-		"event":      "state_changed",
 		"id":         toggle.ID,
 		stateKey:     toggle.State,
 		"reason":     toggle.Reason.String,
 		"created_at": toggle.CreatedAt.Time,
 	}); err == nil {
-		h.broker.Broadcast(eventPayload)
+		h.broker.Broadcast("state_changed", eventPayload)
 	}
 
 	c.JSON(http.StatusOK, ToggleResponse{

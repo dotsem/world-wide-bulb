@@ -24,7 +24,7 @@ func (h *Handler) StreamEvents(c *gin.Context) {
 	})
 
 	if err == nil {
-		c.SSEvent("message", string(initialPayload))
+		c.SSEvent("state_changed", string(initialPayload))
 		c.Writer.Flush()
 	}
 
@@ -38,11 +38,11 @@ func (h *Handler) StreamEvents(c *gin.Context) {
 		case <-ticker.C:
 			c.SSEvent("ping", "")
 			return true
-		case msg, ok := <-ch:
+		case evt, ok := <-ch:
 			if !ok {
 				return false
 			}
-			c.SSEvent("message", string(msg))
+			c.SSEvent(evt.Name, string(evt.Data))
 			return true
 		}
 	})

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"world-wide-bulb/internal/api/sse"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,7 +41,7 @@ func TestStreamEvents(t *testing.T) {
 
 		line1, err := reader.ReadString('\n')
 		require.NoError(t, err)
-		assert.Equal(t, "event:message\n", strings.TrimSpace(line1)+"\n")
+		assert.Equal(t, "event:state_changed\n", strings.TrimSpace(line1)+"\n")
 
 		line2, err := reader.ReadString('\n')
 		require.NoError(t, err)
@@ -70,11 +71,15 @@ func TestStreamEvents(t *testing.T) {
 		_, _ = reader.ReadString('\n')
 		_, _ = reader.ReadString('\n')
 
-		env.broker.Broadcast([]byte(`{"event":"state_changed","state":true}`))
+		event := sse.Event{
+			Name: "state_changed",
+			Data: []byte(`{"state":true}`),
+		}
+		env.broker.Broadcast(event.Name, event.Data)
 
 		eventLine, err := reader.ReadString('\n')
 		require.NoError(t, err)
-		assert.Equal(t, "event:message\n", strings.TrimSpace(eventLine)+"\n")
+		assert.Equal(t, "event:state_changed\n", strings.TrimSpace(eventLine)+"\n")
 
 		dataLine, err := reader.ReadString('\n')
 		require.NoError(t, err)

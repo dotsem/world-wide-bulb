@@ -67,6 +67,7 @@ func (h *Handler) PostReason(c *gin.Context) {
 	}
 	if payload, err := json.Marshal(wsMsg); err == nil {
 		h.hub.Broadcast(payload)
+		h.broker.Broadcast(payload)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})

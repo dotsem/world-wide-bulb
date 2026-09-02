@@ -9,6 +9,7 @@ import (
 	"testing/fstest"
 	"world-wide-bulb/internal/api"
 	"world-wide-bulb/internal/api/rest"
+	"world-wide-bulb/internal/api/sse"
 	"world-wide-bulb/internal/api/ws"
 	"world-wide-bulb/internal/bulb"
 	"world-wide-bulb/internal/store"
@@ -33,9 +34,10 @@ func TestNewRouter(t *testing.T) {
 	queries := store.New(db)
 	engine := bulb.NewEngine(ctx, queries)
 	hub := ws.NewHub()
+	broker := sse.NewBroker()
 	hasher := utils.NewHasher("test_salt")
 
-	restH := rest.NewHandler(queries, engine, hub, hasher, false)
+	restH := rest.NewHandler(queries, engine, hub, broker, hasher, false)
 	wsH := ws.NewHandler(hub, false, []string{"*"})
 
 	testFS := fstest.MapFS{

@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 	"world-wide-bulb/internal/api/rest"
+	"world-wide-bulb/internal/api/sse"
 	"world-wide-bulb/internal/api/ws"
 	"world-wide-bulb/internal/bulb"
 	"world-wide-bulb/internal/config"
@@ -39,8 +40,9 @@ func NewApp(ctx context.Context, cfg *config.Config, db *sql.DB) (*App, error) {
 	engine := bulb.NewEngine(ctx, queries)
 	hasher := utils.NewHasher(cfg.IPSalt)
 	hub := ws.NewHub()
+	broker := sse.NewBroker()
 
-	restHandler := rest.NewHandler(queries, engine, hub, hasher, cfg.IsProd)
+	restHandler := rest.NewHandler(queries, engine, hub, broker, hasher, cfg.IsProd)
 	wsHandler := ws.NewHandler(hub, cfg.IsProd, cfg.AllowedHosts)
 
 	staticFS, err := web.GetFS()

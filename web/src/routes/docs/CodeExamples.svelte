@@ -29,6 +29,14 @@
 			}, 2000);
 		}
 	}
+
+	const langToPath = {
+		javascript: 'examples/sse/javascript/client.js',
+		python: 'examples/sse/python/client.py',
+		go: 'examples/sse/go/main.go'
+	};
+
+	const repoPath = 'https://github.com/dotsem/world-wide-bulb/tree/main/';
 </script>
 
 <section class="space-y-4">
@@ -63,9 +71,15 @@
 			class="flex items-center justify-between px-4 py-2.5 bg-app-surface border-b border-app-border text-xs text-app-muted"
 		>
 			<span class="font-mono">
-				{activeLang === 'curl'
-					? 'terminal'
-					: `examples/sse/${activeLang === 'javascript' ? 'javascript/client.js' : activeLang === 'python' ? 'python/client.py' : 'go/main.go'}`}
+				{#if activeLang === 'curl'}
+					terminal
+				{:else}
+					<a
+						target="_blank"
+						href={repoPath + langToPath[activeLang]}
+						class="text-app-accent underline">{langToPath[activeLang]}</a
+					>
+				{/if}
 			</span>
 			<button
 				type="button"
@@ -82,7 +96,7 @@
 			</button>
 		</div>
 		<pre
-			class="p-5 text-xs sm:text-sm font-mono text-app-text overflow-x-auto leading-relaxed"><code
+			class="p-4 sm:p-5 text-xs sm:text-sm font-mono text-app-text overflow-x-auto max-h-145 overflow-y-auto leading-relaxed"><code
 				>{snippets[activeLang]}</code
 			></pre>
 	</div>

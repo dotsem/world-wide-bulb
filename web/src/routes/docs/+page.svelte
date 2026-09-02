@@ -52,35 +52,40 @@
 	/>
 </div>
 
-<div class="max-w-4xl mx-auto w-full px-4 sm:px-8 pb-32 space-y-8">
-	<!-- Overview Card -->
-	<section
-		class="rounded-2xl border border-app-border bg-app-surface/60 p-6 sm:p-7 space-y-4 backdrop-blur-sm"
-	>
-		<div class="flex items-center gap-2.5 text-app-accent">
-			<Webhook size={22} />
-			<h2 class="text-lg font-bold text-app-text">Server-Sent Events (SSE) Endpoint</h2>
-		</div>
-		<p class="text-sm text-app-muted leading-relaxed">
-			World Wide Bulb exposes a public, unauthenticated HTTP event stream. Anyone can subscribe to
-			receive instantaneous notifications whenever the lamp flips state or a toggle reason is
-			submitted.
-		</p>
-		<div class="flex flex-wrap items-center gap-3 pt-2">
-			<span
-				class="px-2.5 py-1 rounded-md bg-app-accent/15 text-app-accent text-xs font-semibold uppercase tracking-wider"
-				>GET</span
+<div class="max-w-7xl mx-auto w-full px-4 sm:px-8 pb-32">
+	<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+		<div class="lg:col-span-5 space-y-6">
+			<section
+				class="rounded-2xl border border-app-border bg-app-surface/60 p-5 sm:p-6 space-y-4 backdrop-blur-sm shadow-sm"
 			>
-			<code
-				class="font-mono text-sm px-3 py-1.5 rounded-lg bg-app-surface border border-app-border text-app-text"
-			>
-				/api/v1/events
-			</code>
-			<span class="text-xs text-app-muted/80">Content-Type: text/event-stream</span>
+				<div class="flex items-center gap-2.5 text-app-accent">
+					<Webhook size={20} />
+					<h2 class="text-base font-bold text-app-text">Server-Sent Events (SSE) Endpoint</h2>
+				</div>
+				<p class="text-xs sm:text-sm text-app-muted leading-relaxed">
+					World Wide Bulb exposes a public, unauthenticated HTTP event stream. Anyone can subscribe
+					to receive instantaneous notifications whenever the lamp flips state or a toggle reason is
+					submitted. Go creative!
+				</p>
+				<div class="flex flex-wrap items-center gap-2.5 pt-1">
+					<span
+						class="px-2 py-0.5 rounded-md bg-app-accent/15 text-app-accent text-[11px] font-semibold uppercase tracking-wider"
+						>GET</span
+					>
+					<code
+						class="font-mono text-xs px-2.5 py-1 rounded-lg bg-app-surface border border-app-border text-app-text"
+					>
+						/api/v1/events
+					</code>
+					<span class="text-[11px] text-app-muted/80">Content-Type: text/event-stream</span>
+				</div>
+			</section>
+
+			<EventPayloads />
 		</div>
-	</section>
 
-	<CodeExamples {sseUrl} />
-
-	<EventPayloads />
+		<div class="lg:col-span-7 lg:sticky lg:top-24">
+			<CodeExamples {sseUrl} />
+		</div>
+	</div>
 </div>

@@ -27,7 +27,25 @@ func TestFromToggle(t *testing.T) {
 
 	msg := ws.FromToggle(toggle)
 
+	assert.Equal(t, "state_changed", msg.Type)
+	assert.Equal(t, int64(42), msg.ID)
 	assert.True(t, msg.State)
 	assert.Equal(t, "test reason", msg.Reason)
 	assert.Equal(t, now, msg.CreatedAt)
+}
+
+func TestFromReason(t *testing.T) {
+	toggle := store.Toggle{
+		ID: 42,
+		Reason: sql.NullString{
+			String: "test reason",
+			Valid:  true,
+		},
+	}
+
+	msg := ws.FromReason(toggle)
+
+	assert.Equal(t, "reason_updated", msg.Type)
+	assert.Equal(t, int64(42), msg.ID)
+	assert.Equal(t, "test reason", msg.Reason)
 }

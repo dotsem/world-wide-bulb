@@ -140,6 +140,7 @@ func (e *Engine) UpdateReason(ctx context.Context, id string, reason string) (st
 		return store.Toggle{}, err
 	}
 
+	existingToggle.Reason = nullReason
 	return existingToggle, nil
 }
 

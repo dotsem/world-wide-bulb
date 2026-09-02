@@ -27,8 +27,8 @@
 <Dialog bind:isOpen maxWidth="max-w-lg">
 	{#snippet header()}
 		<div class="flex items-center gap-2">
-			<Webhook size={20} class="text-app-accent" />
 			<h2 class="text-lg font-bold tracking-tight">Hook into the Lamp</h2>
+			<Webhook size={20} class="text-app-accent animate-spin" />
 		</div>
 	{/snippet}
 

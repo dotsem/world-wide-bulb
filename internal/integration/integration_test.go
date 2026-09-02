@@ -43,7 +43,10 @@ func setupIntegrationServer(t *testing.T) *testServerEnv {
 	require.NoError(t, err)
 
 	ts := httptest.NewServer(app.Router)
-	t.Cleanup(ts.Close)
+	t.Cleanup(func() {
+		ts.CloseClientConnections()
+		ts.Close()
+	})
 
 	wsURL := "ws" + strings.TrimPrefix(ts.URL, "http") + "/ws"
 

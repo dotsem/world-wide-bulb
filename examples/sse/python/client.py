@@ -2,7 +2,7 @@ import json
 import os
 import urllib.request
 
-url = os.environ.get("WWB_URL", "http://localhost:8080/api/v1/events")
+url = os.environ.get("WWB_URL", "https://wwb.dotsem.be/api/v1/events")
 req = urllib.request.Request(url, headers={"Accept": "text/event-stream"})
 
 print(f"Connecting to {url}...")

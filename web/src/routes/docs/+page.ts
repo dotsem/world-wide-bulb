@@ -28,7 +28,7 @@ export async function load() {
 				themes,
 				defaultColor: false
 			}),
-			codeToHtml('curl -N http://localhost:8080/api/v1/events', {
+			codeToHtml('curl -N https://wwb.dotsem.be/api/v1/events', {
 				lang: 'bash',
 				themes,
 				defaultColor: false
@@ -79,7 +79,7 @@ export async function load() {
 			javascript: jsCode,
 			python: pyCode,
 			go: goCode,
-			curl: 'curl -N http://localhost:8080/api/v1/events'
+			curl: 'curl -N https://wwb.dotsem.be/api/v1/events'
 		},
 		highlighted: {
 			javascript: jsHtml,

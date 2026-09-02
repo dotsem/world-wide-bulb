@@ -1,5 +1,5 @@
-// Connect to World Wide Bulb SSE stream in Node.js (v18+) or Browser
-const sseUrl = process.env.WWB_URL || 'http://localhost:8080/api/v1/events';
+// Connect to World Wide Bulb SSE stream in Node.js (v22.3+ with --experimental-eventsource) or Browser
+const sseUrl = process.env.WWB_URL || 'https://wwb.dotsem.be/api/v1/events';
 
 console.log(`Connecting to ${sseUrl}...`);
 const events = new EventSource(sseUrl);

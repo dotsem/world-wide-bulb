@@ -32,7 +32,7 @@ type ReasonEvent struct {
 func main() {
 	url := os.Getenv("WWB_URL")
 	if url == "" {
-		url = "http://localhost:8080/api/v1/events"
+		url = "https://wwb.dotsem.be/api/v1/events"
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

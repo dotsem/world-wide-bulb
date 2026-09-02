@@ -91,12 +91,16 @@
 			</button>
 		</div>
 
-		<div class="max-h-145 overflow-y-auto text-xs sm:text-sm font-mono leading-relaxed">
+		<div
+			class="custom-scrollbar max-h-145 overflow-auto text-xs sm:text-sm font-mono leading-relaxed"
+		>
 			{#if highlighted && highlighted[activeLang]}
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html highlighted[activeLang]}
 			{:else}
-				<pre class="p-4 sm:p-5 text-app-text overflow-x-auto"><code>{raw[activeLang]}</code></pre>
+				<pre class="custom-scrollbar p-4 sm:p-5 text-app-text overflow-x-auto"><code
+						>{raw[activeLang]}</code
+					></pre>
 			{/if}
 		</div>
 	</div>

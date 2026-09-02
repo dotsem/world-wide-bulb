@@ -84,13 +84,41 @@ html[data-theme='on'],
 	font-family: inherit;
 	font-size: inherit;
 	line-height: inherit;
-	overflow-x: auto;
+	overflow: visible;
 }
 
 .shiki code {
 	display: block;
 	width: fit-content;
 	min-width: 100%;
+}
+
+.custom-scrollbar,
+.shiki {
+	scrollbar-width: thin;
+	scrollbar-color: var(--app-border) var(--app-surface-solid);
+}
+
+.custom-scrollbar::-webkit-scrollbar,
+.shiki::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track,
+.shiki::-webkit-scrollbar-track {
+	background: var(--app-surface-solid);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb,
+.shiki::-webkit-scrollbar-thumb {
+	background: var(--app-border);
+	border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+.shiki::-webkit-scrollbar-thumb:hover {
+	background: var(--app-muted);
 }
 
 .shiki,

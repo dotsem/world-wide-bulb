@@ -101,6 +101,7 @@ runs:
         key: ${{ inputs.ssh-private-key }}
         passphrase: ${{ inputs.ssh-passphrase }}
         script: |
+          bash -c
           mkdir -p ${{ inputs.deploy-path }}
           cd ${{ inputs.deploy-path }}
           docker compose pull

@@ -2,16 +2,20 @@ name: Staging CD
 
 permissions:
   contents: read
-  packages: read
+  packages: write
 
 on:
-  workflow_run:
-    workflows: ["Build Single Binary CI"]
-    types:
-      - completed
-    branches:
-      - "main"
+  push:
+    branches: ["main"]
+    paths:
+      - "**"
+      - "!**.md"
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Target container image tag (defaults to 'staging')"
+        required: false
+        default: "staging"
 
 concurrency:
   group: staging-cd
@@ -22,15 +26,15 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     environment: staging
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Staging VM
+      - name: Build & Deploy to Staging VM
         uses: ./.github/actions/deploy
         with:
-          tag: staging
+          tag: ${{ github.event.inputs.tag || 'staging' }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           app-env: ${{ vars.APP_ENV }}
           backend-port: ${{ vars.BACKEND_PORT }}
           ip-salt: ${{ secrets.IP_SALT }}

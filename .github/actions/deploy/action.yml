@@ -1,10 +1,18 @@
 name: "Deploy Application"
-description: "Deploys WWB Docker container to VM over Tailscale and SSH"
+description: "Builds, packages, and deploys WWB Docker container to VM over Tailscale and SSH"
 
 inputs:
   tag:
     description: "Target container image tag"
     required: true
+  github-token:
+    description: "GitHub token for GHCR authentication"
+    required: false
+    default: ${{ github.token }}
+  push-latest:
+    description: "Whether to tag and push :latest image"
+    required: false
+    default: "false"
   app-env:
     description: "APP_ENV variable"
     required: true
@@ -53,6 +61,53 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Setup Frontend Environment
+      uses: ./.github/actions/setup-frontend
+
+    - name: Setup Backend Environment
+      uses: ./.github/actions/setup-backend
+
+    - name: Setup Just runner
+      uses: extractions/setup-just@v2
+
+    - name: Build Single Binary with Embedded Svelte
+      shell: bash
+      run: |
+        just build-prod
+        cp bin/wwb bin/wwb-bin
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.github-token }}
+
+    - name: Lowercase repo name
+      id: prep
+      shell: bash
+      run: |
+        echo "repo_lower=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+
+    - name: Build and push container
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: |
+          ghcr.io/${{ steps.prep.outputs.repo_lower }}:${{ inputs.tag }}
+          ghcr.io/${{ steps.prep.outputs.repo_lower }}:sha-${{ github.sha }}
+          ${{ inputs.push-latest == 'true' && format('ghcr.io/{0}:latest', steps.prep.outputs.repo_lower) || '' }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
     - name: Connect to Tailscale
       uses: tailscale/github-action@v3
       with:
@@ -107,7 +162,7 @@ runs:
           docker compose pull
           docker compose up -d
           sleep 3
-          if ! docker compose ps wwb --format '{{.State}}' | grep -iq "running"; then
+          if ! docker compose ps wwb --format "{{.State}}" | grep -iq "running"; then
             echo "::error::Container failed to start or crashed!"
             docker compose logs --tail=50
             exit 1

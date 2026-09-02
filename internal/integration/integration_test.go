@@ -144,12 +144,14 @@ func TestBackendIntegration_WebSocketBroadcast(t *testing.T) {
 	require.NoError(t, err)
 
 	var broadcast struct {
+		ID        int64     `json:"id"`
 		State     bool      `json:"state"`
 		CreatedAt time.Time `json:"created_at"`
 	}
 	err = json.Unmarshal(message, &broadcast)
 	require.NoError(t, err)
 	assert.True(t, broadcast.State)
+	assert.Positive(t, broadcast.ID)
 
 	reasonPayload := strings.NewReader(`{"id":"` + toggleRes.ID + `","reason":"broadcast reason test"}`)
 	reasonResp, err := client.Post(env.baseURL+"/api/v1/reason", "application/json", reasonPayload)
@@ -162,13 +164,13 @@ func TestBackendIntegration_WebSocketBroadcast(t *testing.T) {
 
 	var reasonBroadcast struct {
 		Type   string `json:"type"`
-		ID     string `json:"id"`
+		ID     int64  `json:"id"`
 		Reason string `json:"reason"`
 	}
 	err = json.Unmarshal(reasonMessage, &reasonBroadcast)
 	require.NoError(t, err)
 	assert.Equal(t, "reason_updated", reasonBroadcast.Type)
-	assert.Equal(t, toggleRes.ID, reasonBroadcast.ID)
+	assert.Equal(t, broadcast.ID, reasonBroadcast.ID)
 	assert.Equal(t, "broadcast reason test", reasonBroadcast.Reason)
 }
 

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"world-wide-bulb/internal/api/ws"
 	"world-wide-bulb/internal/bulb"
 
 	goaway "github.com/TwiN/go-away"
@@ -59,11 +60,7 @@ func (h *Handler) PostReason(c *gin.Context) {
 		return
 	}
 
-	wsMsg := gin.H{
-		"toggle_id": toggle.ID,
-		"reason":    trimmedReason,
-	}
-	if payload, err := json.Marshal(wsMsg); err == nil {
+	if payload, err := json.Marshal(ws.FromReason(toggle)); err == nil {
 		h.hub.Broadcast(payload)
 		h.broker.Broadcast("reason_updated", payload)
 	}

@@ -1,28 +1,22 @@
 <script lang="ts">
-	import jsCode from '../../../../examples/sse/javascript/client.js?raw';
-	import pyCode from '../../../../examples/sse/python/client.py?raw';
-	import goCode from '../../../../examples/sse/go/main.go?raw';
 	import { Check, Code, Copy } from '@lucide/svelte';
 
 	type Language = 'javascript' | 'python' | 'go' | 'curl';
 
-	let { sseUrl }: { sseUrl: string } = $props();
+	let {
+		highlighted,
+		raw
+	}: {
+		highlighted: Record<Language, string>;
+		raw: Record<Language, string>;
+	} = $props();
 
 	let activeLang = $state<Language>('javascript');
 	let copiedLang = $state<string | null>(null);
 
-	const curlCode = $derived(`curl -N ${sseUrl}`);
-
-	const snippets = $derived<Record<Language, string>>({
-		javascript: jsCode,
-		python: pyCode,
-		go: goCode,
-		curl: curlCode
-	});
-
 	function copySnippet(lang: Language) {
 		if (typeof navigator !== 'undefined') {
-			navigator.clipboard.writeText(snippets[lang]);
+			navigator.clipboard.writeText(raw[lang]);
 			copiedLang = lang;
 			setTimeout(() => {
 				if (copiedLang === lang) copiedLang = null;
@@ -30,7 +24,7 @@
 		}
 	}
 
-	const langToPath = {
+	const langToPath: Record<Exclude<Language, 'curl'>, string> = {
 		javascript: 'examples/sse/javascript/client.js',
 		python: 'examples/sse/python/client.py',
 		go: 'examples/sse/go/main.go'
@@ -76,6 +70,7 @@
 				{:else}
 					<a
 						target="_blank"
+						rel="noreferrer"
 						href={repoPath + langToPath[activeLang]}
 						class="text-app-accent underline">{langToPath[activeLang]}</a
 					>
@@ -95,9 +90,14 @@
 				{/if}
 			</button>
 		</div>
-		<pre
-			class="p-4 sm:p-5 text-xs sm:text-sm font-mono text-app-text overflow-x-auto max-h-145 overflow-y-auto leading-relaxed"><code
-				>{snippets[activeLang]}</code
-			></pre>
+
+		<div class="max-h-145 overflow-y-auto text-xs sm:text-sm font-mono leading-relaxed">
+			{#if highlighted && highlighted[activeLang]}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html highlighted[activeLang]}
+			{:else}
+				<pre class="p-4 sm:p-5 text-app-text overflow-x-auto"><code>{raw[activeLang]}</code></pre>
+			{/if}
+		</div>
 	</div>
 </section>

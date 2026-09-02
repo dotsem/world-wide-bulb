@@ -77,3 +77,30 @@ html[data-theme='on'],
 	--app-bulb-base-dark: #423f3c;
 	--app-bulb-base-light: #8e8a86;
 }
+
+.shiki {
+	background-color: transparent !important;
+	padding: 1rem 1.25rem;
+	font-family: inherit;
+	font-size: inherit;
+	line-height: inherit;
+	overflow-x: auto;
+}
+
+.shiki code {
+	display: block;
+	width: fit-content;
+	min-width: 100%;
+}
+
+.shiki,
+.shiki span {
+	color: var(--shiki-off);
+}
+
+html[data-theme='on'] .shiki,
+[data-theme='on'] .shiki,
+html[data-theme='on'] .shiki span,
+[data-theme='on'] .shiki span {
+	color: var(--shiki-on);
+}

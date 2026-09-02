@@ -1,0 +1,96 @@
+import { codeToHtml } from 'shiki';
+import jsCode from '../../../../examples/sse/javascript/client.js?raw';
+import pyCode from '../../../../examples/sse/python/client.py?raw';
+import goCode from '../../../../examples/sse/go/main.go?raw';
+
+export const prerender = true;
+
+export async function load() {
+	const themes = {
+		off: 'tokyo-night',
+		on: 'gruvbox-dark-soft'
+	};
+
+	const [jsHtml, pyHtml, goHtml, curlHtml, stateChangedHtml, reasonUpdatedHtml, pingHtml] =
+		await Promise.all([
+			codeToHtml(jsCode, {
+				lang: 'javascript',
+				themes,
+				defaultColor: false
+			}),
+			codeToHtml(pyCode, {
+				lang: 'python',
+				themes,
+				defaultColor: false
+			}),
+			codeToHtml(goCode, {
+				lang: 'go',
+				themes,
+				defaultColor: false
+			}),
+			codeToHtml('curl -N http://localhost:8080/api/v1/events', {
+				lang: 'bash',
+				themes,
+				defaultColor: false
+			}),
+			codeToHtml(
+				JSON.stringify(
+					{
+						type: 'state_changed',
+						id: 42,
+						state: true,
+						reason: 'It was getting dark here',
+						created_at: '2026-09-02T17:35:00Z'
+					},
+					null,
+					2
+				),
+				{
+					lang: 'json',
+					themes,
+					defaultColor: false
+				}
+			),
+			codeToHtml(
+				JSON.stringify(
+					{
+						type: 'reason_updated',
+						id: 42,
+						reason: 'Party at the office!'
+					},
+					null,
+					2
+				),
+				{
+					lang: 'json',
+					themes,
+					defaultColor: false
+				}
+			),
+			codeToHtml('""', {
+				lang: 'json',
+				themes,
+				defaultColor: false
+			})
+		]);
+
+	return {
+		raw: {
+			javascript: jsCode,
+			python: pyCode,
+			go: goCode,
+			curl: 'curl -N http://localhost:8080/api/v1/events'
+		},
+		highlighted: {
+			javascript: jsHtml,
+			python: pyHtml,
+			go: goHtml,
+			curl: curlHtml
+		},
+		payloads: {
+			stateChanged: stateChangedHtml,
+			reasonUpdated: reasonUpdatedHtml,
+			ping: pingHtml
+		}
+	};
+}

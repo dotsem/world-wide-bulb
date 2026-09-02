@@ -3,13 +3,9 @@
 	import { bulbState, Bulb } from '$lib';
 	import CodeExamples from './CodeExamples.svelte';
 	import EventPayloads from './EventPayloads.svelte';
+	import type { PageData } from './$types';
 
-	function getBaseUrl(): string {
-		if (typeof window === 'undefined') return 'http://localhost:8080';
-		return window.location.origin;
-	}
-
-	const sseUrl = $derived(`${getBaseUrl()}/api/v1/events`);
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -81,11 +77,11 @@
 				</div>
 			</section>
 
-			<EventPayloads />
+			<EventPayloads payloads={data?.payloads} />
 		</div>
 
 		<div class="lg:col-span-7 lg:sticky lg:top-24">
-			<CodeExamples {sseUrl} />
+			<CodeExamples highlighted={data?.highlighted} raw={data?.raw} />
 		</div>
 	</div>
 </div>

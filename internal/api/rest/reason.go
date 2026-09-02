@@ -60,8 +60,6 @@ func (h *Handler) PostReason(c *gin.Context) {
 	}
 
 	wsMsg := gin.H{
-		"type":      "reason_updated",
-		"id":        req.ID,
 		"toggle_id": toggle.ID,
 		"reason":    trimmedReason,
 	}

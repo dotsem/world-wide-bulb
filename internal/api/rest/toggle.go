@@ -62,6 +62,7 @@ func (h *Handler) PostToggle(c *gin.Context) {
 	}); err == nil {
 		h.broker.Broadcast("state_changed", eventPayload)
 	}
+	// note: we publish the ID to everyone & the UUID to the original user
 
 	c.JSON(http.StatusOK, ToggleResponse{
 		ID:         toggle.Uuid,

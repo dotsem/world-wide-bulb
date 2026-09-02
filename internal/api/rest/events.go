@@ -19,7 +19,6 @@ func (h *Handler) StreamEvents(c *gin.Context) {
 	defer h.broker.Unsubscribe(ch)
 
 	initialPayload, err := json.Marshal(gin.H{
-		"event":  stateKey,
 		stateKey: h.engine.GetState(),
 	})
 

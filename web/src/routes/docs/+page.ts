@@ -6,7 +6,7 @@ import goCode from '../../../../examples/sse/go/main.go?raw';
 export const prerender = true;
 
 export async function load() {
-	const theme = "tokyo-night";
+	const theme = 'tokyo-night';
 
 	const [jsHtml, pyHtml, goHtml, curlHtml, stateChangedHtml, reasonUpdatedHtml, pingHtml] =
 		await Promise.all([

@@ -9,7 +9,7 @@
 	let { children } = $props();
 
 	let isDocsPage = $derived(page.url.pathname.startsWith('/docs'));
-	let theme = $derived(isDocsPage ? 'off' : (bulbState.isOn ? 'on' : 'off'));
+	let theme = $derived(isDocsPage ? 'off' : bulbState.isOn ? 'on' : 'off');
 
 	$effect(() => {
 		if (typeof document !== 'undefined') {

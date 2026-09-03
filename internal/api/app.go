@@ -50,7 +50,7 @@ func NewApp(ctx context.Context, cfg *config.Config, db *sql.DB) (*App, error) {
 		return nil, fmt.Errorf("failed to load embedded static filesystem: %w", err)
 	}
 
-	router := NewRouter(restHandler, wsHandler, staticFS, cfg.IsProd)
+	router := NewRouter(restHandler, wsHandler, staticFS, cfg.IsProd, cfg.AllowedHosts)
 
 	return &App{
 		Router:  router,

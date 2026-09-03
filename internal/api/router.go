@@ -11,25 +11,36 @@ import (
 )
 
 // NewRouter creates and initializes the Gin engine with all API routes and embedded static frontend.
-func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool) *gin.Engine {
+func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool, allowedHosts []string) *gin.Engine {
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	r := gin.Default()
 	_ = r.SetTrustedProxies(nil)
-	r.Use(middleware.CORS())
+
+	publicLimiter := middleware.NewIPRateLimiter(100, 30)
+	webLimiter := middleware.NewIPRateLimiter(20, 5)
 
 	v1 := r.Group("/api/v1")
 	{
-		v1.GET("/state", restH.GetState)
-		v1.GET("/history", restH.GetHistory)
-		v1.GET("/events", restH.StreamEvents)
-		v1.POST("/toggle", restH.PostToggle)
-		v1.POST("/reason", restH.PostReason)
+		public := v1.Group("")
+		public.Use(middleware.RateLimit(publicLimiter), middleware.PublicCORS())
+		{
+			public.GET("/state", restH.GetState)
+			public.GET("/history", restH.GetHistory)
+			public.GET("/events", restH.StreamEvents)
+		}
+		web := v1.Group("")
+		web.Use(middleware.RateLimit(webLimiter), middleware.WebCORS(isProd, allowedHosts))
+		{
+			web.POST("/toggle", restH.PostToggle)
+			web.POST("/reason", restH.PostReason)
+		}
 	}
 
-	r.GET("/ws", wsH.ServeWS)
+	wsLimiter := middleware.NewIPRateLimiter(30, 5)
+	r.GET("/ws", middleware.RateLimit(wsLimiter), wsH.ServeWS)
 
 	if staticFS != nil {
 		r.NoRoute(ServeStatic(staticFS))

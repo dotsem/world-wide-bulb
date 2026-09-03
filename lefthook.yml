@@ -7,12 +7,14 @@ pre-commit:
     go-fmt:
       glob: "*.go"
       run: just go fmt
+      stage_fixed: true
     go-lint:
       glob: "*.go"
       run: just go lint
     web-fmt:
       glob: "web/**/*.{js,ts,svelte,json,css,html,md}"
       run: just web fmt
+      stage_fixed: true
     web-lint:
       glob: "web/**/*.{js,ts,svelte}"
       run: just web lint
@@ -23,4 +25,3 @@ pre-commit:
       glob: "{justfile,just/*.just,cmd/docgen/*.go}"
       run: just docgen
       stage_fixed: true
-

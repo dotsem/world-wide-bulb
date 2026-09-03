@@ -132,6 +132,7 @@ docker run -d \
 | `just go lint` | Lint Go code |
 | `just go test` | Run Go tests |
 | `just go test-ci` | Run Go tests for CI with gotestsum and coverage |
+| `just go test-examples` | Run Go tests only for the code examples |
 | `just go coverage` | Run Go tests with coverage report (excluding generated sqlc files) |
 | `just go dev` | Run Go development server |
 

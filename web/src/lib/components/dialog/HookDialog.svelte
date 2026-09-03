@@ -65,7 +65,13 @@
 	</div>
 
 	{#snippet footer()}
-		<div class="text-xs text-app-muted">No API keys required. Open & free for everyone.</div>
+		<a
+			href="/docs"
+			onclick={() => (isOpen = false)}
+			class="text-xs font-semibold text-app-accent hover:underline inline-flex items-center gap-1"
+		>
+			View Code Examples &rarr;
+		</a>
 		<button
 			type="button"
 			onclick={() => (isOpen = false)}

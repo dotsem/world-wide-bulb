@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRun(t *testing.T) {
@@ -60,6 +62,20 @@ func TestRun(t *testing.T) {
 		err := run(ctx)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "failed to load config")
+	})
+
+	t.Run("returns error when database directory creation fails", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		filePath := filepath.Join(tmpDir, "regular_file")
+		require.NoError(t, os.WriteFile(filePath, []byte("data"), 0o600))
+
+		t.Setenv("DB_PATH", filepath.Join(filePath, "invalid", "test.db"))
+		t.Setenv("BACKEND_PORT", "0")
+
+		ctx := context.Background()
+		err := run(ctx)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "failed to create database directory")
 	})
 }
 

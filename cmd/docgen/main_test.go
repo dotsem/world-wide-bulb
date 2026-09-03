@@ -232,3 +232,44 @@ func TestEndToEndDocgenSync(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, changedAfter)
 }
+
+func TestRunDocgen(t *testing.T) {
+	t.Run("detects drift in check mode", func(t *testing.T) {
+		dir := t.TempDir()
+		justFile := filepath.Join(dir, "justfile")
+		docFile := filepath.Join(dir, "README.md")
+
+		require.NoError(t, os.WriteFile(justFile, []byte("# Root task\nroot:\n  echo 1"), 0o600))
+		require.NoError(t, os.WriteFile(docFile, []byte("<!-- TEST_START -->\n<!-- TEST_END -->"), 0o600))
+
+		drift, err := runDocgen(justFile, docFile, "TEST", true)
+		assert.True(t, drift)
+		assert.ErrorIs(t, err, errDriftDetected)
+	})
+
+	t.Run("returns error when target file does not exist", func(t *testing.T) {
+		dir := t.TempDir()
+		justFile := filepath.Join(dir, "justfile")
+
+		require.NoError(t, os.WriteFile(justFile, []byte("# Root task\nroot:\n  echo 1"), 0o600))
+
+		drift, err := runDocgen(justFile, "/non/existent/doc.md", "TEST", false)
+		assert.False(t, drift)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "error reading")
+	})
+
+	t.Run("returns error when marker is missing in target file", func(t *testing.T) {
+		dir := t.TempDir()
+		justFile := filepath.Join(dir, "justfile")
+		docFile := filepath.Join(dir, "README.md")
+
+		require.NoError(t, os.WriteFile(justFile, []byte("# Root task\nroot:\n  echo 1"), 0o600))
+		require.NoError(t, os.WriteFile(docFile, []byte("# No markers here"), 0o600))
+
+		drift, err := runDocgen(justFile, docFile+",", "TEST", false)
+		assert.False(t, drift)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "error updating")
+	})
+}

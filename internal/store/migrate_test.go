@@ -88,4 +88,39 @@ func TestMigrate(t *testing.T) {
 		assert.NotEmpty(t, uuids[1])
 		assert.NotEqual(t, uuids[0], uuids[1])
 	})
+
+	t.Run("handles duplicate column name error gracefully", func(t *testing.T) {
+		db, err := sql.Open("sqlite", ":memory:")
+		require.NoError(t, err)
+		defer func() { _ = db.Close() }()
+
+		ctx := context.Background()
+		_, err = db.ExecContext(ctx, `
+			CREATE TABLE toggles (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				state BOOLEAN NOT NULL,
+				reason TEXT,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				ip_hash TEXT NOT NULL,
+				uuid TEXT NOT NULL
+			);
+		`)
+		require.NoError(t, err)
+
+		err = store.Migrate(ctx, db)
+		assert.NoError(t, err)
+	})
+
+	t.Run("returns error when schema execution fails with non-duplicate error", func(t *testing.T) {
+		db, err := sql.Open("sqlite", ":memory:")
+		require.NoError(t, err)
+		defer func() { _ = db.Close() }()
+
+		ctx := context.Background()
+		_, err = db.ExecContext(ctx, "CREATE TABLE toggles (id TEXT);")
+		require.NoError(t, err)
+
+		err = store.Migrate(ctx, db)
+		assert.Error(t, err)
+	})
 }

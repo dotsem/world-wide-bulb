@@ -25,7 +25,7 @@ on:
 
 jobs:
     test:
-        name: Test Examples
+        name: Test Doc Code Examples
         runs-on: ubuntu-latest
 
         steps:

@@ -1,0 +1,59 @@
+name: Examples Test
+
+permissions:
+    contents: read
+
+concurrency:
+    group: examples-test-${{ github.ref }}
+    cancel-in-progress: true
+
+on:
+    push:
+        branches: ["main"]
+        paths:
+            - "**"
+            - "!web/**"
+            - "!.github/workflows/frontend-ci.yml"
+            - "!**.md"
+    pull_request:
+        branches: ["**"]
+        paths:
+            - "**"
+            - "!web/**"
+            - "!.github/workflows/frontend-ci.yml"
+            - "!**.md"
+
+jobs:
+    test:
+        name: Test Examples
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Backend Environment
+              uses: ./.github/actions/setup-backend
+
+            - name: Setup Just runner
+              uses: extractions/setup-just@v2
+
+            # Setup all code example toolchains
+            # Update when new toolchain is used!
+
+            - name: Setup Python
+              uses: actions/setup-python@v5
+              with:
+                  python-version: "3.14"
+
+            - name: Setup Node
+              uses: actions/setup-node@v5
+              with:
+                  node-version: "22"
+
+            - name: Setup Go
+              working-directory: examples/sse/go
+              run: go mod download
+
+            - name: Test examples
+              run: just go test-examples

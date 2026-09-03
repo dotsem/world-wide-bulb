@@ -35,6 +35,10 @@ test-ci:
     fi
     exit $TEST_EXIT
 
+# Run Go tests only for the code examples
+test-examples:
+    go test -tags=examples -run TestExamples ./internal/integration
+
 # Run Go tests with coverage report (excluding generated sqlc files)
 coverage:
     #!/usr/bin/env bash

@@ -46,14 +46,25 @@ func TestNewRouter(t *testing.T) {
 	}
 
 	isProd := false
-	router := api.NewRouter(restH, wsH, testFS, isProd)
+	allowedHosts := []string{"localhost"}
+	router := api.NewRouter(restH, wsH, testFS, isProd, allowedHosts)
 	assert.NotNil(t, router)
 
-	t.Run("API endpoint", func(t *testing.T) {
+	t.Run("Public API endpoint applies PublicCORS", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/state", nil)
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, "*", rec.Header().Get("Access-Control-Allow-Origin"))
+	})
+
+	t.Run("Web API endpoint rejects unauthorized origin in production", func(t *testing.T) {
+		prodRouter := api.NewRouter(restH, wsH, testFS, true, []string{"example.com"})
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
+		req.Header.Set("Origin", "https://evil.com")
+		rec := httptest.NewRecorder()
+		prodRouter.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusForbidden, rec.Code)
 	})
 
 	t.Run("Static asset", func(t *testing.T) {
@@ -74,13 +85,13 @@ func TestNewRouter(t *testing.T) {
 
 	t.Run("Production mode sets release mode", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		_ = api.NewRouter(restH, wsH, testFS, true)
+		_ = api.NewRouter(restH, wsH, testFS, true, allowedHosts)
 		assert.Equal(t, gin.ReleaseMode, gin.Mode())
 	})
 
 	t.Run("Non-production mode retains mode", func(t *testing.T) {
 		gin.SetMode(gin.TestMode)
-		_ = api.NewRouter(restH, wsH, testFS, false)
+		_ = api.NewRouter(restH, wsH, testFS, false, allowedHosts)
 		assert.Equal(t, gin.TestMode, gin.Mode())
 	})
 }

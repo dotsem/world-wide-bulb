@@ -20,7 +20,6 @@ func TestClientPumps(t *testing.T) {
 
 	t.Run("ReadPump and WritePump handle messages and connection close", func(t *testing.T) {
 		hub := ws.NewHub()
-		go hub.Run()
 
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			conn, err := upgrader.Upgrade(w, r, nil)
@@ -53,7 +52,6 @@ func TestClientPumps(t *testing.T) {
 
 	t.Run("WritePump sends ping messages and batch messages", func(t *testing.T) {
 		hub := ws.NewHub()
-		go hub.Run()
 
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			conn, err := upgrader.Upgrade(w, r, nil)

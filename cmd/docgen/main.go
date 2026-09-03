@@ -3,6 +3,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -28,6 +29,8 @@ var (
 	recipeRegex = regexp.MustCompile(`^([a-zA-Z0-9_-]+)(?:\s+[^:]*?)?:(?:\s+.*)?$`)
 )
 
+var errDriftDetected = errors.New("documentation is out of sync")
+
 func main() {
 	targetsFlag := flag.String("targets", "README.md,GUIDELINES.md", "comma-separated markdown files to update")
 	justfileFlag := flag.String("justfile", "justfile", "path to root justfile")
@@ -35,16 +38,30 @@ func main() {
 	checkFlag := flag.Bool("check", false, "verify docs without writing (fails if out of sync)")
 	flag.Parse()
 
-	modules, err := parseRootAndModules(*justfileFlag)
+	driftDetected, err := runDocgen(*justfileFlag, *targetsFlag, *markerFlag, *checkFlag)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error parsing justfiles: %v\n", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		if driftDetected {
+			fmt.Fprintln(os.Stderr, "\nrun 'just docgen' locally to regenerate command documentation.")
+		}
 		os.Exit(1)
 	}
 
+	if *checkFlag {
+		fmt.Println("documentation is in sync with just recipes.")
+	}
+}
+
+func runDocgen(justfile, targets, marker string, check bool) (bool, error) {
+	modules, err := parseRootAndModules(justfile)
+	if err != nil {
+		return false, fmt.Errorf("error parsing justfiles: %w", err)
+	}
+
 	generatedMarkdown := formatModulesMarkdown(modules)
-	targetFiles := strings.Split(*targetsFlag, ",")
-	startMarker := fmt.Sprintf("<!-- %s_START -->", *markerFlag)
-	endMarker := fmt.Sprintf("<!-- %s_END -->", *markerFlag)
+	targetFiles := strings.Split(targets, ",")
+	startMarker := fmt.Sprintf("<!-- %s_START -->", marker)
+	endMarker := fmt.Sprintf("<!-- %s_END -->", marker)
 
 	driftDetected := false
 
@@ -57,40 +74,33 @@ func main() {
 		cleanTarget := filepath.Clean(target)
 		content, err := os.ReadFile(cleanTarget) //nolint:gosec // Target files are CLI arguments for local code generation.
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error reading %s: %v\n", target, err)
-			os.Exit(1)
+			return false, fmt.Errorf("error reading %s: %w", target, err)
 		}
 
 		updated, changed, err := injectMarkdown(string(content), generatedMarkdown, startMarker, endMarker)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error updating %s: %v\n", target, err)
-			os.Exit(1)
+			return false, fmt.Errorf("error updating %s: %w", target, err)
 		}
 
 		if !changed {
 			continue
 		}
 
-		if *checkFlag {
-			fmt.Fprintf(os.Stderr, "drift detected in %s (documentation is out of sync)\n", target)
+		if check {
 			driftDetected = true
 		} else {
 			if err := os.WriteFile(cleanTarget, []byte(updated), 0o600); err != nil { //nolint:gosec // Target files are CLI arguments for local code generation.
-				fmt.Fprintf(os.Stderr, "error writing %s: %v\n", target, err)
-				os.Exit(1)
+				return false, fmt.Errorf("error writing %s: %w", target, err)
 			}
 			fmt.Printf("updated %s\n", target)
 		}
 	}
 
 	if driftDetected {
-		fmt.Fprintln(os.Stderr, "\nrun 'just docgen' locally to regenerate command documentation.")
-		os.Exit(1)
+		return true, errDriftDetected
 	}
 
-	if *checkFlag {
-		fmt.Println("documentation is in sync with just recipes.")
-	}
+	return false, nil
 }
 
 func parseRootAndModules(rootPath string) ([]module, error) {

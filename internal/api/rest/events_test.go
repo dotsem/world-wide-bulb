@@ -85,4 +85,24 @@ func TestStreamEvents(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, dataLine, `"state":true`)
 	})
+
+	t.Run("terminates stream cleanly when request context is canceled", func(t *testing.T) {
+		env := setupTestEnv(t)
+
+		server := httptest.NewServer(env.router)
+		defer server.Close()
+
+		ctx, cancel := context.WithCancel(context.Background())
+
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, server.URL+"/api/v1/events", nil)
+		require.NoError(t, err)
+
+		resp, err := server.Client().Do(req)
+		require.NoError(t, err)
+		defer func() { _ = resp.Body.Close() }()
+
+		cancel()
+
+		time.Sleep(50 * time.Millisecond)
+	})
 }

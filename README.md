@@ -33,7 +33,8 @@ To build or develop World Wide Bulb, the following tools are required:
 
 - **Go** (1.26+)
 - **[`golangci-lint`](https://golangci-lint.run/)**: Fast Go linters runner for code quality and pre-commit validation.
-- **node.js** & **pnpm** (for frontend asset compilation and development)
+- **pnpm** (11+)
+- **nodejs** (22.x+)
 - **[`just`](https://github.com/casey/just)**: It is recommended to install [`just`](https://github.com/casey/just) for the best development experience. `just` acts as the primary task runner, unifying commands for building, linting, formatting, and running tests across Go and Svelte components.
 - **[`lefthook`](https://github.com/evilmartians/lefthook)**: Required for automated pre-commit checks (`just install` hooks it up).
 

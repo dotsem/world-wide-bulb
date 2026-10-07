@@ -1,5 +1,6 @@
 import { restApi } from '$lib/api/rest';
 import { wsClient } from '$lib/api/ws.svelte';
+import { toast } from '$lib/state/toast.svelte';
 
 class BulbState {
 	isOn = $state(false);
@@ -90,15 +91,20 @@ class BulbState {
 			if (err?.cooldown_ms) {
 				this.setCooldown(err.cooldown_ms);
 			}
+			toast.error(err?.message || 'Failed to toggle bulb');
 		}
 	};
 
 	submitReason = async (reason: string) => {
 		if (!this.lastToggleId) return;
-		await restApi.postReason(this.lastToggleId, reason);
-		this.showReasonPrompt = false;
-		this.lastToggleId = null;
-		this.lastActionState = null;
+		try {
+			await restApi.postReason(this.lastToggleId, reason);
+			this.showReasonPrompt = false;
+			this.lastToggleId = null;
+			this.lastActionState = null;
+		} catch (err: any) {
+			toast.error(err?.message || 'Failed to submit reason');
+		}
 	};
 
 	dismissReason = () => {

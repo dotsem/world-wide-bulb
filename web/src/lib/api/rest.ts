@@ -21,10 +21,7 @@ class RestApi {
 	async state(): Promise<StateResponse> {
 		const res = await fetch(`${API_BASE}/api/v1/state`, {
 			method: 'GET',
-			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json'
-			}
+			credentials: 'include'
 		});
 		if (!res.ok) {
 			throw new Error('Failed to get bulb state');
@@ -55,10 +52,7 @@ class RestApi {
 		const query = params.toString() ? `?${params.toString()}` : '';
 		const res = await fetch(`${API_BASE}/api/v1/history${query}`, {
 			method: 'GET',
-			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json'
-			}
+			credentials: 'include'
 		});
 		if (!res.ok) {
 			throw new Error('Failed to get bulb history');

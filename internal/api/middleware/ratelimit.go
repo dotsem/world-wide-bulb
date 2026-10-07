@@ -81,6 +81,10 @@ func (lim *IPRateLimiter) Allow(ip string) (bool, time.Duration) {
 // RateLimit returns a Gin middleware enforcing the token bucket rate limit.
 func RateLimit(limiter *IPRateLimiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if c.Request.Method == http.MethodOptions {
+			c.Next()
+			return
+		}
 		ip := c.ClientIP()
 		allowed, retryAfter := limiter.Allow(ip)
 		if !allowed {

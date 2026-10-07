@@ -50,12 +50,32 @@ func TestNewRouter(t *testing.T) {
 	router := api.NewRouter(restH, wsH, testFS, isProd, allowedHosts)
 	assert.NotNil(t, router)
 
-	t.Run("Public API endpoint applies PublicCORS", func(t *testing.T) {
+	t.Run("Public SSE endpoint applies PublicCORS", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodOptions, "/api/v1/events", nil)
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Equal(t, "*", rec.Header().Get("Access-Control-Allow-Origin"))
+	})
+
+	t.Run("Web API endpoint applies WebCORS in development", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/state", nil)
+		req.Header.Set("Origin", "http://localhost:5001")
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "*", rec.Header().Get("Access-Control-Allow-Origin"))
+		assert.Equal(t, "http://localhost:5001", rec.Header().Get("Access-Control-Allow-Origin"))
+		assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
+	})
+
+	t.Run("Web API preflight OPTIONS returns 204 with credentials", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodOptions, "/api/v1/state", nil)
+		req.Header.Set("Origin", "http://localhost:5001")
+		rec := httptest.NewRecorder()
+		router.ServeHTTP(rec, req)
+		assert.Equal(t, http.StatusNoContent, rec.Code)
+		assert.Equal(t, "http://localhost:5001", rec.Header().Get("Access-Control-Allow-Origin"))
+		assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
 	})
 
 	t.Run("Web API endpoint rejects unauthorized origin in production", func(t *testing.T) {

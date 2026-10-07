@@ -25,17 +25,25 @@ func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool
 	v1 := r.Group("/api/v1")
 	{
 		public := v1.Group("")
-		public.Use(middleware.RateLimit(publicLimiter), middleware.PublicCORS())
+		public.Use(middleware.PublicCORS(), middleware.RateLimit(publicLimiter))
 		{
 			public.GET("/state", restH.GetState)
 			public.GET("/history", restH.GetHistory)
 			public.GET("/events", restH.StreamEvents)
+			public.OPTIONS("/events", func(_ *gin.Context) {})
 		}
 		web := v1.Group("")
-		web.Use(middleware.RateLimit(webLimiter), middleware.WebCORS(isProd, allowedHosts))
+		web.Use(middleware.WebCORS(isProd, allowedHosts), middleware.RateLimit(webLimiter))
 		{
+			web.GET("/state", restH.GetState)
+			web.GET("/history", restH.GetHistory)
 			web.POST("/toggle", restH.PostToggle)
 			web.POST("/reason", restH.PostReason)
+
+			web.OPTIONS("/state", func(_ *gin.Context) {})
+			web.OPTIONS("/history", func(_ *gin.Context) {})
+			web.OPTIONS("/toggle", func(_ *gin.Context) {})
+			web.OPTIONS("/reason", func(_ *gin.Context) {})
 		}
 	}
 

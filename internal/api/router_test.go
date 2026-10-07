@@ -57,11 +57,13 @@ func TestNewRouter(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "*", rec.Header().Get("Access-Control-Allow-Origin"))
 
-		reqEvents := httptest.NewRequest(http.MethodOptions, "/api/v1/events", nil)
-		recEvents := httptest.NewRecorder()
-		router.ServeHTTP(recEvents, reqEvents)
-		assert.Equal(t, http.StatusNoContent, recEvents.Code)
-		assert.Equal(t, "*", recEvents.Header().Get("Access-Control-Allow-Origin"))
+		for _, path := range []string{"/api/v1/state", "/api/v1/history", "/api/v1/events"} {
+			reqOpt := httptest.NewRequest(http.MethodOptions, path, nil)
+			recOpt := httptest.NewRecorder()
+			router.ServeHTTP(recOpt, reqOpt)
+			assert.Equal(t, http.StatusNoContent, recOpt.Code)
+			assert.Equal(t, "*", recOpt.Header().Get("Access-Control-Allow-Origin"))
+		}
 	})
 
 	t.Run("Web API endpoint applies WebCORS in development", func(t *testing.T) {
@@ -74,13 +76,15 @@ func TestNewRouter(t *testing.T) {
 	})
 
 	t.Run("Web API preflight OPTIONS returns 204 with credentials", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodOptions, "/api/v1/toggle", nil)
-		req.Header.Set("Origin", "http://localhost:5001")
-		rec := httptest.NewRecorder()
-		router.ServeHTTP(rec, req)
-		assert.Equal(t, http.StatusNoContent, rec.Code)
-		assert.Equal(t, "http://localhost:5001", rec.Header().Get("Access-Control-Allow-Origin"))
-		assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
+		for _, path := range []string{"/api/v1/toggle", "/api/v1/reason"} {
+			req := httptest.NewRequest(http.MethodOptions, path, nil)
+			req.Header.Set("Origin", "http://localhost:5001")
+			rec := httptest.NewRecorder()
+			router.ServeHTTP(rec, req)
+			assert.Equal(t, http.StatusNoContent, rec.Code)
+			assert.Equal(t, "http://localhost:5001", rec.Header().Get("Access-Control-Allow-Origin"))
+			assert.Equal(t, "true", rec.Header().Get("Access-Control-Allow-Credentials"))
+		}
 	})
 
 	t.Run("Web API endpoint rejects unauthorized origin in production", func(t *testing.T) {

@@ -75,4 +75,18 @@ func TestRateLimitMiddleware(t *testing.T) {
 		assert.NotEmpty(t, rec2.Header().Get("Retry-After"))
 		assert.Contains(t, rec2.Body.String(), "rate limit exceeded")
 	})
+
+	t.Run("skips rate limiting for OPTIONS requests", func(t *testing.T) {
+		limiter := middleware.NewIPRateLimiter(60, 1)
+		r := gin.New()
+		r.Use(middleware.RateLimit(limiter))
+		r.OPTIONS("/ping", func(c *gin.Context) { c.Status(http.StatusNoContent) })
+
+		for range 5 {
+			req := httptest.NewRequest(http.MethodOptions, "/ping", nil)
+			rec := httptest.NewRecorder()
+			r.ServeHTTP(rec, req)
+			assert.Equal(t, http.StatusNoContent, rec.Code)
+		}
+	})
 }

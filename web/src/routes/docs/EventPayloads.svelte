@@ -18,7 +18,7 @@
 	sentWhen: string,
 	description?: string
 )}
-	<div class="p-4 rounded-xl bg-app-surface border border-app-border space-y-2">
+	<div class="space-y-2">
 		<p class="font-mono font-bold text-app-accent">event: {type}</p>
 		<p class="text-xs text-app-muted">{sentWhen}</p>
 		<div

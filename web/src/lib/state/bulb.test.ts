@@ -73,14 +73,24 @@ describe('BulbState', () => {
 		expect(state.remainingSeconds).toBe(3);
 	});
 
-	it('updates state upon receiving websocket events', () => {
+	it('updates state upon receiving websocket events and applies 1s debounce', () => {
 		const mockEmitter = (wsClient as any).emitMock;
 
 		mockEmitter('state_changed', { state: true });
 		expect(state.isOn).toBe(true);
+		expect(state.isCooldownActive).toBe(true);
+		expect(state.remainingSeconds).toBe(1);
 
 		mockEmitter('viewer_count', { count: 15 });
 		expect(state.viewers).toBe(15);
+	});
+
+	it('does not reduce longer personal cooldown upon receiving state_changed', () => {
+		const mockEmitter = (wsClient as any).emitMock;
+		state.setCooldown(8000);
+
+		mockEmitter('state_changed', { state: true });
+		expect(state.remainingSeconds).toBe(8);
 	});
 
 	it('handles cooldown countdown and cancellation', () => {

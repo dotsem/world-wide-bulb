@@ -12,6 +12,9 @@ export class BulbState {
 	constructor() {
 		wsClient.on('state_changed', (msg) => {
 			this.isOn = msg.state;
+			if (this.remainingMs < 1000) {
+				this.setCooldown(1000);
+			}
 		});
 		wsClient.onViewerCount((msg) => {
 			this.viewers = msg.count;

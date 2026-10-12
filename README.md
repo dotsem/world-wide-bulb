@@ -147,6 +147,9 @@ docker run -d \
 | `just web lint` | Lint Web code |
 | `just web check` | Run Svelte type-checking |
 | `just web test` | Run Web tests |
+| `just web test-unit` | — |
+| `just web test-e2e` | — |
+| `just web playwright-install` | Install Playwright browsers and dependencies |
 | `just web build` | Build Svelte static assets |
 | `just web audit` | Audit frontend dependencies |
 | `just web dev` | Run frontend development server |

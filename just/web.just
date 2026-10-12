@@ -24,6 +24,16 @@ check:
 test:
     cd web && pnpm test
 
+test-unit:
+    cd web && pnpm test:unit
+
+test-e2e:
+    cd web && pnpm test:e2e
+
+# Install Playwright browsers and dependencies
+playwright-install:
+    cd web && pnpm exec playwright install --with-deps chromium
+
 # Build Svelte static assets
 build:
     cd web && pnpm build

@@ -2,7 +2,7 @@ import { restApi } from '$lib/api/rest';
 import { wsClient } from '$lib/api/ws.svelte';
 import { toast } from '$lib/state/toast.svelte';
 
-class BulbState {
+export class BulbState {
 	isOn = $state(false);
 	cooldownUntil = $state<number | null>(null);
 	remainingMs = $state(0);

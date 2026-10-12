@@ -1,4 +1,5 @@
 import { restApi } from '$lib/api/rest';
+import { SvelteDate, SvelteSet } from 'svelte/reactivity';
 import { wsClient, type StateChangedEvent, type ReasonUpdatedEvent } from '$lib/api/ws.svelte';
 import type { HistoryItem } from '$lib/types/rest.types';
 
@@ -41,7 +42,7 @@ function prepareItem(item: HistoryItem): FormattedHistoryItem {
 	};
 }
 
-class HistoryState {
+export class HistoryState {
 	items = $state<FormattedHistoryItem[]>([]);
 	nextCursor = $state<number | undefined>(undefined);
 	hasMore = $state(true);
@@ -75,7 +76,7 @@ class HistoryState {
 			id: msg.id,
 			state: msg.state,
 			reason: msg.reason || '',
-			created_at: msg.created_at || new Date().toISOString()
+			created_at: msg.created_at || new SvelteDate().toISOString()
 		};
 
 		if (this.items.length > 0 && msg.id > this.items[0].id + 1) {
@@ -118,7 +119,7 @@ class HistoryState {
 		try {
 			const res = await restApi.history(20, this.nextCursor);
 			const formatted = res.toggles.map(prepareItem);
-			const existingIds = new Set(this.items.map((i) => i.id));
+			const existingIds = new SvelteSet(this.items.map((i) => i.id));
 			const newItems = formatted.filter((i) => !existingIds.has(i.id));
 
 			this.items = [...this.items, ...newItems];

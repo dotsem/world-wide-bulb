@@ -28,7 +28,7 @@ export interface ViewerCountEvent {
 	count: number;
 }
 
-class WsClient {
+export class WsClient {
 	private socket?: WebSocket;
 	private handlers: Record<string, Array<(msg: any) => void>> = {};
 	private isUnloading = false;

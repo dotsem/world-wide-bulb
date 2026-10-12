@@ -36,4 +36,14 @@ func TestHasher(t *testing.T) {
 
 		assert.NotEqual(t, hash1, hash2)
 	})
+
+	t.Run("signs and verifies valid signature", func(t *testing.T) {
+		hasher := utils.NewHasher("secret_salt")
+		sig := hasher.Sign("payload-uuid-123")
+
+		assert.NotEmpty(t, sig)
+		assert.True(t, hasher.Verify("payload-uuid-123", sig))
+		assert.False(t, hasher.Verify("payload-uuid-123", "invalid-sig"))
+		assert.False(t, hasher.Verify("tampered-payload", sig))
+	})
 }

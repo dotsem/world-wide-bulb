@@ -30,8 +30,14 @@ func (h *Handler) PostToggle(c *gin.Context) {
 
 	toggle, remainingTime, err := h.engine.Toggle(c.Request.Context(), h.hasher.Hash(primaryKey))
 	if err != nil {
-		if errors.Is(err, bulb.ErrCooldown) {
-			remaining := h.engine.GetRemainingCooldown(h.hasher.Hash(primaryKey))
+		if errors.Is(err, bulb.ErrCooldown) ||
+			errors.Is(err, bulb.ErrGlobalDebounce) ||
+			errors.Is(err, bulb.ErrRapidPenalty) ||
+			errors.Is(err, bulb.ErrVelocityLimit) {
+			remaining := remainingTime
+			if remaining <= 0 {
+				remaining = h.engine.GetRemainingCooldown(h.hasher.Hash(primaryKey))
+			}
 			c.JSON(http.StatusTooManyRequests, gin.H{
 				errKey:        err.Error(),
 				"cooldown_ms": remaining.Milliseconds(),
@@ -45,7 +51,7 @@ func (h *Handler) PostToggle(c *gin.Context) {
 	}
 
 	if secondaryKey != "" {
-		remainingTime = h.engine.RecordCooldown(h.hasher.Hash(secondaryKey))
+		_ = h.engine.RecordCooldown(h.hasher.Hash(secondaryKey))
 	}
 
 	if payload, err := json.Marshal(ws.FromToggle(toggle)); err == nil {

@@ -1,27 +1,45 @@
-# Lefthook Git Hooks Configuration
-# https://github.com/evilmartians/lefthook
-
 pre-commit:
   parallel: true
-  commands:
-    go-fmt:
-      glob: "*.go"
-      run: just go fmt
-      stage_fixed: true
-    go-lint:
-      glob: "*.go"
-      run: just go lint
-    web-fmt:
+  jobs:
+    - name: gitleaks
+      tags:
+        - security
+      skip:
+        - run: "! command -v gitleaks >/dev/null 2>&1"
+      run: gitleaks protect --verbose --staged
+
+    - name: web
+      tags:
+        - web
       glob: "web/**/*.{js,ts,svelte,json,css,html,md}"
-      run: just web fmt
-      stage_fixed: true
-    web-lint:
-      glob: "web/**/*.{js,ts,svelte}"
-      run: just web lint
-    web-check:
-      glob: "web/**/*.{ts,svelte}"
-      run: just web check
-    docgen:
+      group:
+        parallel: false
+        jobs:
+          - name: format
+            run: just web fmt
+            stage_fixed: true
+          - name: lint
+            run: just web lint
+          - name: check
+            run: just web check
+
+    - name: go
+      tags:
+        - backend
+        - go
+      glob: "**/*.go"
+      group:
+        parallel: false
+        jobs:
+          - name: format
+            run: just go fmt
+            stage_fixed: true
+          - name: lint
+            run: just go lint
+
+    - name: docs
+      tags:
+        - docs
       glob: "{justfile,just/*.just,cmd/docgen/*.go}"
       run: just docgen
       stage_fixed: true

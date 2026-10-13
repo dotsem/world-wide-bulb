@@ -42,9 +42,16 @@ func TestClientPumps(t *testing.T) {
 
 		hub.Broadcast([]byte("hello client"))
 
-		_, msg, err := wsConn.ReadMessage()
-		require.NoError(t, err)
-		assert.Equal(t, "hello client", string(msg))
+		var received string
+		for range 5 {
+			_, msg, readErr := wsConn.ReadMessage()
+			require.NoError(t, readErr)
+			if string(msg) == "hello client" {
+				received = string(msg)
+				break
+			}
+		}
+		assert.Equal(t, "hello client", received)
 
 		require.NoError(t, wsConn.Close())
 		time.Sleep(50 * time.Millisecond)

@@ -42,7 +42,7 @@ func NewCooldown(cooldownTime time.Duration) *Cooldown {
 	rapidWindow := 2 * time.Second
 	rapidPenalty := 60 * time.Second
 	if cooldownTime < 1*time.Second {
-		rapidWindow = cooldownTime / 5
+		rapidWindow = cooldownTime * 3
 		rapidPenalty = cooldownTime * 6
 	}
 

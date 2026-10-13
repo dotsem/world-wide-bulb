@@ -171,7 +171,7 @@ func TestPostToggle(t *testing.T) {
 
 		for i := range 3 {
 			if i > 0 {
-				time.Sleep(11 * time.Millisecond)
+				time.Sleep(15 * time.Millisecond)
 			}
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/toggle", nil)
 			req.RemoteAddr = "192.168.1.77:12345"

@@ -121,10 +121,10 @@ func TestCooldown(t *testing.T) {
 		c := NewCooldown(10 * time.Millisecond)
 
 		c.Record("clockwork_bot")
-		time.Sleep(11 * time.Millisecond)
+		time.Sleep(15 * time.Millisecond)
 
 		c.Record("clockwork_bot")
-		time.Sleep(11 * time.Millisecond)
+		time.Sleep(15 * time.Millisecond)
 
 		nextCooldown := c.Record("clockwork_bot")
 		assert.Equal(t, 60*time.Millisecond, nextCooldown)
@@ -138,7 +138,7 @@ func TestCooldown(t *testing.T) {
 		c := NewCooldown(10 * time.Millisecond)
 
 		c.Record("slow_actor")
-		time.Sleep(20 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 
 		c.Record("slow_actor")
 		c.mu.Lock()

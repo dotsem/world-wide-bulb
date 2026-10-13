@@ -108,7 +108,7 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 	})
 
 	t.Run("generates new ID when cookie is empty string", func(t *testing.T) {
-		h := NewHandler(nil, nil, nil, nil, nil, false)
+		h := NewHandler(nil, nil, nil, nil, hasher, false)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 

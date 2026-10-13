@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"testing"
+	"time"
 	"world-wide-bulb/internal/store"
 
 	"github.com/stretchr/testify/assert"
@@ -107,16 +108,28 @@ func TestToggle(t *testing.T) {
 		assert.ErrorIs(t, err, ErrCooldown)
 	})
 
-	t.Run("different IP allowed during other IP cooldown", func(t *testing.T) {
-		e := NewEngine(ctx, &mockStore{})
+	t.Run("different IP allowed during other IP cooldown after global debounce", func(t *testing.T) {
+		e := NewEngineWithCooldown(ctx, &mockStore{}, NewCooldown(10*time.Millisecond))
 
 		_, _, err := e.Toggle(ctx, "ip_1")
 		assert.NoError(t, err)
+
+		time.Sleep(3 * time.Millisecond)
 
 		toggle, remainingTime, err := e.Toggle(ctx, "ip_2")
 		assert.NoError(t, err)
 		assert.False(t, toggle.State)
 		assert.NotZero(t, remainingTime)
+	})
+
+	t.Run("blocks rapid toggle from different IP within global debounce window", func(t *testing.T) {
+		e := NewEngine(ctx, &mockStore{})
+
+		_, _, err := e.Toggle(ctx, "ip_1")
+		assert.NoError(t, err)
+
+		_, _, err = e.Toggle(ctx, "ip_2")
+		assert.ErrorIs(t, err, ErrGlobalDebounce)
 	})
 
 	t.Run("db failure does not mutate state or record cooldown", func(t *testing.T) {

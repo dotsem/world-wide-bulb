@@ -17,6 +17,12 @@ import (
 var (
 	// ErrCooldown indicates a user tried to toggle before their cooldown expired.
 	ErrCooldown = errors.New("rate limited: please wait before toggling again")
+	// ErrGlobalDebounce indicates the lamp toggled too recently globally.
+	ErrGlobalDebounce = errors.New("lamp just toggled: please wait a moment")
+	// ErrRapidPenalty indicates repeated rapid clockwork toggles triggered a cooldown penalty.
+	ErrRapidPenalty = errors.New("rapid toggle streak detected: taking a 1-minute breather")
+	// ErrVelocityLimit indicates sustained toggle volume exceeded the rolling quota.
+	ErrVelocityLimit = errors.New("sustained toggle limit reached (max 10 / 4 min): cooldown extended")
 	// ErrNotFound indicates a toggle record with the specified UUID was not found.
 	ErrNotFound = errors.New("toggle not found")
 	// ErrInvalidUUID indicates the provided string is not a valid UUID.
@@ -45,11 +51,11 @@ type Engine struct {
 	cooldown *Cooldown
 }
 
-// NewEngine initializes a new bulb Engine and hydrates state from the database.
-func NewEngine(ctx context.Context, s Store) *Engine {
+// NewEngineWithCooldown initializes a new bulb Engine with a custom Cooldown manager.
+func NewEngineWithCooldown(ctx context.Context, s Store, c *Cooldown) *Engine {
 	e := &Engine{
 		store:    s,
-		cooldown: NewCooldown(CooldownTime),
+		cooldown: c,
 	}
 
 	toggle, err := s.GetLatestToggle(ctx)
@@ -61,6 +67,11 @@ func NewEngine(ctx context.Context, s Store) *Engine {
 
 	e.state.Store(toggle.State)
 	return e
+}
+
+// NewEngine initializes a new bulb Engine and hydrates state from the database.
+func NewEngine(ctx context.Context, s Store) *Engine {
+	return NewEngineWithCooldown(ctx, s, NewCooldown(CooldownTime))
 }
 
 // GetState returns the current state of the bulb.
@@ -77,15 +88,15 @@ func (e *Engine) RecordCooldown(ipHash string) time.Duration {
 // It returns the new toggle record and an error if the toggle failed
 // The toggle is rate limited based on the cooldown time
 func (e *Engine) Toggle(ctx context.Context, ipHash string) (store.Toggle, time.Duration, error) {
-	if !e.cooldown.CanToggle(ipHash) {
-		return store.Toggle{}, time.Duration(0), ErrCooldown
+	if remaining, err := e.cooldown.CheckCanToggle(ipHash); err != nil {
+		return store.Toggle{}, remaining, err
 	}
 
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	if !e.cooldown.CanToggle(ipHash) {
-		return store.Toggle{}, time.Duration(0), ErrCooldown
+	if remaining, err := e.cooldown.CheckCanToggle(ipHash); err != nil {
+		return store.Toggle{}, remaining, err
 	}
 
 	newState := !e.state.Load()

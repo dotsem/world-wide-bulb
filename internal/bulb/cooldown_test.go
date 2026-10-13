@@ -32,11 +32,12 @@ func TestCooldown(t *testing.T) {
 		assert.True(t, c.CanToggle("ip_1"))
 	})
 
-	t.Run("isolates cooldown between different IPs", func(t *testing.T) {
+	t.Run("isolates cooldown between different IPs after global debounce", func(t *testing.T) {
 		c := NewCooldown(100 * time.Millisecond)
 
 		c.Record("ip_1")
 		assert.False(t, c.CanToggle("ip_1"))
+		time.Sleep(15 * time.Millisecond)
 		assert.True(t, c.CanToggle("ip_2"))
 	})
 
@@ -70,10 +71,13 @@ func TestCooldown(t *testing.T) {
 
 	t.Run("CheckAndRecord cleans up expired history entries when maxHistoryEntries exceeded", func(t *testing.T) {
 		c := NewCooldown(1 * time.Millisecond)
-		past := time.Now().Add(-10 * time.Millisecond)
+		past := time.Now().Add(-5 * time.Minute)
 		c.mu.Lock()
 		for i := range 502 {
-			c.history[string(rune(i))] = past
+			c.actors[string(rune(i))] = &actorRecord{
+				lastToggle:    past,
+				cooldownUntil: past,
+			}
 		}
 		c.mu.Unlock()
 
@@ -82,18 +86,78 @@ func TestCooldown(t *testing.T) {
 
 	t.Run("Record cleans up expired history entries when maxHistoryEntries exceeded", func(t *testing.T) {
 		c := NewCooldown(1 * time.Millisecond)
-		past := time.Now().Add(-10 * time.Millisecond)
+		past := time.Now().Add(-5 * time.Minute)
 		c.mu.Lock()
 		for i := range 502 {
-			c.history[string(rune(i))] = past
+			c.actors[string(rune(i))] = &actorRecord{
+				lastToggle:    past,
+				cooldownUntil: past,
+			}
 		}
 		c.mu.Unlock()
 
 		c.Record("ip_trigger_cleanup")
 		c.mu.Lock()
-		count := len(c.history)
+		count := len(c.actors)
 		c.mu.Unlock()
 		assert.Equal(t, 1, count)
+	})
+
+	t.Run("enforces global debounce across different actors", func(t *testing.T) {
+		c := NewCooldown(100 * time.Millisecond)
+		c.Record("actor_1")
+
+		remaining, err := c.CheckCanToggle("actor_2")
+		assert.ErrorIs(t, err, ErrGlobalDebounce)
+		assert.Greater(t, remaining, time.Duration(0))
+
+		time.Sleep(15 * time.Millisecond)
+
+		_, err = c.CheckCanToggle("actor_2")
+		assert.NoError(t, err)
+	})
+
+	t.Run("triggers 60s rapid penalty on 3rd consecutive rapid toggle", func(t *testing.T) {
+		c := NewCooldown(10 * time.Millisecond)
+
+		c.Record("clockwork_bot")
+		time.Sleep(15 * time.Millisecond)
+
+		c.Record("clockwork_bot")
+		time.Sleep(15 * time.Millisecond)
+
+		nextCooldown := c.Record("clockwork_bot")
+		assert.Equal(t, 60*time.Millisecond, nextCooldown)
+
+		remaining, err := c.CheckCanToggle("clockwork_bot")
+		assert.ErrorIs(t, err, ErrRapidPenalty)
+		assert.Greater(t, remaining, 10*time.Millisecond)
+	})
+
+	t.Run("resets rapid streak when actor waits past rapid window", func(t *testing.T) {
+		c := NewCooldown(10 * time.Millisecond)
+
+		c.Record("slow_actor")
+		time.Sleep(50 * time.Millisecond)
+
+		c.Record("slow_actor")
+		c.mu.Lock()
+		streak := c.actors["slow_actor"].rapidStreak
+		c.mu.Unlock()
+		assert.Equal(t, 1, streak)
+	})
+
+	t.Run("enforces velocity limit after 10 toggles within rolling window", func(t *testing.T) {
+		c := NewCooldown(1 * time.Millisecond)
+
+		for range 10 {
+			c.Record("velocity_actor")
+			time.Sleep(2 * time.Millisecond)
+		}
+
+		remaining, err := c.CheckCanToggle("velocity_actor")
+		assert.ErrorIs(t, err, ErrVelocityLimit)
+		assert.Greater(t, remaining, 3*time.Minute)
 	})
 
 	t.Run("GetRemainingCooldown returns 0 for unrecorded IP", func(t *testing.T) {

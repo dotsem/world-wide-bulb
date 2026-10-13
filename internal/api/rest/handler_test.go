@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"testing"
+	"time"
 	"world-wide-bulb/internal/api/rest"
 	"world-wide-bulb/internal/api/sse"
 	"world-wide-bulb/internal/api/ws"
@@ -23,9 +24,10 @@ type testEnv struct {
 	broker  *sse.Broker
 	hub     *ws.Hub
 	db      *sql.DB
+	hasher  *utils.Hasher
 }
 
-func setupTestEnv(t *testing.T) *testEnv {
+func setupTestEnvWithCooldown(t *testing.T, cd time.Duration) *testEnv {
 	t.Helper()
 	gin.SetMode(gin.TestMode)
 
@@ -38,7 +40,7 @@ func setupTestEnv(t *testing.T) *testEnv {
 	require.NoError(t, err)
 
 	queries := store.New(db)
-	engine := bulb.NewEngine(ctx, queries)
+	engine := bulb.NewEngineWithCooldown(ctx, queries, bulb.NewCooldown(cd))
 	hasher := utils.NewHasher("test_salt")
 	hub := ws.NewHub()
 	broker := sse.NewBroker()
@@ -59,8 +61,13 @@ func setupTestEnv(t *testing.T) *testEnv {
 		router:  r,
 		queries: queries,
 		engine:  engine,
-		hub:     hub,
 		broker:  broker,
+		hub:     hub,
 		db:      db,
+		hasher:  hasher,
 	}
+}
+
+func setupTestEnv(t *testing.T) *testEnv {
+	return setupTestEnvWithCooldown(t, bulb.CooldownTime)
 }

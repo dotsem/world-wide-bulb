@@ -93,7 +93,7 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 	})
 
 	t.Run("sets secure cookie in production mode", func(t *testing.T) {
-		h := NewHandler(nil, nil, nil, nil, nil, true)
+		h := NewHandler(nil, nil, nil, nil, hasher, true)
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 

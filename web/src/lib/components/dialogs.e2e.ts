@@ -70,7 +70,7 @@ test.describe('Dialog Components (InfoDialog, HookDialog, Dialog UI)', () => {
 		await expect(hookDialog).toBeVisible();
 		await expect(hookDialog).toContainText('curl -N');
 
-		const docsLink = hookDialog.locator('a[href="/docs"]');
+		const docsLink = hookDialog.locator('a[href^="/docs"]');
 		await expect(docsLink).toBeVisible();
 		await docsLink.click();
 

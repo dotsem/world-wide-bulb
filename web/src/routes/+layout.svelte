@@ -29,9 +29,7 @@
 	data-theme={theme}
 	class="min-h-screen bg-app-bg text-app-text flex flex-col font-sans selection:bg-app-accent/30 selection:text-app-accent relative"
 >
-	{#if !isDocsPage}
-		<NavToolBar />
-	{/if}
+	<NavToolBar />
 
 	<main class="flex-1 flex flex-col">
 		{@render children()}

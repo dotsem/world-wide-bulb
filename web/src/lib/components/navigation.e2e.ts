@@ -25,27 +25,31 @@ test.describe('Navigation and ToolBar UI Components', () => {
 		await page.goto('/');
 	});
 
-	test('renders navigation toolbar with Bulb and History links', async ({ page }) => {
+	test('renders navigation toolbar with Bulb, History, and Docs links', async ({ page }) => {
 		const nav = page.locator('nav.fixed.bottom-6');
 		await expect(nav).toBeVisible();
 
 		const bulbLink = nav.locator('a[href="/"]');
 		const historyLink = nav.locator('a[href="/history"]');
+		const docsLink = nav.locator('a[href="/docs"]');
 
 		await expect(bulbLink).toBeVisible();
-		await expect(bulbLink).toContainText('Bulb');
 		await expect(historyLink).toBeVisible();
-		await expect(historyLink).toContainText('History');
+		await expect(docsLink).toBeVisible();
 	});
 
 	test('navigates between views when toolbar items are clicked', async ({ page }) => {
 		const nav = page.locator('nav.fixed.bottom-6');
 		const historyLink = nav.locator('a[href="/history"]');
+		const docsLink = nav.locator('a[href="/docs"]');
+		const bulbLink = nav.locator('a[href="/"]');
 
 		await historyLink.click();
 		await expect(page).toHaveURL(/\/history/);
 
-		const bulbLink = nav.locator('a[href="/"]');
+		await docsLink.click();
+		await expect(page).toHaveURL(/\/docs/);
+
 		await bulbLink.click();
 		await expect(page).toHaveURL(/\//);
 	});

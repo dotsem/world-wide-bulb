@@ -1,7 +1,6 @@
 <script lang="ts">
+	import { Language } from '$lib/types/example-languages.types';
 	import { Check, Code, Copy } from '@lucide/svelte';
-
-	type Language = 'javascript' | 'python' | 'go' | 'curl';
 
 	let {
 		highlighted,
@@ -11,7 +10,7 @@
 		raw: Record<Language, string>;
 	} = $props();
 
-	let activeLang = $state<Language>('javascript');
+	let activeLang = $state<Language>(Language.Python);
 	let copiedLang = $state<string | null>(null);
 
 	function copySnippet(lang: Language) {

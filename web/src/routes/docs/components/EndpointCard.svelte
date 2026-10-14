@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Check, Copy, ExternalLink } from '@lucide/svelte';
 	import RestTypeLabel from './RestTypeLabel.svelte';
+	import { Language } from '$lib/types/example-languages.types';
 
 	type Param = {
 		name: string;
@@ -8,8 +9,6 @@
 		required: boolean;
 		description: string;
 	};
-
-	type Language = 'curl' | 'javascript' | 'python' | 'go';
 
 	let {
 		id,
@@ -35,11 +34,9 @@
 		>;
 	} = $props();
 
-	const availableLangs = $derived(
-		(['curl', 'javascript', 'python', 'go'] as const).filter((l) => codeExamples && codeExamples[l])
-	);
+	let activeLang = $state<Language>(Language.Python);
 
-	let activeLang = $state<Language>('curl');
+	const availableLangs = $derived(Object.values(Language).filter((lang) => codeExamples?.[lang]));
 
 	$effect(() => {
 		if (availableLangs.length > 0 && !availableLangs.includes(activeLang)) {

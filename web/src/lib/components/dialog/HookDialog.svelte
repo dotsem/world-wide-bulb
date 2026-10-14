@@ -67,7 +67,7 @@
 
 	{#snippet footer()}
 		<a
-			href={resolve('/docs')}
+			href={resolve('/docs#sse-events')}
 			onclick={() => (isOpen = false)}
 			class="text-xs font-semibold text-app-accent hover:underline inline-flex items-center gap-1"
 		>

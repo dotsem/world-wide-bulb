@@ -125,7 +125,7 @@
 			<div class="lg:col-span-5 space-y-2">
 				<h4 class="text-xs font-bold uppercase tracking-wider text-app-muted">Response Payload</h4>
 				<div
-					class="rounded-xl border border-app-border bg-app-surface-solid overflow-hidden text-xs font-mono p-3 leading-relaxed custom-scrollbar max-h-80"
+					class="rounded-xl border border-app-border bg-app-surface-solid overflow-auto text-xs font-mono p-3 leading-relaxed custom-scrollbar max-h-80"
 				>
 					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 					{@html responseHtml}

@@ -21,6 +21,10 @@
 	--color-app-bulb-base-light: var(--app-bulb-base-light);
 }
 
+html {
+	scroll-behavior: smooth;
+}
+
 html,
 body {
 	scrollbar-gutter: stable;

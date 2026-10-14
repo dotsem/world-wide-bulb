@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { ResolvedPathname } from '$app/types';
 
 	let {
 		href,
@@ -8,7 +9,7 @@
 		badge,
 		onclick
 	}: {
-		href: string;
+		href: ResolvedPathname;
 		title: string;
 		active?: boolean;
 		badge?: Snippet;

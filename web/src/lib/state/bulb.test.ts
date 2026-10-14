@@ -13,7 +13,7 @@ vi.mock('$lib/api/rest', () => ({
 }));
 
 vi.mock('$lib/api/ws.svelte', () => {
-	const handlers: Record<string, ((...args: any[]) => void)[]> = {};
+	const handlers: Record<string, ((...args: unknown[]) => void)[]> = {};
 	return {
 		wsClient: {
 			on: vi.fn((event, handler) => {
@@ -21,11 +21,16 @@ vi.mock('$lib/api/ws.svelte', () => {
 				handlers[event].push(handler);
 				return () => {};
 			}),
+			onStateChange: vi.fn((handler) => {
+				handlers['state_changed'] = handlers['state_changed'] || [];
+				handlers['state_changed'].push(handler);
+				return () => {};
+			}),
 			onViewerCount: vi.fn((handler) => {
 				handlers['viewer_count'] = handlers['viewer_count'] || [];
 				handlers['viewer_count'].push(handler);
 			}),
-			emitMock: (event: string, data: any) => {
+			emitMock: (event: string, data: unknown) => {
 				handlers[event]?.forEach((h) => h(data));
 			}
 		}
@@ -73,8 +78,10 @@ describe('BulbState', () => {
 		expect(state.remainingSeconds).toBe(3);
 	});
 
+	type MockWsClient = { emitMock: (event: string, data: unknown) => void };
+
 	it('updates state upon receiving websocket events and applies 1s debounce', () => {
-		const mockEmitter = (wsClient as any).emitMock;
+		const mockEmitter = (wsClient as unknown as MockWsClient).emitMock;
 
 		mockEmitter('state_changed', { state: true });
 		expect(state.isOn).toBe(true);
@@ -86,7 +93,7 @@ describe('BulbState', () => {
 	});
 
 	it('does not reduce longer personal cooldown upon receiving state_changed', () => {
-		const mockEmitter = (wsClient as any).emitMock;
+		const mockEmitter = (wsClient as unknown as MockWsClient).emitMock;
 		state.setCooldown(8000);
 
 		mockEmitter('state_changed', { state: true });
@@ -160,7 +167,7 @@ describe('BulbState', () => {
 		state.lastToggleId = 'toggle-456';
 		state.showReasonPrompt = true;
 		state.lastActionState = true;
-		vi.mocked(restApi.postReason).mockResolvedValueOnce({} as any);
+		vi.mocked(restApi.postReason).mockResolvedValueOnce(undefined);
 
 		await state.submitReason('Working late');
 

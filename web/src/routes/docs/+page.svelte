@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ArrowLeft, BookOpen, Globe, Radio, Webhook } from '@lucide/svelte';
+	import { resolve } from '$app/paths';
 	import DocsBar from './components/DocsBar.svelte';
 	import DocsSection from './components/DocsSection.svelte';
 	import EndpointCard from './components/EndpointCard.svelte';
@@ -46,7 +47,7 @@
 >
 	<div class="flex items-center gap-3.5">
 		<a
-			href="/"
+			href={resolve('/')}
 			class="p-2 rounded-xl text-app-muted hover:text-app-text hover:bg-app-surface-hover transition-colors border border-app-border/40 shrink-0"
 			aria-label="Back to bulb"
 			title="Back to bulb"

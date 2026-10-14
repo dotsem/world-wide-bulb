@@ -102,8 +102,8 @@ export class HistoryState {
 			this.items = res.toggles.map(prepareItem);
 			this.nextCursor = res.next_cursor;
 			this.hasMore = res.has_more;
-		} catch (err: any) {
-			this.error = err?.message || 'Failed to load history items';
+		} catch (err: unknown) {
+			this.error = err instanceof Error ? err.message : 'Failed to load history items';
 		} finally {
 			this.loading = false;
 			this.initialLoading = false;
@@ -125,8 +125,8 @@ export class HistoryState {
 			this.items = [...this.items, ...newItems];
 			this.nextCursor = res.next_cursor;
 			this.hasMore = res.has_more;
-		} catch (err: any) {
-			this.error = err?.message || 'Failed to load history items';
+		} catch (err: unknown) {
+			this.error = err instanceof Error ? err.message : 'Failed to load history items';
 		} finally {
 			this.loading = false;
 			this.initialLoading = false;

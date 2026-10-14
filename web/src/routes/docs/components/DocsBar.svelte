@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Menu, X } from '@lucide/svelte';
+	import { resolve } from '$app/paths';
 	import DocsBarSection from './DocsBarSection.svelte';
 	import DocsBarEndpoint from './DocsBarEndpoint.svelte';
 	import RestTypeLabel from './RestTypeLabel.svelte';
@@ -44,9 +45,9 @@
 		? 'block'
 		: 'hidden lg:block'}"
 >
-	<DocsBarSection title="REST API" href="#rest-api">
+	<DocsBarSection title="REST API" href={resolve('/docs#rest-api')}>
 		<DocsBarEndpoint
-			href="#get-state"
+			href={resolve('/docs#get-state')}
 			title="/state"
 			active={activeId === 'get-state'}
 			onclick={closeMobile}
@@ -57,7 +58,7 @@
 		</DocsBarEndpoint>
 
 		<DocsBarEndpoint
-			href="#get-history"
+			href={resolve('/docs#get-history')}
 			title="/history"
 			active={activeId === 'get-history'}
 			onclick={closeMobile}
@@ -68,7 +69,7 @@
 		</DocsBarEndpoint>
 
 		<DocsBarEndpoint
-			href="#post-toggle"
+			href={resolve('/docs#post-toggle')}
 			title="/toggle"
 			active={activeId === 'post-toggle'}
 			onclick={closeMobile}
@@ -79,7 +80,7 @@
 		</DocsBarEndpoint>
 
 		<DocsBarEndpoint
-			href="#post-reason"
+			href={resolve('/docs#post-reason')}
 			title="/reason"
 			active={activeId === 'post-reason'}
 			onclick={closeMobile}
@@ -90,9 +91,9 @@
 		</DocsBarEndpoint>
 	</DocsBarSection>
 
-	<DocsBarSection title="Server Side Events" href="#sse">
+	<DocsBarSection title="Server Side Events" href={resolve('/docs#sse')}>
 		<DocsBarEndpoint
-			href="#sse-events"
+			href={resolve('/docs#sse-events')}
 			title="/events"
 			active={activeId === 'sse-events'}
 			onclick={closeMobile}
@@ -103,9 +104,9 @@
 		</DocsBarEndpoint>
 	</DocsBarSection>
 
-	<DocsBarSection title="WebSockets" href="#ws">
+	<DocsBarSection title="WebSockets" href={resolve('/docs#ws')}>
 		<DocsBarEndpoint
-			href="#ws-stream"
+			href={resolve('/docs#ws-stream')}
 			title="/ws"
 			active={activeId === 'ws-stream'}
 			onclick={closeMobile}

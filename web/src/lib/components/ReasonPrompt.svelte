@@ -60,8 +60,8 @@
 			successTimeout = setTimeout(() => {
 				isSuccess = false;
 			}, 1500);
-		} catch (err: any) {
-			errorMsg = err?.message || 'Failed to submit reason';
+		} catch (err) {
+			errorMsg = err instanceof Error ? err.message : 'Failed to submit reason';
 		} finally {
 			isSubmitting = false;
 		}

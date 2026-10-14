@@ -1,12 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { ResolvedPathname } from '$app/types';
 
 	let {
 		href,
 		active = false,
 		children
 	}: {
-		href: string;
+		href: ResolvedPathname;
 		active?: boolean;
 		children?: Snippet;
 	} = $props();

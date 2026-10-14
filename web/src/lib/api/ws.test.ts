@@ -4,27 +4,33 @@ import { WsClient } from './ws.svelte';
 class MockWebSocket {
 	onopen: (() => void) | null = null;
 	onclose: (() => void) | null = null;
-	onmessage: ((event: any) => void) | null = null;
+	onmessage: ((event: { data: string }) => void) | null = null;
 	close = vi.fn();
 }
 
+type TestWsClient = {
+	handleMessage: (msg: Record<string, unknown>) => void;
+};
+
 describe('WsClient', () => {
 	let client: WsClient;
+	let testClient: TestWsClient;
 
 	beforeEach(() => {
 		vi.stubGlobal('WebSocket', MockWebSocket);
 		client = new WsClient();
+		testClient = client as unknown as TestWsClient;
 	});
 
 	it('registers event handler and unsubscribes via returned function', () => {
 		const handler = vi.fn();
 		const unsub = client.on('test_event', handler);
 
-		(client as any).handleMessage({ type: 'test_event', data: 'hello' });
+		testClient.handleMessage({ type: 'test_event', data: 'hello' });
 		expect(handler).toHaveBeenCalledWith({ type: 'test_event', data: 'hello' });
 
 		unsub();
-		(client as any).handleMessage({ type: 'test_event', data: 'world' });
+		testClient.handleMessage({ type: 'test_event', data: 'world' });
 		expect(handler).toHaveBeenCalledTimes(1);
 	});
 
@@ -32,7 +38,7 @@ describe('WsClient', () => {
 		const stateHandler = vi.fn();
 		client.onStateChange(stateHandler);
 
-		(client as any).handleMessage({ state: true, id: 10 });
+		testClient.handleMessage({ state: true, id: 10 });
 		expect(stateHandler).toHaveBeenCalledWith({ state: true, id: 10 });
 	});
 
@@ -40,7 +46,7 @@ describe('WsClient', () => {
 		const reasonHandler = vi.fn();
 		client.onReasonUpdate(reasonHandler);
 
-		(client as any).handleMessage({ type: 'reason_updated', toggle_id: 5, reason: 'Test' });
+		testClient.handleMessage({ type: 'reason_updated', toggle_id: 5, reason: 'Test' });
 		expect(reasonHandler).toHaveBeenCalledWith({
 			type: 'reason_updated',
 			toggle_id: 5,
@@ -52,7 +58,7 @@ describe('WsClient', () => {
 		const countHandler = vi.fn();
 		client.onViewerCount(countHandler);
 
-		(client as any).handleMessage({ type: 'viewer_count', count: 99 });
+		testClient.handleMessage({ type: 'viewer_count', count: 99 });
 		expect(countHandler).toHaveBeenCalledWith({ type: 'viewer_count', count: 99 });
 	});
 });

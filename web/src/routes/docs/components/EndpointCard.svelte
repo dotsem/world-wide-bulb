@@ -164,7 +164,7 @@
 							{#if codeExamples[activeLang]?.repoPath}
 								<a
 									target="_blank"
-									rel="noreferrer"
+									rel="noreferrer external"
 									href={repoBase + codeExamples[activeLang]?.repoPath}
 									class="inline-flex items-center gap-1 text-app-accent hover:underline"
 								>

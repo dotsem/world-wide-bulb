@@ -33,7 +33,7 @@
 	<a
 		{href}
 		target="_blank"
-		rel="noopener noreferrer"
+		rel="noopener noreferrer external"
 		class="inline-flex items-center gap-1.5 text-xs font-medium text-app-muted hover:text-app-accent transition-colors duration-200 underline underline-offset-2 focus:outline-none focus:ring-2 focus:ring-app-accent/50"
 	>
 		<Icon size={14} />

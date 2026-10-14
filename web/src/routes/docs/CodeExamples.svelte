@@ -70,7 +70,7 @@
 				{:else}
 					<a
 						target="_blank"
-						rel="noreferrer"
+						rel="noreferrer external"
 						href={repoPath + langToPath[activeLang]}
 						class="text-app-accent underline">{langToPath[activeLang]}</a
 					>

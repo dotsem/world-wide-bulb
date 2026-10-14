@@ -30,7 +30,7 @@ export interface ViewerCountEvent {
 
 export class WsClient {
 	private socket?: WebSocket;
-	private handlers: Record<string, Array<(msg: any) => void>> = {};
+	private handlers: Record<string, Array<(msg: unknown) => void>> = {};
 	private isUnloading = false;
 	isConnected = $state(false);
 
@@ -66,26 +66,28 @@ export class WsClient {
 		};
 	}
 
-	private handleMessage(msg: any) {
+	private handleMessage(msg: Record<string, unknown>) {
 		if (msg.state !== undefined && this.handlers['state_changed']) {
 			this.handlers['state_changed'].forEach((handler) => handler(msg));
 		}
-		if (msg.type && this.handlers[msg.type]) {
+		if (typeof msg.type === 'string' && this.handlers[msg.type]) {
 			this.handlers[msg.type].forEach((handler) => handler(msg));
 		}
 	}
 
-	on(eventType: string, handler: (msg: any) => void): () => void {
+	on<T>(eventType: string, handler: (msg: T) => void): () => void {
 		if (!this.handlers[eventType]) {
 			this.handlers[eventType] = [];
 		}
-		this.handlers[eventType].push(handler);
+		this.handlers[eventType].push(handler as (msg: unknown) => void);
 		return () => this.off(eventType, handler);
 	}
 
-	off(eventType: string, handler: (msg: any) => void) {
+	off<T>(eventType: string, handler: (msg: T) => void) {
 		if (!this.handlers[eventType]) return;
-		this.handlers[eventType] = this.handlers[eventType].filter((h) => h !== handler);
+		this.handlers[eventType] = this.handlers[eventType].filter(
+			(h) => h !== (handler as (msg: unknown) => void)
+		);
 	}
 
 	onStateChange(handler: (msg: StateChangedEvent) => void): () => void {

@@ -1,12 +1,13 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { RotateCcwClock, Sun } from '@lucide/svelte';
 	import ToolBar from './ui/ToolBar.svelte';
 	import ToolBarItem from './ui/ToolBarItem.svelte';
 
 	const links = [
-		{ href: '/', label: 'Bulb', icon: Sun },
-		{ href: '/history', label: 'History', icon: RotateCcwClock }
+		{ href: resolve('/'), label: 'Bulb', icon: Sun },
+		{ href: resolve('/history'), label: 'History', icon: RotateCcwClock }
 	];
 
 	let activeIndex = $derived(page.url.pathname === '/history' ? 1 : 0);

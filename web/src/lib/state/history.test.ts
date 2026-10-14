@@ -9,9 +9,22 @@ vi.mock('$lib/api/rest', () => ({
 	}
 }));
 
+type MockHistoryWsClient = {
+	emitStateChange: (msg: {
+		id: number;
+		state: boolean;
+		reason?: string;
+		created_at?: string;
+	}) => void;
+	emitReasonUpdate: (msg: { type: string; toggle_id: number; reason: string }) => void;
+};
+
 vi.mock('$lib/api/ws.svelte', () => {
-	let stateChangeHandler: ((msg: any) => void) | undefined;
-	let reasonUpdateHandler: ((msg: any) => void) | undefined;
+	let stateChangeHandler:
+		| ((msg: { id: number; state: boolean; reason?: string; created_at?: string }) => void)
+		| undefined;
+	let reasonUpdateHandler:
+		((msg: { type: string; toggle_id: number; reason: string }) => void) | undefined;
 
 	return {
 		wsClient: {
@@ -23,8 +36,14 @@ vi.mock('$lib/api/ws.svelte', () => {
 				reasonUpdateHandler = handler;
 				return () => {};
 			}),
-			emitStateChange: (msg: any) => stateChangeHandler?.(msg),
-			emitReasonUpdate: (msg: any) => reasonUpdateHandler?.(msg)
+			emitStateChange: (msg: {
+				id: number;
+				state: boolean;
+				reason?: string;
+				created_at?: string;
+			}) => stateChangeHandler?.(msg),
+			emitReasonUpdate: (msg: { type: string; toggle_id: number; reason: string }) =>
+				reasonUpdateHandler?.(msg)
 		}
 	};
 });
@@ -132,7 +151,7 @@ describe('HistoryState', () => {
 			}
 		];
 
-		(wsClient as any).emitStateChange({
+		(wsClient as unknown as MockHistoryWsClient).emitStateChange({
 			id: 6,
 			state: false,
 			reason: 'Leaving room',
@@ -156,7 +175,7 @@ describe('HistoryState', () => {
 			}
 		];
 
-		(wsClient as any).emitStateChange({
+		(wsClient as unknown as MockHistoryWsClient).emitStateChange({
 			id: 5,
 			state: true,
 			reason: 'Correction'
@@ -180,7 +199,7 @@ describe('HistoryState', () => {
 		];
 		const refreshSpy = vi.spyOn(state, 'refresh').mockImplementation(async () => {});
 
-		(wsClient as any).emitStateChange({
+		(wsClient as unknown as MockHistoryWsClient).emitStateChange({
 			id: 8,
 			state: false
 		});
@@ -200,7 +219,7 @@ describe('HistoryState', () => {
 			}
 		];
 
-		(wsClient as any).emitReasonUpdate({
+		(wsClient as unknown as MockHistoryWsClient).emitReasonUpdate({
 			type: 'reason_updated',
 			toggle_id: 10,
 			reason: 'Because darkness'

@@ -10,7 +10,7 @@ export class BulbState {
 	private timer?: ReturnType<typeof setInterval>;
 
 	constructor() {
-		wsClient.on('state_changed', (msg) => {
+		wsClient.onStateChange((msg) => {
 			this.isOn = msg.state;
 			if (this.remainingMs < 1000) {
 				this.setCooldown(1000);
@@ -89,12 +89,13 @@ export class BulbState {
 			this.lastActionState = res.state;
 			this.showReasonPrompt = true;
 			this.setCooldown(res.cooldown_ms);
-		} catch (err: any) {
+		} catch (err: unknown) {
 			this.isOn = prevState;
-			if (err?.cooldown_ms) {
-				this.setCooldown(err.cooldown_ms);
+			const error = err as { message?: string; cooldown_ms?: number } | undefined;
+			if (error?.cooldown_ms) {
+				this.setCooldown(error.cooldown_ms);
 			}
-			toast.error(err?.message || 'Failed to toggle bulb');
+			toast.error(error?.message || 'Failed to toggle bulb');
 		}
 	};
 
@@ -105,8 +106,9 @@ export class BulbState {
 			this.showReasonPrompt = false;
 			this.lastToggleId = null;
 			this.lastActionState = null;
-		} catch (err: any) {
-			toast.error(err?.message || 'Failed to submit reason');
+		} catch (err: unknown) {
+			const message = err instanceof Error ? err.message : 'Failed to submit reason';
+			toast.error(message);
 		}
 	};
 

@@ -59,7 +59,7 @@
 <div class="w-full px-4 sm:px-8 mb-20">
 	{#if historyState.initialLoading}
 		<div class="space-y-3.5">
-			{#each Array(5) as _, i (i)}
+			{#each [0, 1, 2, 3, 4] as i (i)}
 				<div
 					class="animate-pulse flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-app-border bg-app-surface/40 p-4 sm:p-5"
 				>

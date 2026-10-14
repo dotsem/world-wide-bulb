@@ -14,14 +14,38 @@
 
 	let activeSection = $state('overview');
 
+	const sectionDelegates: Record<string, string> = {
+		'rest-api': 'get-state',
+		sse: 'sse-events',
+		ws: 'ws-stream'
+	};
+
 	$effect(() => {
 		if (typeof window === 'undefined') return;
 
+		function updateFromHash() {
+			const hash = window.location.hash.replace('#', '');
+			if (hash) {
+				activeSection = sectionDelegates[hash] ?? hash;
+			}
+		}
+
+		window.addEventListener('hashchange', updateFromHash);
+		updateFromHash();
+
 		const observer = new IntersectionObserver(
 			(entries) => {
-				const visible = entries.find((e) => e.isIntersecting);
+				const visibleArticle = entries.find(
+					(e) => e.isIntersecting && e.target.tagName === 'ARTICLE'
+				);
+				const visibleSection = entries.find(
+					(e) => e.isIntersecting && e.target.tagName === 'SECTION'
+				);
+				const visible = visibleArticle || visibleSection;
+
 				if (visible?.target?.id) {
-					activeSection = visible.target.id;
+					const targetId = visible.target.id;
+					activeSection = sectionDelegates[targetId] ?? targetId;
 				}
 			},
 			{ rootMargin: '-20% 0px -70% 0px' }
@@ -30,7 +54,10 @@
 		const elements = document.querySelectorAll('article[id], section[id]');
 		elements.forEach((el) => observer.observe(el));
 
-		return () => observer.disconnect();
+		return () => {
+			window.removeEventListener('hashchange', updateFromHash);
+			observer.disconnect();
+		};
 	});
 
 	const ep = $derived(data.endpoints);

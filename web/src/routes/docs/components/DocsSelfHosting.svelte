@@ -1,19 +1,46 @@
 <script lang="ts">
-	import { Check, Container, Copy, Server, Terminal } from '@lucide/svelte';
+	import { Check, Container, Copy, Server, ShipCargo, Terminal } from '@lucide/svelte';
 
-	let activeTab = $state<'binary' | 'docker'>('binary');
-	let copied = $state(false);
+	type TabKey = 'binary' | 'docker' | 'docker-compose';
 
-	const binarySnippet = `./wwb -port 8080 -db ./wwb.db`;
-	const dockerSnippet = `docker run -d \\
+	interface TabConfig {
+		label: string;
+		icon: typeof Terminal;
+		comment: string;
+		snippet: string;
+	}
+
+	const tabs: Record<TabKey, TabConfig> = {
+		binary: {
+			label: 'Standalone Binary',
+			icon: Terminal,
+			comment: '# Run directly (or build with `just build`)',
+			snippet: `./wwb -port 8080 -db ./wwb.db`
+		},
+		docker: {
+			label: 'Docker Container',
+			icon: Container,
+			comment: '# Persist database across container rebuilds via volume',
+			snippet: `docker run -d \\
   --name world-wide-bulb \\
   -p 8080:8080 \\
   -v ./data:/data \\
   -e DB_PATH=/data/wwb.db \\
-  ghcr.io/dotsem/world-wide-bulb:latest`;
+  ghcr.io/dotsem/world-wide-bulb:latest`
+		},
+		'docker-compose': {
+			label: 'Docker Compose',
+			icon: ShipCargo,
+			comment: '# Make sure you populated the .env file!',
+			snippet: `docker compose up -d`
+		}
+	};
+
+	let activeTab = $state<TabKey>('binary');
+	let copied = $state(false);
 
 	async function copySnippet() {
-		const text = activeTab === 'binary' ? binarySnippet : dockerSnippet;
+		const text = tabs[activeTab].snippet;
 		if (typeof navigator !== 'undefined' && navigator.clipboard) {
 			await navigator.clipboard.writeText(text);
 			copied = true;
@@ -21,6 +48,22 @@
 		}
 	}
 </script>
+
+{#snippet tabButton(key: TabKey)}
+	{@const tab = tabs[key]}
+	{@const Icon = tab.icon}
+	<button
+		type="button"
+		onclick={() => (activeTab = key)}
+		class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer {activeTab ===
+		key
+			? 'bg-app-accent text-app-accent-contrast shadow-sm'
+			: 'text-app-muted hover:text-app-text hover:bg-app-surface-hover'}"
+	>
+		<Icon size={14} />
+		<span>{tab.label}</span>
+	</button>
+{/snippet}
 
 <section id="self-hosting" class="scroll-mt-28 space-y-6 pt-4">
 	<div class="space-y-1.5">
@@ -54,30 +97,9 @@
 			class="flex items-center justify-between border-b border-app-border bg-app-surface-solid px-4 py-2.5"
 		>
 			<div class="flex items-center gap-2">
-				<button
-					type="button"
-					onclick={() => (activeTab = 'binary')}
-					class={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-						activeTab === 'binary'
-							? 'bg-app-accent text-app-accent-contrast shadow-sm'
-							: 'text-app-muted hover:text-app-text hover:bg-app-surface-hover'
-					}`}
-				>
-					<Terminal size={14} />
-					<span>Standalone Binary</span>
-				</button>
-				<button
-					type="button"
-					onclick={() => (activeTab = 'docker')}
-					class={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-						activeTab === 'docker'
-							? 'bg-app-accent text-app-accent-contrast shadow-sm'
-							: 'text-app-muted hover:text-app-text hover:bg-app-surface-hover'
-					}`}
-				>
-					<Container size={14} />
-					<span>Docker Container</span>
-				</button>
+				{#each Object.keys(tabs) as TabKey[] as key (key)}
+					{@render tabButton(key)}
+				{/each}
 			</div>
 
 			<button
@@ -99,15 +121,8 @@
 
 		<!-- Code Display -->
 		<div class="p-4 bg-app-bg overflow-x-auto text-xs font-mono text-app-text leading-relaxed">
-			{#if activeTab === 'binary'}
-				<div class="text-app-muted mb-2"># Run directly (or build with `just build`)</div>
-				<pre class="select-all">{binarySnippet}</pre>
-			{:else}
-				<div class="text-app-muted mb-2">
-					# Persist database across container rebuilds via volume
-				</div>
-				<pre class="select-all">{dockerSnippet}</pre>
-			{/if}
+			<div class="text-app-muted mb-2">{tabs[activeTab].comment}</div>
+			<pre class="select-all">{tabs[activeTab].snippet}</pre>
 		</div>
 
 		<!-- Flags Reference Footer -->

@@ -22,7 +22,7 @@
 		<p class="font-mono font-bold text-app-accent">event: {type}</p>
 		<p class="text-xs text-app-muted">{sentWhen}</p>
 		<div
-			class="rounded-lg bg-app-surface-solid border border-app-border/60 text-xs font-mono text-app-text overflow-hidden"
+			class="rounded-lg bg-app-surface-solid border border-app-border/60 text-xs font-mono text-app-text overflow-x-auto custom-scrollbar"
 		>
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 			{@html highlightedHtml}

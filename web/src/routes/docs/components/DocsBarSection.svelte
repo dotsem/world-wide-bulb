@@ -5,10 +5,12 @@
 	let {
 		title,
 		href,
+		onclick,
 		children
 	}: {
 		title: string;
 		href?: ResolvedPathname;
+		onclick?: () => void;
 		children: Snippet;
 	} = $props();
 </script>
@@ -18,6 +20,7 @@
 		<a
 			{href}
 			class="block text-[11px] font-bold uppercase tracking-wider text-app-muted hover:text-app-text px-3 py-1 transition-colors"
+			{onclick}
 		>
 			{title}
 		</a>

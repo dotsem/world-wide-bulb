@@ -3,6 +3,10 @@
 	import Header from '$lib/components/Header.svelte';
 </script>
 
+<svelte:head>
+	<title>World Wide Bulb</title>
+</svelte:head>
+
 <Header />
 <div
 	class="flex-1 flex flex-col items-center justify-center relative overflow-hidden px-4 py-8 min-h-[calc(100vh-5rem)]"

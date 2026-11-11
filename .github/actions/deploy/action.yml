@@ -149,7 +149,7 @@ runs:
         target: ${{ inputs.deploy-path }}
 
     - name: Deploy to VM
-      uses: appleboy/ssh-action@v1.0.3
+      uses: appleboy/ssh-action@v1.2.5
       with:
         host: ${{ inputs.ssh-host }}
         username: ${{ inputs.ssh-user }}

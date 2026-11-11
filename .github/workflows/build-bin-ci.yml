@@ -35,7 +35,7 @@ jobs:
         uses: ./.github/actions/setup-backend
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v4
 
       - name: Build Single Binary with Embedded Svelte
         run: just build-prod

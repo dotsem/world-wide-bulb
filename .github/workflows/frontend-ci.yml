@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/setup-frontend
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v4
 
       - name: Run ESLint
         run: just web lint
@@ -63,7 +63,7 @@ jobs:
         uses: ./.github/actions/setup-frontend
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v4
 
       - name: Build frontend
         run: just web build
@@ -86,7 +86,7 @@ jobs:
         uses: ./.github/actions/setup-frontend
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v4
 
       - name: Run vitest unit tests
         run: just web test-unit
@@ -102,7 +102,7 @@ jobs:
         uses: ./.github/actions/setup-frontend
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v4
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4

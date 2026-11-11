@@ -40,7 +40,7 @@ jobs:
           install-deps: "false"
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v4
 
       - name: Run security audit
         run: just web audit

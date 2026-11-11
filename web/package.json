@@ -32,7 +32,7 @@
 		"globals": "^17.14.0",
 		"prettier": "^3.9.9",
 		"prettier-plugin-svelte": "^4.1.1",
-		"shiki": "^4.5.0",
+		"shiki": "^4.6.0",
 		"svelte": "^5.57.3",
 		"svelte-check": "^4.7.8",
 		"tailwindcss": "^4.3.3",

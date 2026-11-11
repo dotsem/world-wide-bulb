@@ -28,7 +28,7 @@ jobs:
     environment: staging
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build & Deploy to Staging VM
         uses: ./.github/actions/deploy

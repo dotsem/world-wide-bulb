@@ -5,9 +5,11 @@
 
 	type HeaderPosition = 'top' | 'bottom';
 
-	let { position = 'top' } = $props<{
+	interface Props {
 		position?: HeaderPosition;
-	}>();
+	}
+
+	let { position = 'top' }: Props = $props();
 
 	let isInfoOpen = $state(false);
 	let hookInfoOpen = $state(false);

@@ -1,0 +1,124 @@
+version: 2
+updates:
+  # GitHub Actions & composite actions
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+      - "/.github/actions/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci(actions)"
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # Frontend (pnpm)
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"
+    ignore:
+      - dependency-name: "@sveltejs/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "svelte*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "prettier-plugin-svelte"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint-plugin-svelte"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@lucide/svelte"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+    groups:
+      svelte:
+        patterns:
+          - "@sveltejs/*"
+          - "svelte*"
+          - "prettier-plugin-svelte"
+          - "eslint-plugin-svelte"
+          - "@lucide/svelte"
+      tooling:
+        patterns:
+          - "*eslint*"
+          - "prettier*"
+          - "typescript*"
+          - "@playwright/*"
+          - "vite*"
+          - "*tailwind*"
+
+  # Backend (Go modules)
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 10
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      go-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # Example Go modules
+  - package-ecosystem: "gomod"
+    directories:
+      - "/examples/rest/go"
+      - "/examples/sse/go"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(examples)"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      examples-go-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # Docker container base images
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    target-branch: "main"
+    open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(docker)"

@@ -46,7 +46,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v4
 
       - name: Check formatting (gofmt)
         run: just go fmt-check
@@ -83,7 +83,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v4
 
       - name: Cache gotestsum binary
         id: cache-gotestsum

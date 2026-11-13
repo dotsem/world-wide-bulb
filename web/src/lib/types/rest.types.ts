@@ -9,6 +9,7 @@ export interface StateResponse {
 	state: boolean;
 	cooldown_ms: number;
 	viewers?: number;
+	turnstile_site_key?: string;
 }
 
 export interface HistoryItem {

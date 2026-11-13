@@ -23,16 +23,19 @@ type Handler struct {
 	broker  *sse.Broker
 	hasher  *utils.Hasher
 	isProd  bool
+	// turnstileSiteKey is empty when Turnstile is disabled.
+	turnstileSiteKey string
 }
 
 // NewHandler creates a new REST handler with the given dependencies.
-func NewHandler(q *store.Queries, e *bulb.Engine, h *ws.Hub, b *sse.Broker, hasher *utils.Hasher, isProd bool) *Handler {
+func NewHandler(q *store.Queries, e *bulb.Engine, h *ws.Hub, b *sse.Broker, hasher *utils.Hasher, isProd bool, turnstileSiteKey string) *Handler {
 	return &Handler{
-		queries: q,
-		engine:  e,
-		hub:     h,
-		broker:  b,
-		hasher:  hasher,
-		isProd:  isProd,
+		queries:          q,
+		engine:           e,
+		hub:              h,
+		broker:           b,
+		hasher:           hasher,
+		isProd:           isProd,
+		turnstileSiteKey: turnstileSiteKey,
 	}
 }

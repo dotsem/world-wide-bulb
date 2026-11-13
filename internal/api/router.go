@@ -3,6 +3,7 @@ package api
 
 import (
 	"io/fs"
+	"net/http"
 	"world-wide-bulb/internal/api/middleware"
 	"world-wide-bulb/internal/api/rest"
 	"world-wide-bulb/internal/api/ws"
@@ -43,9 +44,11 @@ func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool
 		{
 			web.POST("/toggle", append(toggleGuards, restH.PostToggle)...)
 			web.POST("/reason", restH.PostReason)
+			web.POST("/verify", append(toggleGuards, verified)...)
 
 			web.OPTIONS("/toggle", webCORS)
 			web.OPTIONS("/reason", webCORS)
+			web.OPTIONS("/verify", webCORS)
 		}
 	}
 
@@ -57,4 +60,9 @@ func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool
 	}
 
 	return r
+}
+
+// verified lets the frontend pass the toggle guards ahead of time, so a click does not wait on them.
+func verified(c *gin.Context) {
+	c.Status(http.StatusNoContent)
 }

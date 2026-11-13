@@ -62,6 +62,9 @@ export class BulbState {
 			this.viewers = res.viewers;
 		}
 		this.setCooldown(res.cooldown_ms);
+		if (res.turnstile_site_key) {
+			restApi.verifyInBackground(res.turnstile_site_key);
+		}
 	}
 
 	lastToggleId = $state<string | null>(null);

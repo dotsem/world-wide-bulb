@@ -8,7 +8,8 @@ vi.mock('$lib/api/rest', () => ({
 	restApi: {
 		state: vi.fn().mockResolvedValue({ state: false, viewers: 1, cooldown_ms: 0 }),
 		toggle: vi.fn(),
-		postReason: vi.fn()
+		postReason: vi.fn(),
+		verifyInBackground: vi.fn()
 	}
 }));
 
@@ -76,6 +77,20 @@ describe('BulbState', () => {
 		expect(state.viewers).toBe(42);
 		expect(state.isCooldownActive).toBe(true);
 		expect(state.remainingSeconds).toBe(3);
+	});
+
+	it('starts background human verification only when the server asks for it', async () => {
+		vi.mocked(restApi.verifyInBackground).mockClear();
+		await state.init();
+		expect(restApi.verifyInBackground).not.toHaveBeenCalled();
+
+		vi.mocked(restApi.state).mockResolvedValueOnce({
+			state: false,
+			cooldown_ms: 0,
+			turnstile_site_key: 'site-key'
+		});
+		await state.init();
+		expect(restApi.verifyInBackground).toHaveBeenCalledWith('site-key');
 	});
 
 	type MockWsClient = { emitMock: (event: string, data: unknown) => void };

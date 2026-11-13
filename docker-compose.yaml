@@ -12,6 +12,8 @@ services:
       - IP_SALT=${IP_SALT:-}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-}
       - RETENTION_LIMIT=${RETENTION_LIMIT:-}
+      - TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
+      - TURNSTILE_SECRET=${TURNSTILE_SECRET:-}
     volumes:
       - ${DATA_DIR:-wwb-data}:/app/data
 

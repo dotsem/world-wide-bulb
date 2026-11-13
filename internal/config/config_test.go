@@ -53,6 +53,20 @@ func TestLoad(t *testing.T) {
 		assert.Equal(t, int64(10000), cfg.RetentionLimit)
 	})
 
+	t.Run("requires both turnstile keys or neither", func(t *testing.T) {
+		os.Clearenv()
+		t.Setenv("TURNSTILE_SECRET", "secret")
+
+		_, err := config.Load()
+		assert.ErrorContains(t, err, "must be set together")
+
+		t.Setenv("TURNSTILE_SITE_KEY", "site")
+		cfg, err := config.Load()
+		require.NoError(t, err)
+		assert.Equal(t, "site", cfg.TurnstileSiteKey)
+		assert.Equal(t, "secret", cfg.TurnstileSecret)
+	})
+
 	t.Run("handles invalid and negative RETENTION_LIMIT gracefully", func(t *testing.T) {
 		os.Clearenv()
 		t.Setenv("RETENTION_LIMIT", "invalid_number")

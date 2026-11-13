@@ -102,6 +102,10 @@ docker run -d \
   ghcr.io/dotsem/world-wide-bulb:latest
 ```
 
+### Blocking scripted toggles
+
+By default anything that can send a `POST /api/v1/toggle` can flip the bulb, including `curl` and scripts. To allow only real browsers, create a [Cloudflare Turnstile](https://developers.cloudflare.com/turnstile/) widget for your hostname and set both `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET`. Leave them empty to keep scripted toggles working.
+
 ## Task Runner Reference (`just`)
 
 <!-- JUST_COMMANDS_START -->

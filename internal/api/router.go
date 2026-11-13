@@ -11,7 +11,8 @@ import (
 )
 
 // NewRouter creates and initializes the Gin engine with all API routes and embedded static frontend.
-func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool, allowedHosts []string) *gin.Engine {
+// Any toggleGuards run before the toggle handler and may abort the request.
+func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool, allowedHosts []string, toggleGuards ...gin.HandlerFunc) *gin.Engine {
 	if isProd {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -40,7 +41,7 @@ func NewRouter(restH *rest.Handler, wsH *ws.Handler, staticFS fs.FS, isProd bool
 		web := v1.Group("")
 		web.Use(webCORS, middleware.RateLimit(webLimiter))
 		{
-			web.POST("/toggle", restH.PostToggle)
+			web.POST("/toggle", append(toggleGuards, restH.PostToggle)...)
 			web.POST("/reason", restH.PostReason)
 
 			web.OPTIONS("/toggle", webCORS)

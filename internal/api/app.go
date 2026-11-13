@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"world-wide-bulb/internal/api/middleware"
 	"world-wide-bulb/internal/api/rest"
 	"world-wide-bulb/internal/api/sse"
 	"world-wide-bulb/internal/api/ws"
@@ -50,7 +51,12 @@ func NewApp(ctx context.Context, cfg *config.Config, db *sql.DB) (*App, error) {
 		return nil, fmt.Errorf("failed to load embedded static filesystem: %w", err)
 	}
 
-	router := NewRouter(restHandler, wsHandler, staticFS, cfg.IsProd, cfg.AllowedHosts)
+	var toggleGuards []gin.HandlerFunc
+	if cfg.TurnstileSecret != "" {
+		toggleGuards = append(toggleGuards, middleware.Human(cfg.TurnstileSiteKey, hasher, cfg.IsProd, middleware.TurnstileVerifier(cfg.TurnstileSecret)))
+	}
+
+	router := NewRouter(restHandler, wsHandler, staticFS, cfg.IsProd, cfg.AllowedHosts, toggleGuards...)
 
 	return &App{
 		Router:  router,

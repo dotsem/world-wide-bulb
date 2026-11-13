@@ -1,9 +1,12 @@
 package rest
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"world-wide-bulb/internal/api/middleware"
 	"world-wide-bulb/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +43,32 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 		assert.Equal(t, "192.168.1.100:"+uuidVal, primary)
 		assert.Empty(t, secondary)
 		assert.Empty(t, w.Header().Get("Set-Cookie"))
+	})
+
+	t.Run("uses the Turnstile human ID over a freshly minted device_id", func(t *testing.T) {
+		h := NewHandler(nil, nil, nil, nil, hasher, false)
+		r := gin.New()
+		var primary string
+		r.POST("/", middleware.Human("site", hasher, false, func(context.Context, string) bool { return true }), func(c *gin.Context) {
+			primary, _ = h.getOrCreateDeviceID(c)
+		})
+
+		req := httptest.NewRequest(http.MethodPost, "/", nil)
+		req.RemoteAddr = "192.168.1.100:12345"
+		req.Header.Set("X-Turnstile-Token", "token")
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+		human := rec.Result().Cookies()[0].Value
+		humanID := strings.Split(human, ".")[0]
+		assert.Equal(t, "192.168.1.100:"+humanID, primary)
+
+		for _, deviceID := range []string{"bot-device-1", "bot-device-2"} {
+			req := httptest.NewRequest(http.MethodPost, "/", nil)
+			req.RemoteAddr = "192.168.1.100:12345"
+			req.Header.Set("Cookie", "human="+human+"; device_id="+deviceID+"."+hasher.Sign(deviceID))
+			r.ServeHTTP(httptest.NewRecorder(), req)
+			assert.Equal(t, "192.168.1.100:"+humanID, primary)
+		}
 	})
 
 	t.Run("rejects forged or unsigned cookie and falls back to IP", func(t *testing.T) {

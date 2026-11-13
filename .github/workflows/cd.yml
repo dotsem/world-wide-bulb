@@ -61,6 +61,8 @@ jobs:
           deploy-path: ${{ vars.DEPLOY_PATH }}
           ts-oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           ts-oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          turnstile-site-key: ${{ vars.TURNSTILE_SITE_KEY }}
+          turnstile-secret: ${{ secrets.TURNSTILE_SECRET }}
 
       - name: Upload Binary to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.tag != ''

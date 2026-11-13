@@ -57,6 +57,14 @@ inputs:
   ts-oauth-secret:
     description: "Tailscale OAuth Secret"
     required: true
+  turnstile-site-key:
+    description: "Cloudflare Turnstile Site Key secret"
+    required: false
+    default: ""
+  turnstile-secret:
+    description: "Cloudflare Turnstile Secret secret"
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -126,6 +134,8 @@ runs:
         RETENTION_LIMIT: ${{ inputs.retention-limit }}
         TAG: ${{ inputs.tag }}
         CONTAINER_NAME: ${{ inputs.container-name }}
+        TURNSTILE_SITE_KEY: ${{ inputs.turnstile-site-key }}
+        TURNSTILE_SECRET: ${{ inputs.turnstile-secret }}
       run: |
         cat <<EOF > .env
         APP_ENV=${APP_ENV}
@@ -136,6 +146,8 @@ runs:
         RETENTION_LIMIT=${RETENTION_LIMIT}
         TAG=${TAG}
         CONTAINER_NAME=${CONTAINER_NAME}
+        TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY}
+        TURNSTILE_SECRET=${TURNSTILE_SECRET}
         EOF
 
     - name: Copy deployment files

@@ -43,7 +43,7 @@ func NewApp(ctx context.Context, cfg *config.Config, db *sql.DB) (*App, error) {
 	hub := ws.NewHub()
 	broker := sse.NewBroker()
 
-	restHandler := rest.NewHandler(queries, engine, hub, broker, hasher, cfg.IsProd)
+	restHandler := rest.NewHandler(queries, engine, hub, broker, hasher, cfg.IsProd, cfg.TurnstileSiteKey)
 	wsHandler := ws.NewHandler(hub, cfg.IsProd, cfg.AllowedHosts)
 
 	staticFS, err := web.GetFS()

@@ -20,7 +20,7 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 	hasher := utils.NewHasher("test_salt")
 
 	t.Run("returns ip:deviceID when valid signed device_id cookie is present", func(t *testing.T) {
-		h := NewHandler(nil, nil, nil, nil, hasher, false)
+		h := NewHandler(nil, nil, nil, nil, hasher, false, "")
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 
@@ -46,7 +46,7 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 	})
 
 	t.Run("uses the Turnstile human ID over a freshly minted device_id", func(t *testing.T) {
-		h := NewHandler(nil, nil, nil, nil, hasher, false)
+		h := NewHandler(nil, nil, nil, nil, hasher, false, "")
 		r := gin.New()
 		var primary string
 		r.POST("/", middleware.Human("site", hasher, false, func(context.Context, string) bool { return true }), func(c *gin.Context) {
@@ -72,7 +72,7 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 	})
 
 	t.Run("rejects forged or unsigned cookie and falls back to IP", func(t *testing.T) {
-		h := NewHandler(nil, nil, nil, nil, hasher, false)
+		h := NewHandler(nil, nil, nil, nil, hasher, false, "")
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 
@@ -95,7 +95,7 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 	})
 
 	t.Run("generates new device_id and sets signed cookie when cookie is missing", func(t *testing.T) {
-		h := NewHandler(nil, nil, nil, nil, hasher, false)
+		h := NewHandler(nil, nil, nil, nil, hasher, false, "")
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 
@@ -122,7 +122,7 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 	})
 
 	t.Run("sets secure cookie in production mode", func(t *testing.T) {
-		h := NewHandler(nil, nil, nil, nil, hasher, true)
+		h := NewHandler(nil, nil, nil, nil, hasher, true, "")
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 
@@ -137,7 +137,7 @@ func TestGetOrCreateDeviceID(t *testing.T) {
 	})
 
 	t.Run("generates new ID when cookie is empty string", func(t *testing.T) {
-		h := NewHandler(nil, nil, nil, nil, hasher, false)
+		h := NewHandler(nil, nil, nil, nil, hasher, false, "")
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
 

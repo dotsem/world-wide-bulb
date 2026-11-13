@@ -4,7 +4,26 @@ import type { HistoryResponse, StateResponse, ToggleResponse } from '$lib/types/
 const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 
 class RestApi {
+	private verifying?: Promise<void>;
+
+	/** Passes Turnstile while the visitor looks around, so clicking the bulb does not wait on it. */
+	verifyInBackground(sitekey: string) {
+		this.verifying ??= solveTurnstile(sitekey, 'interaction-only')
+			.then((token) =>
+				fetch(`${API_BASE}/api/v1/verify`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: { 'X-Turnstile-Token': token }
+				})
+			)
+			.then(
+				() => undefined,
+				() => undefined
+			);
+	}
+
 	async toggle(turnstileToken?: string): Promise<ToggleResponse> {
+		await this.verifying;
 		const res = await fetch(`${API_BASE}/api/v1/toggle`, {
 			method: 'POST',
 			credentials: 'include',

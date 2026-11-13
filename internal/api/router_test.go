@@ -37,7 +37,7 @@ func TestNewRouter(t *testing.T) {
 	broker := sse.NewBroker()
 	hasher := utils.NewHasher("test_salt")
 
-	restH := rest.NewHandler(queries, engine, hub, broker, hasher, false)
+	restH := rest.NewHandler(queries, engine, hub, broker, hasher, false, "")
 	wsH := ws.NewHandler(hub, false, []string{"*"})
 
 	testFS := fstest.MapFS{

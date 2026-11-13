@@ -45,7 +45,7 @@ func setupTestEnvWithCooldown(t *testing.T, cd time.Duration) *testEnv {
 	hub := ws.NewHub()
 	broker := sse.NewBroker()
 
-	handler := rest.NewHandler(queries, engine, hub, broker, hasher, false)
+	handler := rest.NewHandler(queries, engine, hub, broker, hasher, false, "")
 
 	r := gin.New()
 	v1 := r.Group("/api/v1")

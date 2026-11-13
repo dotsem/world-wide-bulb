@@ -20,6 +20,9 @@ type Config struct {
 	DBPath         string
 	AllowedHosts   []string
 	RetentionLimit int64
+	// TurnstileSiteKey and TurnstileSecret enable human verification on toggles when both are set.
+	TurnstileSiteKey string
+	TurnstileSecret  string
 }
 
 // Load parses environment variables and returns a validated Config.
@@ -49,6 +52,12 @@ func Load() (*Config, error) {
 		DBPath:         getEnv("bulb.db", "DB_PATH"),
 		AllowedHosts:   hosts,
 		RetentionLimit: retentionLimit,
+
+		TurnstileSiteKey: os.Getenv("TURNSTILE_SITE_KEY"),
+		TurnstileSecret:  os.Getenv("TURNSTILE_SECRET"),
+	}
+	if (cfg.TurnstileSiteKey == "") != (cfg.TurnstileSecret == "") {
+		return nil, errors.New("TURNSTILE_SITE_KEY and TURNSTILE_SECRET must be set together")
 	}
 	if cfg.IsProd && cfg.IPSalt == "" {
 		return nil, errors.New("IP_SALT must be set in production")

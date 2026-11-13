@@ -156,7 +156,7 @@
 					method="POST"
 					path="/api/v1/toggle"
 					title="Toggle Bulb State"
-					description="Flips the lamp on or off. Rate-limited per device and debounced globally."
+					description="Flips the lamp on or off. Rate-limited per device and debounced globally. Instances with Turnstile enabled (including the public one) answer 403 until a browser passes human verification; self-hosted instances without it accept scripts."
 					isInternal={true}
 					responseHtml={ep.toggle.responseHtml}
 					codeExamples={ep.toggle.examples}

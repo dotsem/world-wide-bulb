@@ -3,6 +3,7 @@ package rest
 import (
 	"net/http"
 	"strings"
+	"world-wide-bulb/internal/api/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -14,11 +15,16 @@ const (
 )
 
 // getOrCreateDeviceID returns (primaryKey, secondaryKey).
+// If the request has passed a Turnstile challenge, returns (IP:humanID, ""): device_id cookies are
+// free to mint, so with Turnstile on only a solved challenge may count as a new device.
 // If the request presents a valid HMAC-signed device_id cookie, returns (IP:deviceID, "").
 // If no cookie is present or the signature is invalid, sets a signed Set-Cookie and returns (IP, IP:newDeviceID).
 func (h *Handler) getOrCreateDeviceID(c *gin.Context) (string, string) {
 	ip := c.ClientIP()
 	hasher := h.hasher
+	if id := middleware.HumanID(c, hasher); id != "" {
+		return ip + ":" + id, ""
+	}
 
 	if rawCookie, err := c.Cookie(deviceCookieName); err == nil && rawCookie != "" {
 		if id, sig, ok := strings.Cut(rawCookie, "."); ok && id != "" && sig != "" {

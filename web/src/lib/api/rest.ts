@@ -1,17 +1,22 @@
+import { solveTurnstile } from './turnstile';
 import type { HistoryResponse, StateResponse, ToggleResponse } from '$lib/types/rest.types';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 
 class RestApi {
-	async toggle(): Promise<ToggleResponse> {
+	async toggle(turnstileToken?: string): Promise<ToggleResponse> {
 		const res = await fetch(`${API_BASE}/api/v1/toggle`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
+				...(turnstileToken && { 'X-Turnstile-Token': turnstileToken })
 			}
 		});
 		const data = await res.json();
+		if (res.status === 403 && data.turnstile_site_key && !turnstileToken) {
+			return this.toggle(await solveTurnstile(data.turnstile_site_key));
+		}
 		if (!res.ok) {
 			throw { message: data.error || 'Failed to toggle bulb', cooldown_ms: data.cooldown_ms || 0 };
 		}

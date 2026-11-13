@@ -58,6 +58,22 @@ func TestHuman(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, do("2.2.2.2:1000", "", cookies[0].Value).Code)
 	})
 
+	t.Run("HumanID sees a challenge solved earlier in the same request", func(t *testing.T) {
+		hasher := utils.NewHasher("salt")
+		var seen string
+		r := gin.New()
+		r.POST("/toggle", middleware.Human("site-key", hasher, false, verify), func(c *gin.Context) {
+			seen = middleware.HumanID(c, hasher)
+		})
+		req := httptest.NewRequest(http.MethodPost, "/toggle", nil)
+		req.Header.Set("X-Turnstile-Token", "good")
+		rec := httptest.NewRecorder()
+		r.ServeHTTP(rec, req)
+
+		require.Len(t, rec.Result().Cookies(), 1)
+		assert.Equal(t, strings.Split(rec.Result().Cookies()[0].Value, ".")[0], seen)
+	})
+
 	t.Run("each solve on the same IP gets its own ID", func(t *testing.T) {
 		first := strings.Split(do("1.1.1.1:1000", "good", "").Result().Cookies()[0].Value, ".")[0]
 		second := strings.Split(do("1.1.1.1:1000", "good", "").Result().Cookies()[0].Value, ".")[0]
@@ -71,6 +87,9 @@ func TestHuman(t *testing.T) {
 		require.Len(t, parts, 3)
 		assert.Equal(t, http.StatusForbidden, do("1.1.1.1:1000", "", parts[0]+".9999999999."+parts[2]).Code)
 		assert.Equal(t, http.StatusForbidden, do("1.1.1.1:1000", "", "other-id."+parts[1]+"."+parts[2]).Code)
+
+		notANumber := "id.soon." + utils.NewHasher("salt").Sign("human|1.1.1.1|id|soon")
+		assert.Equal(t, http.StatusForbidden, do("1.1.1.1:1000", "", notANumber).Code)
 
 		expired := "id.1." + utils.NewHasher("salt").Sign("human|1.1.1.1|id|1")
 		assert.Equal(t, http.StatusForbidden, do("1.1.1.1:1000", "", expired).Code)

@@ -53,7 +53,7 @@ func NewApp(ctx context.Context, cfg *config.Config, db *sql.DB) (*App, error) {
 
 	var toggleGuards []gin.HandlerFunc
 	if cfg.TurnstileSecret != "" {
-		toggleGuards = append(toggleGuards, middleware.Human(cfg.TurnstileSiteKey, hasher, cfg.IsProd, middleware.TurnstileVerifier(cfg.TurnstileSecret)))
+		toggleGuards = append(toggleGuards, middleware.Human(cfg.TurnstileSiteKey, hasher, cfg.IsProd, middleware.TurnstileVerifier(cfg.TurnstileSecret, middleware.TurnstileVerifyURL)))
 	}
 
 	router := NewRouter(restHandler, wsHandler, staticFS, cfg.IsProd, cfg.AllowedHosts, toggleGuards...)

@@ -21,15 +21,17 @@ const (
 	humanTTL              = time.Hour
 	turnstileHeader       = "X-Turnstile-Token"
 	turnstileMaxTokenSize = 2048
-	turnstileVerifyURL    = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 )
 
-// TurnstileVerifier returns a function that validates a Turnstile token against Cloudflare's siteverify API.
-func TurnstileVerifier(secret string) func(ctx context.Context, token string) bool {
+// TurnstileVerifyURL is Cloudflare's siteverify endpoint.
+const TurnstileVerifyURL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
+// TurnstileVerifier returns a function that validates a Turnstile token against the siteverify API at verifyURL.
+func TurnstileVerifier(secret, verifyURL string) func(ctx context.Context, token string) bool {
 	client := &http.Client{Timeout: 5 * time.Second}
 	return func(ctx context.Context, token string) bool {
 		form := url.Values{"secret": {secret}, "response": {token}}
-		req, err := http.NewRequestWithContext(ctx, http.MethodPost, turnstileVerifyURL, strings.NewReader(form.Encode()))
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, verifyURL, strings.NewReader(form.Encode()))
 		if err != nil {
 			return false
 		}

@@ -178,6 +178,19 @@ describe('BulbState', () => {
 		expect(toast.error).toHaveBeenCalledWith('Rate limit hit');
 	});
 
+	it('keeps the winner state from websocket when a concurrent toggle is rejected', async () => {
+		const mockEmitter = (wsClient as unknown as MockWsClient).emitMock;
+		state.isOn = false;
+		vi.mocked(restApi.toggle).mockImplementationOnce(async () => {
+			mockEmitter('state_changed', { state: true });
+			throw { message: 'lamp just toggled', cooldown_ms: 1000 };
+		});
+
+		await state.toggle();
+
+		expect(state.isOn).toBe(true);
+	});
+
 	it('submits reason and cleans up prompt state', async () => {
 		state.lastToggleId = 'toggle-456';
 		state.showReasonPrompt = true;

@@ -8,9 +8,11 @@ export class BulbState {
 	remainingMs = $state(0);
 	viewers = $state(1);
 	private timer?: ReturnType<typeof setInterval>;
+	private serverState = false;
 
 	constructor() {
 		wsClient.onStateChange((msg) => {
+			this.serverState = msg.state;
 			this.isOn = msg.state;
 			if (this.remainingMs < 1000) {
 				this.setCooldown(1000);
@@ -57,6 +59,7 @@ export class BulbState {
 
 	async init() {
 		const res = await restApi.state();
+		this.serverState = res.state;
 		this.isOn = res.state;
 		if (res.viewers !== undefined) {
 			this.viewers = res.viewers;
@@ -87,13 +90,14 @@ export class BulbState {
 
 		try {
 			const res = await restApi.toggle();
+			this.serverState = res.state;
 			this.isOn = res.state;
 			this.lastToggleId = res.id;
 			this.lastActionState = res.state;
 			this.showReasonPrompt = true;
 			this.setCooldown(res.cooldown_ms);
 		} catch (err: unknown) {
-			this.isOn = prevState;
+			this.isOn = this.serverState;
 			const error = err as { message?: string; cooldown_ms?: number } | undefined;
 			if (error?.cooldown_ms) {
 				this.setCooldown(error.cooldown_ms);

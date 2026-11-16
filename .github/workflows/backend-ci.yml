@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Backend Environment
         uses: ./.github/actions/setup-backend
@@ -46,14 +46,14 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v4
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
 
       - name: Check formatting (gofmt)
         run: just go fmt-check
 
       - name: Cache golangci-lint binary
         id: cache-golangci-lint
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/go/bin/golangci-lint
           key: ${{ runner.os }}-golangci-lint-v2-${{ matrix.go-version }}
@@ -75,7 +75,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup Backend Environment
         uses: ./.github/actions/setup-backend
@@ -83,11 +83,11 @@ jobs:
           go-version: ${{ matrix.go-version }}
 
       - name: Setup Just runner
-        uses: extractions/setup-just@v4
+        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
 
       - name: Cache gotestsum binary
         id: cache-gotestsum
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ~/go/bin/gotestsum
           key: ${{ runner.os }}-gotestsum-${{ matrix.go-version }}
@@ -100,7 +100,7 @@ jobs:
         run: just go test-ci
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v7
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           file: ./coverage.out
           flags: backend
@@ -109,14 +109,14 @@ jobs:
 
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: backend-coverage-report
           path: coverage.out
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: backend-test-results
           path: ./unit-tests.xml
@@ -124,7 +124,7 @@ jobs:
       # --- Test & Coverage Analysis ---
       - name: check test coverage
         id: coverage
-        uses: vladopajic/go-test-coverage@v2
+        uses: vladopajic/go-test-coverage@6890500b00a7e5862e54662c04ea9fa7c799ce1e # v2.23.0
         continue-on-error: true
         with:
           config: ./.github/.testcoverage.yml
@@ -162,7 +162,7 @@ jobs:
 
       - name: post coverage report
         if: always() && steps.find_pr.outputs.pull_request_id
-        uses: thollander/actions-comment-pull-request@v3
+        uses: thollander/actions-comment-pull-request@24bffb9b452ba05a4f3f77933840a6a841d1b32b # v3.0.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           comment-tag: coverage-report

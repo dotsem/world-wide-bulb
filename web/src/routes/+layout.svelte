@@ -1,10 +1,10 @@
 <script lang="ts">
 	import './layout.css';
 	import { page } from '$app/state';
-	import bulb_on from '$lib/assets/bulb_on.svg';
-	import bulb_off from '$lib/assets/bulb_off.svg';
-	import NavToolBar from '$lib/components/NavToolBar.svelte';
-	import { bulbState, Toast } from '$lib';
+	import bulb_on from '#lib/assets/bulb_on.svg';
+	import bulb_off from '#lib/assets/bulb_off.svg';
+	import NavToolBar from '#lib/components/NavToolBar.svelte';
+	import { bulbState, Toast } from '#lib';
 
 	let { children } = $props();
 

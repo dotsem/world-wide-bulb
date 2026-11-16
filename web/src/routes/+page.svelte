@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { bulbState, Bulb, CooldownNotice, ReasonPrompt } from '$lib';
-	import Header from '$lib/components/Header.svelte';
+	import { bulbState, Bulb, CooldownNotice, ReasonPrompt } from '#lib';
+	import Header from '#lib/components/Header.svelte';
 </script>
 
 <svelte:head>

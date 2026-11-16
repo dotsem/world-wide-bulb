@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Bug, Code, Lightbulb } from '@lucide/svelte';
 	import type { LucideIcon } from '@lucide/svelte';
-	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import Dialog from '#lib/components/ui/Dialog.svelte';
 
 	let { isOpen = $bindable(false) }: { isOpen?: boolean } = $props();
 

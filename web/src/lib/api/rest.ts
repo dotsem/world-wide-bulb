@@ -1,5 +1,5 @@
 import { solveTurnstile } from './turnstile';
-import type { HistoryResponse, StateResponse, ToggleResponse } from '$lib/types/rest.types';
+import type { HistoryResponse, StateResponse, ToggleResponse } from '#lib/types/rest.types.ts';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 

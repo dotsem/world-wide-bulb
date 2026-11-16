@@ -31,23 +31,23 @@
 {#snippet navLinks()}
 	<DocsBarSection
 		title="Overview"
-		href={resolve('/docs#overview') as ResolvedPathname}
+		href={resolve('docs#overview') as ResolvedPathname}
 		onclick={closeMobile}
 	>
 		<DocsBarEndpoint
-			href={resolve('/docs#overview') as ResolvedPathname}
-			title="About &amp; GitHub"
+			href={resolve('docs#overview') as ResolvedPathname}
+			title="About & GitHub"
 			active={activeId === 'overview'}
 			onclick={closeMobile}
 		/>
 		<DocsBarEndpoint
-			href={resolve('/docs#use-cases') as ResolvedPathname}
+			href={resolve('docs#use-cases') as ResolvedPathname}
 			title="Use Cases"
 			active={activeId === 'use-cases'}
 			onclick={closeMobile}
 		/>
 		<DocsBarEndpoint
-			href={resolve('/docs#self-hosting') as ResolvedPathname}
+			href={resolve('docs#self-hosting') as ResolvedPathname}
 			title="Self-Hosting"
 			active={activeId === 'self-hosting'}
 			onclick={closeMobile}
@@ -56,11 +56,11 @@
 
 	<DocsBarSection
 		title="REST API"
-		href={resolve('/docs#rest-api') as ResolvedPathname}
+		href={resolve('docs#rest-api') as ResolvedPathname}
 		onclick={closeMobile}
 	>
 		<DocsBarEndpoint
-			href={resolve('/docs#get-state') as ResolvedPathname}
+			href={resolve('docs#get-state') as ResolvedPathname}
 			title="/state"
 			active={activeId === 'get-state'}
 			onclick={closeMobile}
@@ -71,7 +71,7 @@
 		</DocsBarEndpoint>
 
 		<DocsBarEndpoint
-			href={resolve('/docs#get-history') as ResolvedPathname}
+			href={resolve('docs#get-history') as ResolvedPathname}
 			title="/history"
 			active={activeId === 'get-history'}
 			onclick={closeMobile}
@@ -82,7 +82,7 @@
 		</DocsBarEndpoint>
 
 		<DocsBarEndpoint
-			href={resolve('/docs#post-toggle') as ResolvedPathname}
+			href={resolve('docs#post-toggle') as ResolvedPathname}
 			title="/toggle"
 			active={activeId === 'post-toggle'}
 			onclick={closeMobile}
@@ -93,7 +93,7 @@
 		</DocsBarEndpoint>
 
 		<DocsBarEndpoint
-			href={resolve('/docs#post-reason') as ResolvedPathname}
+			href={resolve('docs#post-reason') as ResolvedPathname}
 			title="/reason"
 			active={activeId === 'post-reason'}
 			onclick={closeMobile}
@@ -106,11 +106,11 @@
 
 	<DocsBarSection
 		title="Server-Sent Events"
-		href={resolve('/docs#sse') as ResolvedPathname}
+		href={resolve('docs#sse') as ResolvedPathname}
 		onclick={closeMobile}
 	>
 		<DocsBarEndpoint
-			href={resolve('/docs#sse-events') as ResolvedPathname}
+			href={resolve('docs#sse-events') as ResolvedPathname}
 			title="/events"
 			active={activeId === 'sse-events'}
 			onclick={closeMobile}
@@ -123,11 +123,11 @@
 
 	<DocsBarSection
 		title="WebSockets"
-		href={resolve('/docs#ws') as ResolvedPathname}
+		href={resolve('docs#ws') as ResolvedPathname}
 		onclick={closeMobile}
 	>
 		<DocsBarEndpoint
-			href={resolve('/docs#ws-stream') as ResolvedPathname}
+			href={resolve('docs#ws-stream') as ResolvedPathname}
 			title="/ws"
 			active={activeId === 'ws-stream'}
 			onclick={closeMobile}

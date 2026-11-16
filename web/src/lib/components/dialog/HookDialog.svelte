@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Check, Copy, Terminal, Webhook } from '@lucide/svelte';
 	import { resolve } from '$app/paths';
-	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import Dialog from '#lib/components/ui/Dialog.svelte';
 
 	let { isOpen = $bindable(false) }: { isOpen?: boolean } = $props();
 
@@ -67,12 +67,12 @@
 
 	{#snippet footer()}
 		<a
-			href={resolve('/docs#sse-events')}
+			href={resolve('docs#sse-events')}
 			onclick={() => (isOpen = false)}
 			class="text-xs font-semibold text-app-accent hover:underline inline-flex items-center gap-1"
+			>View Code Examples →</a
 		>
-			View Code Examples &rarr;
-		</a>
+
 		<button
 			type="button"
 			onclick={() => (isOpen = false)}

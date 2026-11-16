@@ -76,7 +76,7 @@ runs:
       uses: ./.github/actions/setup-backend
 
     - name: Setup Just runner
-      uses: extractions/setup-just@v4
+      uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
 
     - name: Build Single Binary with Embedded Svelte
       shell: bash
@@ -85,13 +85,13 @@ runs:
         cp bin/wwb bin/wwb-bin
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+      uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
     - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v3
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -104,7 +104,7 @@ runs:
         echo "repo_lower=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
     - name: Build and push container
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
       with:
         context: .
         file: ./Dockerfile
@@ -117,7 +117,7 @@ runs:
         cache-to: type=gha,mode=max
 
     - name: Connect to Tailscale
-      uses: tailscale/github-action@v3
+      uses: tailscale/github-action@6cae46e2d796f265265cfcf628b72a32b4d7cade # v3.3.0
       with:
         oauth-client-id: ${{ inputs.ts-oauth-client-id }}
         oauth-secret: ${{ inputs.ts-oauth-secret }}
@@ -151,7 +151,7 @@ runs:
         EOF
 
     - name: Copy deployment files
-      uses: appleboy/scp-action@v0.1.7
+      uses: appleboy/scp-action@917f8b81dfc1ccd331fef9e2d61bdc6c8be94634 # v0.1.7
       with:
         host: ${{ inputs.ssh-host }}
         username: ${{ inputs.ssh-user }}
@@ -161,7 +161,7 @@ runs:
         target: ${{ inputs.deploy-path }}
 
     - name: Deploy to VM
-      uses: appleboy/ssh-action@v1.2.5
+      uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
       with:
         host: ${{ inputs.ssh-host }}
         username: ${{ inputs.ssh-user }}

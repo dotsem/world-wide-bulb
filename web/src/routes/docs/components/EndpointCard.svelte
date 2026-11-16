@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Check, Copy, ExternalLink } from '@lucide/svelte';
 	import RestTypeLabel from './RestTypeLabel.svelte';
-	import { Language } from '$lib/types/example-languages.types';
+	import { Language } from '#lib/types/example-languages.types.ts';
 
 	type Param = {
 		name: string;

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HistoryState } from './history.svelte';
-import { restApi } from '$lib/api/rest';
-import { wsClient } from '$lib/api/ws.svelte';
+import { restApi } from '#lib/api/rest.ts';
+import { wsClient } from '#lib/api/ws.svelte.ts';
 
-vi.mock('$lib/api/rest', () => ({
+vi.mock('#lib/api/rest.ts', () => ({
 	restApi: {
 		history: vi.fn()
 	}
@@ -19,7 +19,7 @@ type MockHistoryWsClient = {
 	emitReasonUpdate: (msg: { type: string; toggle_id: number; reason: string }) => void;
 };
 
-vi.mock('$lib/api/ws.svelte', () => {
+vi.mock('#lib/api/ws.svelte.ts', () => {
 	let stateChangeHandler:
 		| ((msg: { id: number; state: boolean; reason?: string; created_at?: string }) => void)
 		| undefined;

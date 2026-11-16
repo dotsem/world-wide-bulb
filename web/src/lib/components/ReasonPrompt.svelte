@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { bulbState } from '$lib/state/bulb.svelte';
+	import { bulbState } from '#lib/state/bulb.svelte.ts';
 	import { fly } from 'svelte/transition';
 	import FloatingInput from './ui/FloatingInput.svelte';
 

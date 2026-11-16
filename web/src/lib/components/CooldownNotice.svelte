@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { bulbState } from '$lib/state/bulb.svelte';
+	import { bulbState } from '#lib/state/bulb.svelte.ts';
 	import { Lock } from '@lucide/svelte';
 	import { fly } from 'svelte/transition';
 

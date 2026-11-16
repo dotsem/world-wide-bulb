@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import { CircleAlert, TriangleAlert, Info, CheckCircle2, X } from '@lucide/svelte';
-	import { toastState, type ToastType } from '$lib/state/toast.svelte';
+	import { toastState, type ToastType } from '#lib/state/toast.svelte.ts';
 
 	interface Props {
 		position?: 'bottom-right' | 'bottom-center' | 'top-right' | 'top-center';

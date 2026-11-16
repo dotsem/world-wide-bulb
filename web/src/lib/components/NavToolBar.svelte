@@ -7,8 +7,12 @@
 
 	const links = [
 		{ href: resolve('/'), label: 'Bulb', icon: Sun },
-		{ href: resolve('/history'), label: 'History', icon: RotateCcwClock },
-		{ href: resolve('/docs'), label: 'Docs', icon: BookOpen }
+		{
+			href: resolve('history'),
+			label: 'History',
+			icon: RotateCcwClock
+		},
+		{ href: resolve('docs'), label: 'Docs', icon: BookOpen }
 	];
 
 	let activeIndex = $derived.by(() => {

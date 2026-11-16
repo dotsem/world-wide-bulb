@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BulbState } from './bulb.svelte';
-import { restApi } from '$lib/api/rest';
-import { wsClient } from '$lib/api/ws.svelte';
-import { toast } from '$lib/state/toast.svelte';
+import { restApi } from '#lib/api/rest.ts';
+import { wsClient } from '#lib/api/ws.svelte.ts';
+import { toast } from '#lib/state/toast.svelte.ts';
 
-vi.mock('$lib/api/rest', () => ({
+vi.mock('#lib/api/rest.ts', () => ({
 	restApi: {
 		state: vi.fn().mockResolvedValue({ state: false, viewers: 1, cooldown_ms: 0 }),
 		toggle: vi.fn(),
@@ -13,7 +13,7 @@ vi.mock('$lib/api/rest', () => ({
 	}
 }));
 
-vi.mock('$lib/api/ws.svelte', () => {
+vi.mock('#lib/api/ws.svelte.ts', () => {
 	const handlers: Record<string, ((...args: unknown[]) => void)[]> = {};
 	return {
 		wsClient: {
@@ -38,7 +38,7 @@ vi.mock('$lib/api/ws.svelte', () => {
 	};
 });
 
-vi.mock('$lib/state/toast.svelte', () => ({
+vi.mock('#lib/state/toast.svelte.ts', () => ({
 	toast: {
 		error: vi.fn(),
 		info: vi.fn(),

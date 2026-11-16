@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Language } from '$lib/types/example-languages.types';
+	import { Language } from '#lib/types/example-languages.types.ts';
 	import { Check, Code, Copy } from '@lucide/svelte';
 
 	let {

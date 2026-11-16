@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { CircleQuestionMark, Webhook } from '@lucide/svelte';
 	import ViewerBadge from './ViewerBadge.svelte';
-	import { HookDialog, InfoDialog } from '$lib';
+	import { HookDialog, InfoDialog } from '#lib';
 
 	type HeaderPosition = 'top' | 'bottom';
 

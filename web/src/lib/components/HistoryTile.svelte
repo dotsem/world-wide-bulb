@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { FormattedHistoryItem } from '$lib/state/history.svelte';
+	import type { FormattedHistoryItem } from '#lib/state/history.svelte.ts';
 	import { Lightbulb, LightbulbOff, MessageSquare, Trophy } from '@lucide/svelte';
 
 	let { item }: { item: FormattedHistoryItem } = $props();

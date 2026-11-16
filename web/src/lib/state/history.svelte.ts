@@ -1,7 +1,7 @@
-import { restApi } from '$lib/api/rest';
+import { restApi } from '#lib/api/rest.ts';
 import { SvelteDate, SvelteSet } from 'svelte/reactivity';
-import { wsClient, type StateChangedEvent, type ReasonUpdatedEvent } from '$lib/api/ws.svelte';
-import type { HistoryItem } from '$lib/types/rest.types';
+import { wsClient, type StateChangedEvent, type ReasonUpdatedEvent } from '#lib/api/ws.svelte.ts';
+import type { HistoryItem } from '#lib/types/rest.types.ts';
 
 export interface FormattedHistoryItem extends HistoryItem {
 	formattedDate: string;

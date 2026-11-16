@@ -1,6 +1,6 @@
-import { restApi } from '$lib/api/rest';
-import { wsClient } from '$lib/api/ws.svelte';
-import { toast } from '$lib/state/toast.svelte';
+import { restApi } from '#lib/api/rest.ts';
+import { wsClient } from '#lib/api/ws.svelte.ts';
+import { toast } from '#lib/state/toast.svelte.ts';
 
 export class BulbState {
 	isOn = $state(false);

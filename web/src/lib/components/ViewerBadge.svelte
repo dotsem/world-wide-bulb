@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Eye, EyeClosed } from '@lucide/svelte';
-	import { bulbState } from '$lib';
+	import { bulbState } from '#lib';
 
 	const labels = [
 		{ singular: 'viewer', plural: 'viewers' },

@@ -28,7 +28,7 @@
 		"@types/node": "^26.6.6",
 		"eslint": "^10.14.0",
 		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-svelte": "^3.24.0",
+		"eslint-plugin-svelte": "^3.24.1",
 		"globals": "^17.14.0",
 		"prettier": "^3.9.10",
 		"prettier-plugin-svelte": "^4.1.1",
@@ -42,7 +42,7 @@
 		"vitest": "^5.1.0"
 	},
 	"dependencies": {
-		"@lucide/svelte": "^1.68.0"
+		"@lucide/svelte": "^1.70.0"
 	},
 	"imports": {
 		"#lib": "./src/lib/index.js",

@@ -22,7 +22,7 @@
 		"@eslint/js": "^10.0.1",
 		"@playwright/test": "^1.65.0",
 		"@sveltejs/adapter-static": "^4.0.0",
-		"@sveltejs/kit": "^3.0.0",
+		"@sveltejs/kit": "^3.2.0",
 		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tailwindcss/vite": "^4.3.5",
 		"@types/node": "^26.6.6",
@@ -42,7 +42,7 @@
 		"vitest": "^5.1.0"
 	},
 	"dependencies": {
-		"@lucide/svelte": "^1.70.0"
+		"@lucide/svelte": "^1.73.0"
 	},
 	"imports": {
 		"#lib": "./src/lib/index.js",

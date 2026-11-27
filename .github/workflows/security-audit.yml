@@ -6,110 +6,105 @@ on:
   workflow_dispatch:
   push:
     branches: ["main"]
-    paths:
+    paths: &paths
       - "web/pnpm-lock.yaml"
       - "go.mod"
       - "go.sum"
       - ".github/workflows/security-audit.yml"
   pull_request:
     branches: ["**"]
-    paths:
-      - "web/pnpm-lock.yaml"
-      - "go.mod"
-      - "go.sum"
-      - ".github/workflows/security-audit.yml"
+    paths: *paths
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
-  frontend-audit:
-    name: Frontend Dependency Audit
+  trivy:
+    permissions: { contents: read, pull-requests: write, issues: write }
+    uses: dotactions/security/.github/workflows/trivy-audit.yml@4d0356342b83c1c83c8e6ac5496589ba8fa665c2 # v0.1.0
+    with:
+      severity: "CRITICAL,HIGH"
+      fail-on-findings: ${{ github.event_name == 'pull_request' }}
+      manage-issue: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+
+  go-audit:
+    name: Go Dependency Audit
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
+    permissions: { contents: read, pull-requests: write, issues: write }
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Setup Frontend Environment
-        uses: ./.github/actions/setup-frontend
-        with:
-          install-deps: "false"
-
-      - name: Setup Just runner
-        uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
-
-      - name: Run security audit
-        run: just web audit
-
-
-  backend-audit:
-    name: Backend Dependency Audit
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Setup Backend Environment
-        uses: ./.github/actions/setup-backend
-
       - name: Run Go Vulnerability Check
         uses: golang/govulncheck-action@032d45514ae346b1db93c04b0c90b841c370344f # v1.1.0
+        with:
+          work-dir: .
+          go-version-input: ""
+          go-version-file: go.mod
+          output-format: sarif
+          output-file: govulncheck.sarif
 
-  notify:
-    name: Notify on Failure
-    runs-on: ubuntu-latest
-    needs: [frontend-audit, backend-audit]
-    if: failure() && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-    steps:
-      - name: Set current date
-        id: date
-        run: echo "date=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
-      - name: Create or Comment on GitHub Issue
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_TITLE: "Security Audit Failure: Vulnerability Detected"
-          ISSUE_BODY: |
-            The scheduled security audit workflow failed. A dependency vulnerability may have been discovered in the frontend or backend.
-
-            **Please review the run details:**
-            - **Workflow Run Logs:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            - **Date:** ${{ steps.date.outputs.date }}
-
-            Please investigate and update the vulnerable dependencies immediately.
-          COMMENT_BODY: |
-            The scheduled security audit failed again.
-
-            **Workflow Run Logs:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            **Date:** ${{ steps.date.outputs.date }}
+      - name: Drop unreachable findings
+        if: always() && hashFiles('govulncheck.sarif') != ''
         run: |
-          set -eo pipefail
+          jq '(.runs[].results) |= map(select(.level != "note"))' govulncheck.sarif > filtered.sarif
+          mv filtered.sarif govulncheck.sarif
 
-          issue_number=$(gh issue list \
-            --repo "${{ github.repository }}" \
-            --state open \
-            --label "security" \
-            --limit 100 \
-            --json number,title \
-            --jq '.[] | select(.title == env.ISSUE_TITLE) | .number' \
-            | head -n 1)
+      - uses: dotactions/sarif-reporter@917c66712f17657e67d429895eade83a9543034d # v0.1.0
+        if: always() && hashFiles('govulncheck.sarif') != ''
+        with:
+          sarif-file: govulncheck.sarif
+          comment-tag: govulncheck
+          title: Go Vulnerability Report
+          issue-title: "[Security Audit] Go vulnerabilities detected"
+          fail-on-findings: ${{ github.event_name == 'pull_request' }}
+          manage-issue: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
 
-          if [ -n "$issue_number" ]; then
-            echo "existing open issue found: #$issue_number. commenting instead of creating a new issue."
-            gh issue comment "$issue_number" \
-              --repo "${{ github.repository }}" \
-              --body "$COMMENT_BODY"
-          else
-            echo "no existing open issue found. creating a new issue."
-            gh issue create \
-              --repo "${{ github.repository }}" \
-              --title "$ISSUE_TITLE" \
-              --body "$ISSUE_BODY" \
-              --label "security"
-          fi
+  image-audit:
+    name: Container Image Audit
+    runs-on: ubuntu-latest
+    permissions: { contents: read, pull-requests: write, issues: write }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-frontend
+
+      - uses: ./.github/actions/setup-backend
+
+      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
+
+      - name: Build binary
+        run: just build-prod
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069
+
+      - name: Build image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          push: false
+          pull: true
+          no-cache: true
+          tags: wwb:audit
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: wwb:audit
+          format: sarif
+          output: trivy-image.sarif
+          ignore-unfixed: true
+          severity: "CRITICAL,HIGH"
+          limit-severities-for-sarif: true
+
+      - uses: dotactions/sarif-reporter@917c66712f17657e67d429895eade83a9543034d # v0.1.0
+        if: always() && hashFiles('trivy-image.sarif') != ''
+        with:
+          sarif-file: trivy-image.sarif
+          comment-tag: trivy-image
+          title: Container Image Report
+          issue-title: "[Security Audit] image vulnerabilities"
+          fail-on-findings: ${{ github.event_name == 'pull_request' }}
+          manage-issue: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}

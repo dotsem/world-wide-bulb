@@ -6,10 +6,6 @@ inputs:
     description: "Backend working directory"
     required: false
     default: "."
-  go-version:
-    description: "Go version to install"
-    required: false
-    default: "1.26"
 
 runs:
   using: "composite"
@@ -17,7 +13,7 @@ runs:
     - name: Set up Go
       uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
-        go-version: ${{ inputs.go-version }}
+        go-version-file: ${{ inputs.work-dir }}/go.mod
         cache: true
         cache-dependency-path: ${{ inputs.work-dir }}/go.sum
 

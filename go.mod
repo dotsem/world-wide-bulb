@@ -1,6 +1,6 @@
 module world-wide-bulb
 
-go 1.26.5
+go 1.26.11
 
 require (
 	github.com/TwiN/go-away v1.8.2-0.20260815020213-da82b895986b

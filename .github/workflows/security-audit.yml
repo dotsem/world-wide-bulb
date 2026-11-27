@@ -66,9 +66,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ./.github/actions/setup-frontend
+      - uses: dotactions/node/setup@63640637f7b0ce70ed1940cfb23c96101d293f9f # v0.1.2
+        with:
+          node-version: "22.x"
+          working-directory: web
 
-      - uses: ./.github/actions/setup-backend
+      - uses: dotactions/go/setup@1a6ae9ba565a8bd6282357d036122ca023631198 # v0.1.1
 
       - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0
 

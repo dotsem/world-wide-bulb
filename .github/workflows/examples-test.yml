@@ -33,7 +33,7 @@ jobs:
               uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
             - name: Setup Backend Environment
-              uses: ./.github/actions/setup-backend
+              uses: dotactions/go/setup@1a6ae9ba565a8bd6282357d036122ca023631198 # v0.1.1
 
             - name: Setup Just runner
               uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4.0.0

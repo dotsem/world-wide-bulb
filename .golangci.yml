@@ -24,6 +24,13 @@ linters:
           - dupl
           - goconst
 
+formatters:
+  enable:
+    - gofmt
+  settings:
+    gofmt:
+      simplify: true
+
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
